@@ -109,15 +109,20 @@ function construireTete(apparence, couleurs) {
     tete.boite([0.04, 0.12, 0.1], [0.12, -0.07, 0.07], cheveux);
   }
 
+  // Lunettes : seulement la monture (on voit les yeux à travers), pour ne
+  // pas ressembler à des lunettes de soleil.
   const monture = couleurs.monture;
   if (apparence.lunettes === 'rondes') {
-    for (const x of [-0.058, 0.058]) {
-      tete.cylindre({ rayon: 0.045, hauteur: 0.012, cotes: 10 }, [x, 0.015, 0.152], monture, [90, 0, 0]);
-    }
-    tete.boite([0.03, 0.012, 0.012], [0, 0.025, 0.154], monture);
+    for (const x of [-0.058, 0.058]) tete.tore({ rayon: 0.04, epaisseur: 0.007, cotes: 12 }, [x, 0.015, 0.152], monture);
+    tete.boite([0.034, 0.01, 0.01], [0, 0.025, 0.154], monture);
   } else if (apparence.lunettes === 'carrees') {
-    for (const x of [-0.058, 0.058]) tete.boite([0.085, 0.06, 0.012], [x, 0.015, 0.152], monture);
-    tete.boite([0.03, 0.012, 0.012], [0, 0.025, 0.154], monture);
+    for (const x of [-0.058, 0.058]) {
+      tete.boite([0.085, 0.011, 0.012], [x, 0.046, 0.152], monture);
+      tete.boite([0.085, 0.011, 0.012], [x, -0.016, 0.152], monture);
+      tete.boite([0.011, 0.062, 0.012], [x - 0.037, 0.015, 0.152], monture);
+      tete.boite([0.011, 0.062, 0.012], [x + 0.037, 0.015, 0.152], monture);
+    }
+    tete.boite([0.034, 0.01, 0.01], [0, 0.025, 0.154], monture);
   }
 
   const chapeau = couleurs.couvreChef;
