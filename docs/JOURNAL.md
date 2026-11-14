@@ -1,5 +1,88 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.0) — à valider
+
+### Ce qui est fait
+
+- **L'ordinateur**, au bureau (« Utiliser l'ordinateur ») : une seule
+  fenêtre, plusieurs écrans : Commandes, Visio avec Ferrus, Tes comptes.
+  Le temps s'arrête tant qu'il est ouvert. En haut, **l'objectif du
+  moment** dit quoi faire (« allume ton ordinateur, au bureau ») et y
+  emmène d'un toucher.
+- **La visio** : au premier allumage, Ferrus appelle. On voit son portrait
+  en 3D (une image fixe prise par le moteur du jeu, devant une
+  bibliothèque) et il explique l'atelier, une réplique à la fois
+  (« Suivant »). Si l'on joue Ferrus, c'est « le vrai Ferrus, depuis le
+  monde réel ». On peut le rappeler ensuite : un conseil adapté à la
+  situation, ou revoir les explications.
+- **Les commandes** (`data/commandes.json`), toutes étiquetées
+  « application fictive », chacune autour d'un principe d'accessibilité :
+  l'essai du mentor (une liste de courses), Théo (les changements annoncés
+  la veille), Madeleine (ses médicaments, très lisibles), Samia (un minuteur
+  lancé d'un seul geste), Karim (des rappels qui se voient et se sentent :
+  il est sourd), puis Hugo (le strict minimum), qui arrive par le
+  bouche-à-oreille (niveau 2 de réputation). Rien n'expire.
+- **L'atelier**, le mini-jeu, sans chronomètre : 1. le modèle (liste,
+  agenda, minuteur, carnet, fiche) ; 2. les fonctions, avec la **jauge de
+  charge** (légère, équilibrée, un peu chargée, trop chargée : en mots ET
+  en barre) ; 3. le confort de l'application (taille du texte, contraste,
+  police, espacement, animations). L'aperçu, un téléphone, change à chaque
+  choix. « Tester comme… » montre ce qu'en pense la personne, point par
+  point ; « Livrer » donne **Parfait**, **Bien** ou **À retravailler**,
+  avec les explications. Le projet est enregistré à chaque choix, et un
+  projet « à retravailler » reste tel quel.
+- **L'argent et la réputation** montent à chaque livraison (moins pour un
+  « Bien », un peu plus pour chaque petit plus) ; un nouveau niveau est
+  annoncé ; « Tes comptes » montre la progression et l'historique.
+- **Les clients** Madeleine, Samia, Karim et Hugo (fictifs, proposés dans le
+  plan) sont dans `data/pnj.json` ; ils ne viennent pas encore au domicile.
+- Au démarrage, le jeu vérifie que chaque commande peut être réussie
+  « parfaitement », et que toutes se débloquent même avec des « Bien ».
+
+### Vérifications faites
+
+- 93 tests sans navigateur, dont les notes (besoin manquant, chose qui
+  gêne, confort, fonction inutile, charge), les récompenses, un projet
+  importé nettoyé, le déblocage des commandes, le niveau 2, et la
+  lisibilité des couleurs de l'aperçu (contraste normal et élevé).
+- 44 tests dans Chromium, dont 6 nouveaux : premier allumage (temps
+  arrêté, portrait, tutoriel, commande d'essai), livraison « Parfait »
+  (argent, réputation, nouvelles commandes), « À retravailler » gardé même
+  après rechargement puis corrigé, jouer Ferrus (« le vrai Ferrus »),
+  clavier (focus, Échap), téléphone (pas de défilement de côté, boutons du
+  bas sur deux lignes, jauge toujours visible).
+
+### Comment tester sur tablette
+
+1. Nouvelle partie : touche l'objectif en haut ; ton personnage va au
+   bureau. Touche « Utiliser l'ordinateur ».
+2. « Décrocher » : écoute Ferrus (« Suivant »), puis « Raccrocher ».
+3. « Commandes » › « Lire la commande » › « Accepter » : choisis « Liste à
+   cocher », ajoute « Partage », puis « Tester comme Ferrus » et « Livrer ».
+4. Prends la commande de Madeleine et ajoute « Statistiques détaillées » :
+   « À retravailler » explique pourquoi. Corrige (texte grand, contraste
+   élevé, police très lisible) et livre à nouveau.
+5. Regarde l'argent et la réputation monter (en haut, et dans « Tes
+   comptes »).
+
+### Limites connues
+
+- L'argent ne sert pas encore : les achats arrivent au jalon 5.
+- Madeleine, Samia, Karim et Hugo ne viennent pas encore au domicile.
+- Le portrait de la visio est une image fixe.
+- Lors de sa visite, le mentor dit toujours « Bientôt, ton ordinateur
+  recevra les premières commandes », même quand elles sont arrivées
+  (phrase validée : à reformuler si Ferrus le souhaite).
+
+### En attente
+
+- **Halaé, la toute première cliente** : sa première commande n'est pas
+  encore dans le jeu, puisque tout ajout la concernant doit d'abord être
+  validé par elle. Une proposition est faite dans le compte rendu (hors du
+  dépôt) ; une fois validée, elle passera juste après l'essai du mentor.
+- La validation par Ferrus des répliques du mentor en visio (tutoriel,
+  conseils).
+
 ## ✅ Jalon 2 — Les habitants et le temps qui passe (version 0.3.0, 14 novembre 2026)
 
 Validé par Ferrus et Halaé le 14 novembre 2026 (fiche d'Halaé et répliques

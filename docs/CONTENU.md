@@ -132,7 +132,12 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
 | `absentSiJoueur` | `"ferrus"` : absent quand on joue Ferrus (le mentor) |
 | `routine` | les créneaux `{ "de": "08:00", "a": "12:00", "lieu": "domicile", "point": "montage", "activite": "montage" }`, dans l'ordre, entre 7 h et 23 h. Hors créneau : la personne n'est pas là |
 | `activites` | pour chaque activité : `description` (« monte sa prochaine vidéo ») et ses `repliques` |
-| `repliques` | `rencontre` (la première fois) et `salut` (ensuite) |
+| `repliques` | `rencontre` (la première fois) et `salut` (ensuite) ; obligatoires pour qui vient dans un lieu |
+| `visio` | (le mentor) les répliques de l'appel en visio : `accueil` (`joueurFerrus` quand on joue Ferrus, `autre` sinon, avec `{nom}`), `tutoriel` (une réplique par « Suivant »), `conseils` (`aRetravailler`, `enCours`, `offres`, `general`) et `auRevoir` |
+
+Une cliente ou un client qui ne vient pas encore dans un lieu (Madeleine,
+Samia, Karim, Hugo) a simplement une `routine` vide : il ou elle passe
+commande sur l'ordinateur.
 
 Les `point` sont des places définies dans le lieu (liste `points`, sans
 description). Le jeu vérifie que chacune est atteignable **depuis la porte
@@ -143,7 +148,48 @@ le point `porte-entree`.
 Dans `data/jeu.json`, `temps` règle la journée : `debutJournee`,
 `finJournee` et `minutesParSeconde` (1 = une minute de jeu par seconde).
 Un meuble peut avoir des `actions` en plus de « Examiner » : `"dormir"`
-pour un lit.
+pour un lit, `"ordinateur"` pour le bureau.
+
+## Le mini-jeu de création : `data/creation.json`
+
+- `modeles` : la base d'une application (`liste`, `agenda`, `minuteur`…),
+  avec ce qu'elle `apporte` (des mots-clés, voir plus bas), sa `capacite`
+  (la charge qu'elle supporte sans devenir fatigante) et les lignes de son
+  `apercu`.
+- `fonctions` : ce qu'on ajoute (rappels à l'écran, vibration…), avec ce
+  qu'elle `apporte`, sa `charge`, son `icone` (facultative) et la ligne
+  montrée dans l'aperçu.
+- `confort` : les réglages de l'application (taille du texte, contraste,
+  police, espacement, animations), leurs `valeurs` et le `defaut`.
+- `bareme` : `toleranceCharge` (au-delà de la capacité : « un peu chargée »
+  jusqu'à cette marge, puis « trop chargée ») et la part de la récompense
+  pour une note « Bien ».
+
+Les **apports** (`"cocher"`, `"rappel-ecran"`, `"prevoir"`…) relient tout :
+une commande dit ce dont la personne a besoin avec ces mots-clés, les
+modèles et les fonctions disent ce qu'ils apportent.
+
+## Les commandes : `data/commandes.json`
+
+| Champ | Rôle |
+|---|---|
+| `id`, `client` | identifiant, et la personne qui commande (un `id` de `data/pnj.json`) |
+| `titre`, `resume`, `demande` | le nom de l'application, une ligne de résumé, et la demande dans les mots de la personne |
+| `besoins` | `{ "apporte", "texte" }` : ce qui doit être couvert (sinon « À retravailler ») |
+| `bonus` | les petits plus : ils ne changent pas la note, mais rapportent `recompense.bonus` pièces chacun |
+| `aEviter` | ce qui gêne la personne (sinon « À retravailler ») |
+| `avis` | facultatif : ce que la personne dit d'une fonction qui ne lui sert à rien (`"alarme-sonore": "…"`) |
+| `chargeMax` | facultatif : une charge plus basse que celle du modèle (« le moins de boutons possible ») |
+| `confort` | `{ "reglage", "valeurs", "texte" }` : les réglages qui conviennent (sinon « Bien » au mieux) |
+| `apercu` | facultatif : les lignes de l'aperçu pour un modèle (`"liste": ["Matin · comprimé rond"]`) |
+| `recompense` | `argent`, `reputation` et `bonus` (pièces par petit plus) |
+| `debloquee` | facultatif : `drapeau` (`"visio-accueil"` = après l'appel du mentor), `apres` (commandes livrées avant) et `niveau` (de réputation) |
+| `reactions` | ce que dit la personne pour chaque note : `parfait`, `bien`, `aRetravailler` |
+
+Toutes ces applications sont **fictives** : le jeu l'affiche sur chaque
+commande. Au démarrage, le jeu vérifie que chaque commande peut être
+réussie « parfaitement », et que toutes finissent par se débloquer même si
+l'on n'obtient que des « Bien ».
 
 ## Les couleurs de la 3D : `data/palette.json`
 

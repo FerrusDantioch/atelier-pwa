@@ -98,6 +98,17 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   sont fixes et prévisibles (pas d'imprévu). Chaque place d'une routine
   doit être atteignable depuis `porte-entree` avec la façon de se déplacer
   du personnage (`coherence.js`).
+- **L'ordinateur** (jalon 3) : une seule fenêtre à « écrans »
+  (`js/interface/ordinateur.js` : `montrer`, `pied`), avec l'atelier
+  (`atelier.js`) et la visio (`visio.js`). Les règles du mini-jeu sont en
+  JavaScript pur, testées : `js/jeu/creation.js` (note, charge,
+  récompense), `commandes.js` (offres, livraison, objectif du moment),
+  `economie.js`. `coherence.js` refuse une commande impossible à réussir
+  « parfaitement » ou qui ne se débloque jamais avec des « Bien ». Chaque
+  commande affiche « application fictive ».
+- **Portraits** (visio, commandes) : `moteur.photographier()` dessine une
+  autre scène dans un coin de la toile et la recopie dans la même tâche
+  (`js/monde/portrait.js`) : pas de second moteur 3D.
 - **Tests navigateur** : pour attendre une condition qui importe des modules
   du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
   `page.waitForFunction` (qui n'attend pas les fonctions async).
@@ -126,6 +137,9 @@ install && npx playwright install chromium`). Ils couvrent : démarrage,
 accessibilité de base, réglages, sauvegarde/export/import/copies, copie
 d'urgence, hors ligne, mise à jour proposée, absence de requête externe,
 contrastes, et (jalon 1) la scène 3D, le toucher, le clavier, « Aller à… »,
-« Examiner », la caméra, le choix du personnage, le petit écran, et
-(jalon 2) l'horloge, le sommeil, les habitants et les dialogues.
+« Examiner », la caméra, le choix du personnage, le petit écran,
+(jalon 2) l'horloge, le sommeil, les habitants et les dialogues, et
+(jalon 3) l'ordinateur, la visio, l'atelier, la livraison et les comptes.
+Dans les textes affichés, la typographie met des espaces fines insécables
+avant « : ! ? » : normaliser les espaces (`\s+`) avant de comparer.
 Petit serveur local : `node outils/serveur.mjs`.

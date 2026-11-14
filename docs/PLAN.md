@@ -208,3 +208,7 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.
 6. *(Réglée : tablette Android, Brave.)*
+7. **Halaé, première cliente (jalon 3)** : valider avec elle la proposition
+   de sa première commande (faite dans le compte rendu, hors du dépôt)
+   avant de l'ajouter.
+8. **Répliques du mentor en visio** (jalon 3) : à valider par Ferrus.
