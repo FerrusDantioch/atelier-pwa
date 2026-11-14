@@ -1,0 +1,206 @@
+{
+  "modeles": [
+    {
+      "id": "liste",
+      "nom": "Liste à cocher",
+      "description": "Des lignes que l'on coche une à une.",
+      "apporte": ["cocher"],
+      "capacite": 5,
+      "apercu": ["Pain", "Pommes", "Lait"]
+    },
+    {
+      "id": "agenda",
+      "nom": "Agenda",
+      "description": "Les jours et les heures, avec ce qui est prévu.",
+      "apporte": ["planifier"],
+      "capacite": 6,
+      "apercu": ["Lundi · 9 h · Rendez-vous", "Mercredi · 14 h · Atelier", "Vendredi · 10 h · Marché"]
+    },
+    {
+      "id": "minuteur",
+      "nom": "Minuteur",
+      "description": "Un compte à rebours, pour savoir quand c'est prêt.",
+      "apporte": ["chronometrer"],
+      "capacite": 4,
+      "apercu": ["12 min 30 s"]
+    },
+    {
+      "id": "carnet",
+      "nom": "Carnet de notes",
+      "description": "Des notes prises en vitesse et retrouvées en un instant.",
+      "apporte": ["noter"],
+      "capacite": 5,
+      "apercu": ["Note du jour", "Idée à garder"]
+    },
+    {
+      "id": "fiche",
+      "nom": "Fiche pratique",
+      "description": "Une page d'informations claires, toujours sous la main.",
+      "apporte": ["informer"],
+      "capacite": 4,
+      "apercu": ["Horaires", "Adresse", "Téléphone"]
+    }
+  ],
+  "fonctions": [
+    {
+      "id": "rappels-ecran",
+      "nom": "Rappels à l'écran",
+      "description": "Un message bien visible s'affiche au bon moment.",
+      "apporte": ["rappel-ecran"],
+      "charge": 1,
+      "icone": "cloche",
+      "apercu": "Rappel : c'est l'heure !"
+    },
+    {
+      "id": "alarme-sonore",
+      "nom": "Sonnerie",
+      "description": "Une sonnerie retentit au bon moment.",
+      "apporte": ["rappel-son"],
+      "charge": 1,
+      "icone": "son",
+      "apercu": "Sonnerie à l'heure prévue"
+    },
+    {
+      "id": "vibration",
+      "nom": "Vibration",
+      "description": "Le téléphone vibre, même au fond d'une poche.",
+      "apporte": ["rappel-vibration"],
+      "charge": 1,
+      "icone": "vibration",
+      "apercu": "Vibre à l'heure prévue"
+    },
+    {
+      "id": "annonce-changements",
+      "nom": "Changements annoncés",
+      "description": "Prévient la veille, en douceur, quand quelque chose change.",
+      "apporte": ["prevoir"],
+      "charge": 2,
+      "icone": "calendrier",
+      "apercu": "Demain, un horaire change : 10 h → 11 h"
+    },
+    {
+      "id": "vue-semaine",
+      "nom": "Vue de la semaine",
+      "description": "Toute la semaine sur un seul écran.",
+      "apporte": ["vue-ensemble"],
+      "charge": 2,
+      "icone": "calendrier",
+      "apercu": "Cette semaine : 5 rendez-vous"
+    },
+    {
+      "id": "lecture-voix",
+      "nom": "Lecture à voix haute",
+      "description": "L'application lit le texte à voix haute, d'un appui.",
+      "apporte": ["ecouter"],
+      "charge": 2,
+      "icone": "son",
+      "apercu": "Écouter"
+    },
+    {
+      "id": "gros-bouton",
+      "nom": "Un seul gros bouton",
+      "description": "L'action principale tient dans un bouton immense, impossible à rater.",
+      "apporte": ["un-geste"],
+      "charge": 1,
+      "icone": "jouer",
+      "apercu": "Démarrer"
+    },
+    {
+      "id": "minuteur-visuel",
+      "nom": "Disque du temps",
+      "description": "Un disque qui se vide : on voit de loin le temps qui reste, sans lire de chiffres.",
+      "apporte": ["temps-visuel"],
+      "charge": 1,
+      "icone": "horloge",
+      "apercu": "Le disque se vide peu à peu"
+    },
+    {
+      "id": "historique",
+      "nom": "Historique",
+      "description": "Garde la trace de ce qui a été fait, jour après jour.",
+      "apporte": ["verifier"],
+      "charge": 1,
+      "icone": "copies",
+      "apercu": "Hier : tout a été fait"
+    },
+    {
+      "id": "partage",
+      "nom": "Partage",
+      "description": "Envoie le contenu à une autre personne, d'un geste.",
+      "apporte": ["partager"],
+      "charge": 2,
+      "icone": "exporter",
+      "apercu": "Partager"
+    },
+    {
+      "id": "statistiques",
+      "nom": "Statistiques détaillées",
+      "description": "Des graphiques sur tout ce qui se passe dans l'application.",
+      "apporte": ["statistiques"],
+      "charge": 3,
+      "icone": "graphique",
+      "apercu": "Graphiques de la semaine"
+    },
+    {
+      "id": "compte-en-ligne",
+      "nom": "Compte en ligne",
+      "description": "Il faut créer un compte avec un mot de passe avant de s'en servir.",
+      "apporte": ["compte"],
+      "charge": 2,
+      "icone": "cadenas",
+      "apercu": "Créer un compte"
+    }
+  ],
+  "confort": [
+    {
+      "id": "texte",
+      "nom": "Taille du texte",
+      "valeurs": [
+        { "id": "normal", "nom": "Normale" },
+        { "id": "grand", "nom": "Grande" },
+        { "id": "tres-grand", "nom": "Très grande" }
+      ],
+      "defaut": "normal"
+    },
+    {
+      "id": "contraste",
+      "nom": "Contraste",
+      "valeurs": [
+        { "id": "normal", "nom": "Normal" },
+        { "id": "eleve", "nom": "Élevé" }
+      ],
+      "defaut": "normal"
+    },
+    {
+      "id": "police",
+      "nom": "Police",
+      "valeurs": [
+        { "id": "standard", "nom": "Standard" },
+        { "id": "lisible", "nom": "Très lisible" }
+      ],
+      "defaut": "standard"
+    },
+    {
+      "id": "espacement",
+      "nom": "Espacement",
+      "valeurs": [
+        { "id": "normal", "nom": "Normal" },
+        { "id": "aere", "nom": "Aéré" }
+      ],
+      "defaut": "normal"
+    },
+    {
+      "id": "animations",
+      "nom": "Animations",
+      "valeurs": [
+        { "id": "oui", "nom": "Animées" },
+        { "id": "reduites", "nom": "Réduites" }
+      ],
+      "defaut": "oui"
+    }
+  ],
+  "bareme": {
+    "toleranceCharge": 2,
+    "bien": { "argent": 0.7, "reputation": 0.7 }
+  }
+}

@@ -74,6 +74,25 @@ function joueurValide(joueur) {
       && estNombre(position.angle)));
 }
 
+// Un projet d'application en cours (jalon 3, voir js/jeu/creation.js). Les
+// identifiants inconnus (modèle, fonctions) sont ignorés à l'usage.
+function projetValide(projet) {
+  return estObjet(projet)
+    && estObjet(projet.acceptee) && estEntier(projet.acceptee.jour, 1) && estEntier(projet.acceptee.minute)
+    && (projet.modele === null || typeof projet.modele === 'string')
+    && estListeDeTextes(projet.fonctions)
+    && estObjet(projet.confort) && Object.values(projet.confort).every((valeur) => typeof valeur === 'string')
+    && estEntier(projet.essais)
+    && (projet.resultat === null || projet.resultat === 'aRetravailler');
+}
+
+// Une commande livrée : sa note et ce qu'elle a rapporté.
+function livraisonValide(livraison) {
+  return estObjet(livraison) && typeof livraison.id === 'string'
+    && ['parfait', 'bien'].includes(livraison.note)
+    && estEntier(livraison.jour, 1) && estEntier(livraison.argent) && estEntier(livraison.reputation);
+}
+
 // Renvoie la liste des problèmes (vide si la partie est bien formée).
 export function verifierPartie(partie) {
   const problemes = [];
@@ -94,7 +113,8 @@ export function verifierPartie(partie) {
     && estListeDeTextes(partie.quetes.finies)
     && (partie.quetes.suivie === null || typeof partie.quetes.suivie === 'string'), 'quetes invalides');
   exiger(estObjet(partie.commandes) && estObjet(partie.commandes.enCours)
-    && Array.isArray(partie.commandes.livrees), 'commandes invalides');
+    && Object.values(partie.commandes.enCours).every(projetValide)
+    && Array.isArray(partie.commandes.livrees) && partie.commandes.livrees.every(livraisonValide), 'commandes invalides');
   exiger(estListeDeTextes(partie.possessions), 'possessions invalides');
   exiger(estObjet(partie.lieux) && typeof partie.lieux.actuel === 'string'
     && estListeDeTextes(partie.lieux.debloques) && estObjet(partie.lieux.amenagements), 'lieux invalides');

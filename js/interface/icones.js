@@ -66,6 +66,16 @@ const DESSINS = {
   lieu: [['path', { d: 'M4 11l8-7 8 7M6 9.5V20h12V9.5' }], ['path', { d: 'M10 20v-5h4v5' }]],
   lune: [['path', { d: 'M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z' }]],
   parler: [['path', { d: 'M4 5.5h16v10H10l-4.5 3.5v-3.5H4z' }], ['path', { d: 'M8 9.5h8M8 12.5h5' }]],
+  // Jalon 3 : l'ordinateur, les commandes, la visio et les fonctions des applications.
+  ordinateur: [['rect', { x: 3, y: 4, width: 18, height: 12, rx: 2 }], ['path', { d: 'M9 20h6M12 16v4' }]],
+  enveloppe: [['rect', { x: 3, y: 5.5, width: 18, height: 13, rx: 2 }], ['path', { d: 'M3.5 7l8.5 6.5L20.5 7' }]],
+  visio: [['rect', { x: 2.5, y: 6.5, width: 13, height: 11, rx: 2 }], ['path', { d: 'M15.5 10.5l6-3.5v10l-6-3.5z' }]],
+  livrer: [['path', { d: 'M4 8l8-4 8 4v8l-8 4-8-4z' }], ['path', { d: 'M4 8l8 4 8-4M12 12v8' }]],
+  cloche: [['path', { d: 'M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z' }], ['path', { d: 'M10 20.5a2 2 0 0 0 4 0' }]],
+  vibration: [['rect', { x: 8, y: 4, width: 8, height: 16, rx: 2 }], ['path', { d: 'M4.5 9v6M19.5 9v6M2 10.5v3M22 10.5v3' }]],
+  calendrier: [['rect', { x: 4, y: 5.5, width: 16, height: 14.5, rx: 2 }], ['path', { d: 'M4 10h16M8.5 3.5v4M15.5 3.5v4' }]],
+  graphique: [['path', { d: 'M4 4v16h16' }], ['path', { d: 'M8 16v-4M12 16V8M16 16v-6' }]],
+  cadenas: [['rect', { x: 5, y: 11, width: 14, height: 9.5, rx: 2 }], ['path', { d: 'M8 11V8a4 4 0 0 1 8 0v3' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

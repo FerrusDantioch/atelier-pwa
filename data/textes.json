@@ -52,6 +52,7 @@
     "objectif": "Objectif :",
     "aucunObjectif": "aucun pour l'instant",
     "journalBientot": "Le journal des quêtes arrivera avec les premières quêtes.",
+    "objectifAide": "Objectif : {objectif}. Touche pour y aller.",
     "pause": "Pause",
     "jour": "Jour {jour}",
     "jourCourt": "J{jour}",
@@ -98,7 +99,8 @@
     "part": "{nom} s'en va."
   },
   "actions": {
-    "dormir": "Dormir"
+    "dormir": "Dormir",
+    "ordinateur": "Utiliser l'ordinateur"
   },
   "temps": {
     "tard": "La journée est finie : l'horloge s'arrête. Va dormir quand tu veux (le lit, dans la chambre).",
@@ -400,5 +402,171 @@
     "tiersLien": "voir les licences.",
     "contact": "Une idée, une remarque, un souci ? Tes retours sont les bienvenus :",
     "omni": "Découvrir l'Omni-système"
+  },
+  "objectifs": {
+    "allumer": "allume ton ordinateur, au bureau",
+    "retravailler": "reprends l'appli de {client}",
+    "terminer": "termine l'appli de {client}",
+    "choisir": "choisis une commande, au bureau",
+    "attendre": "fais grandir ta réputation",
+    "fini": "tout est livré, bravo !",
+    "enRoute": "En route vers ton bureau."
+  },
+  "reputation": {
+    "points": {
+      "un": "{n} point",
+      "plusieurs": "{n} points"
+    }
+  },
+  "notes": {
+    "parfait": "Parfait",
+    "bien": "Bien",
+    "aRetravailler": "À retravailler"
+  },
+  "ordinateur": {
+    "titre": "Ton ordinateur",
+    "retour": "Retour",
+    "accueil": {
+      "titre": "Que veux-tu faire ?",
+      "etat": "{argent} · réputation : niveau {niveau}, {nom}",
+      "commandes": "Commandes",
+      "visio": "Appeler {nom} en visio",
+      "visioDetail": "Des explications et des conseils",
+      "comptes": "Tes comptes",
+      "comptesDetail": "Ton argent et ta réputation",
+      "nouvelles": {
+        "un": "{n} nouvelle commande",
+        "plusieurs": "{n} nouvelles commandes"
+      },
+      "enCours": {
+        "un": "{n} projet en cours",
+        "plusieurs": "{n} projets en cours"
+      },
+      "rien": "Rien de nouveau pour le moment"
+    },
+    "commandes": {
+      "titre": "Commandes",
+      "enCours": "Projets en cours",
+      "nouvelles": "Nouvelles commandes",
+      "livrees": "Commandes livrées",
+      "aucuneAvantVisio": "Les commandes arriveront après l'appel de {nom}.",
+      "attendre": "Aucune nouvelle commande pour le moment : d'autres arriveront quand ta réputation grandira.",
+      "fini": "Toutes les commandes sont livrées. Bravo !",
+      "de": "Commande de {client}",
+      "fictive": "application fictive",
+      "lire": "Lire la commande",
+      "reprendre": "Reprendre le projet",
+      "aReprendre": "à retravailler",
+      "recompense": "Récompense : {argent} et {reputation} de réputation",
+      "livree": "{note} · {argent} · jour {jour}"
+    },
+    "detail": {
+      "demande": "{client} écrit :",
+      "besoins": "Ce dont j'ai besoin",
+      "bonus": "Ce qui me ferait plaisir (petits plus)",
+      "aEviter": "Ce qui me gêne",
+      "confort": "Pour mon confort",
+      "chargeMax": "Le moins de boutons possible : une charge de {n} au plus.",
+      "recompense": "Récompense : {argent} et {reputation} de réputation.",
+      "recompenseBonus": "Chaque petit plus rapporte {argent} de plus.",
+      "accepter": "Accepter",
+      "accepterComplement": "la commande"
+    }
+  },
+  "atelier": {
+    "titre": "Atelier : {titre}",
+    "pour": "Pour {client}",
+    "relire": "Relire la commande",
+    "modele": "1. Le modèle",
+    "modeleAide": "La base de l'application.",
+    "capacite": "Supporte une charge de {n}",
+    "fonctions": "2. Les fonctions",
+    "fonctionsAide": "Ajoute ce qui répond aux besoins de la personne, pas plus : chaque fonction pèse dans la charge.",
+    "charge": "Charge {n}",
+    "confort": "3. Le confort",
+    "confortAide": "Comment l'application s'affiche. L'aperçu change aussitôt.",
+    "apercu": "Aperçu",
+    "apercuSansModele": "Choisis un modèle : l'aperçu de l'application apparaîtra ici.",
+    "apercuResume": "Aperçu : {modele} avec {fonctions}.",
+    "apercuSansFonction": "aucune fonction",
+    "jauge": "Charge",
+    "jaugeValeur": "{charge} sur {capacite} ({etat})",
+    "jaugeSansModele": "choisis un modèle",
+    "etats": {
+      "legere": "légère",
+      "equilibree": "équilibrée",
+      "unPeu": "un peu chargée",
+      "trop": "trop chargée"
+    },
+    "tester": "Tester",
+    "testerComplement": "comme {client}",
+    "livrer": "Livrer",
+    "enregistre": "Ton projet est enregistré au fur et à mesure."
+  },
+  "test": {
+    "titre": "Ce qu'en pense {client}",
+    "verdict": "Si tu livres maintenant : {note}.",
+    "gains": "Tu gagnerais {argent} et {reputation} de réputation.",
+    "remarques": "Les remarques de {client}",
+    "etiquettes": {
+      "ok": "Bon",
+      "mineur": "À revoir",
+      "bloquant": "Gênant",
+      "bonus": "Petit plus",
+      "absent": "Petit plus possible"
+    },
+    "modele": "Choisis d'abord un modèle d'application.",
+    "besoinOk": "{texte} : c'est prévu.",
+    "besoinManque": "Il manque : {texte}",
+    "eviter": "{texte} (à cause de « {source} »)",
+    "confortOk": "{reglage} : {valeur}, ça me convient.",
+    "confortManque": "{texte} ({reglage} : {valeur})",
+    "bonusOk": "{texte} : merci pour ce petit plus !",
+    "bonusAbsent": "{texte} (facultatif)",
+    "inutile": "« {fonction} » n'apporte rien à {client} et alourdit l'application.",
+    "inutileAvis": "« {fonction} » : {avis}",
+    "chargeOk": "Charge {charge} sur {capacite} : facile à prendre en main.",
+    "chargeUnPeu": "Charge {charge} sur {capacite} : un peu chargée.",
+    "chargeTrop": "Charge {charge} sur {capacite} : bien trop chargée, {client} s'y perd.",
+    "retour": "Retour à l'atelier"
+  },
+  "livraison": {
+    "titres": {
+      "parfait": "Livraison : parfait !",
+      "bien": "Livraison réussie : bien",
+      "aRetravailler": "À retravailler"
+    },
+    "gains": "Tu gagnes {argent} et {reputation} de réputation.",
+    "gainsCourt": "+{argent} · +{reputation} de réputation",
+    "niveau": "Nouveau niveau de réputation : {niveau}, {nom} !",
+    "nouvelle": "Nouvelle commande : {client}, « {titre} ».",
+    "garde": "Ton projet est gardé tel quel : corrige ce qui gêne, puis livre à nouveau. Rien ne presse.",
+    "continuer": "Continuer"
+  },
+  "visio": {
+    "titre": "Visio avec {nom}",
+    "appelEntrant": "{nom} t'appelle en visio.",
+    "appelEntrantAide": "Ton ordinateur sonne… sans bruit : l'appel s'affiche simplement ici.",
+    "decrocher": "Décrocher",
+    "plusTard": "Plus tard",
+    "enDirect": "{nom}, en direct depuis le monde réel",
+    "enVisio": "{nom}, en visio",
+    "portrait": "Portrait de {nom}",
+    "suivant": "Suivant",
+    "raccrocher": "Raccrocher",
+    "conseil": "Un conseil ?",
+    "revoir": "Revoir",
+    "revoirComplement": "les explications"
+  },
+  "comptes": {
+    "titre": "Tes comptes",
+    "argent": "Argent : {argent}",
+    "reputation": "Réputation : {points}, niveau {niveau} ({nom})",
+    "prochain": "Encore {reste} pour le niveau {niveau}, {nom}.",
+    "maximum": "Tu as atteint le plus haut niveau de réputation.",
+    "progression": "Progression vers le niveau suivant",
+    "historique": "Commandes livrées",
+    "aucune": "Aucune commande livrée pour l'instant.",
+    "depenses": "Bientôt, tu pourras dépenser tes pièces pour aménager l'atelier."
   }
 }

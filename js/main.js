@@ -66,8 +66,9 @@ let trois = null;
 // l'afficher : un message l'explique, le reste du jeu continue de marcher.
 async function preparer3D() {
   if (trois) return trois;
-  const [moteurJs, paletteJs, mondeJs, studioJs] = await Promise.all([
+  const [moteurJs, paletteJs, mondeJs, studioJs, portraitJs] = await Promise.all([
     import('./monde/moteur.js'), import('./modeles/palette.js'), import('./monde/monde.js'), import('./monde/studio.js'),
+    import('./monde/portrait.js'),
   ]);
   let moteur;
   try {
@@ -85,10 +86,13 @@ async function preparer3D() {
   const studio = studioJs.creerStudio({
     moteur, donnees, palette, animationsReduites: () => document.documentElement.getAttribute('data-animations') === 'reduites',
   });
-  trois = { moteur, palette, studio, creerMonde: mondeJs.creerMonde };
+  // Les portraits (visio, commandes) : des photos prises par le même moteur.
+  const portraits = portraitJs.creerPortraits({ moteur, donnees, palette, luminosite: () => obtenirReglages().luminosite });
+  trois = { moteur, palette, studio, portraits, creerMonde: mondeJs.creerMonde };
   ecouter('reglages:modifies', ({ reglages }) => {
     trois.moteur.changerQualite(reglages.qualite);
     trois.studio.regler({ luminosite: reglages.luminosite });
+    trois.portraits.oublier();
   });
   return trois;
 }
@@ -180,6 +184,8 @@ async function afficherJeu() {
   changerEcran(null);
   ecranJeu = afficherEcranJeu(racine, {
     jeu: donnees.jeu,
+    donnees,
+    portrait: (apparence, taille) => outils.portraits.photographier(apparence, taille),
     creerMonde: (rappels) => outils.creerMonde({
       moteur: outils.moteur,
       donnees,

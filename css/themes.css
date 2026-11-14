@@ -160,3 +160,22 @@
   --attention: #9c1f6b;
   --info: #4b3fa8;
 }
+
+/* --- Aperçu d'une application créée dans l'atelier (jalon 3) ---------------
+   C'est l'écran de l'application de la personne, pas celui du jeu : ces
+   couleurs ne changent pas avec le thème. Les deux versions restent
+   lisibles : contraste « normal » ≥ 4,5, contraste « élevé » = 21
+   (vérifié par tests/creation.test.mjs). */
+:root {
+  --apercu-cadre: #2e2a35;
+  --apercu-fond: #f7f4ee;
+  --apercu-bloc: #efeae2;
+  --apercu-bordure: #a29bae;
+  --apercu-texte: #5c5668;
+  --apercu-titre-fond: #5b4a9e;
+  --apercu-titre-texte: #ffffff;
+  --apercu-accent-fond: #e7e0f7;
+  --apercu-accent-texte: #3f327a;
+  --apercu-fort-fond: #ffffff;
+  --apercu-fort-texte: #000000;
+}

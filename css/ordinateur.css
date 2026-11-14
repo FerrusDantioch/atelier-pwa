@@ -1,0 +1,611 @@
+/* =============================================================================
+   ordinateur.css — l'ordinateur du bureau (jalon 3) : commandes, atelier de
+   création, visio et comptes.
+   -----------------------------------------------------------------------------
+   Aucune couleur ici : seulement des variables de css/themes.css (y compris
+   celles de l'aperçu, « --apercu-… », qui représentent l'application de la
+   personne et pas le jeu).
+   ========================================================================== */
+
+/* --- La fenêtre : une hauteur fixe, comme un écran d'ordinateur --- */
+.fenetre-ordinateur {
+  height: min(48rem, calc(100vh - 16px));
+  height: min(48rem, calc(100dvh - 16px));
+}
+
+@media (min-width: 900px) {
+  .fenetre-ordinateur.fenetre-atelier {
+    width: min(74rem, calc(100vw - 2rem));
+  }
+}
+
+.ecran-titre {
+  margin: 0 0 0.8rem;
+  font-size: 1.3rem;
+}
+
+.ecran-titre:focus {
+  outline: none;
+}
+
+/* --- Les commandes --- */
+.groupe-commandes > h4 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.liste-commandes-recues {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  gap: 0.8rem;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.carte-commande {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: 100%;
+  padding: 0.9rem 1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.carte-commande p {
+  margin: 0;
+}
+
+.carte-commande-entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+}
+
+.carte-commande-entete h5 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.carte-commande-client {
+  margin: 0 0 0.6rem;
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+.carte-commande > .bouton {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.carte-commande-livree {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-weight: 700;
+  color: var(--succes);
+}
+
+.etiquette-attention {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  border-color: var(--attention);
+  color: var(--attention);
+}
+
+.etiquette-attention .icone {
+  width: 1em;
+  height: 1em;
+}
+
+/* --- Une commande : la demande et le cahier des charges --- */
+.demande {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0 0 1rem;
+}
+
+.demande-portrait .portrait {
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: 50%;
+}
+
+.demande-texte {
+  flex: 1;
+  min-width: 0;
+}
+
+.demande blockquote {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .demande {
+    flex-direction: column;
+  }
+}
+
+.cahier {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: 0.8rem 1.4rem;
+  margin: 0 0 1rem;
+}
+
+.cahier-groupe h4 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+}
+
+.cahier-liste {
+  margin: 0;
+  padding-left: 1.3rem;
+}
+
+.cahier-liste li {
+  margin: 0.25rem 0;
+}
+
+.cahier .encadre {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+/* --- L'atelier --- */
+.rappel-commande {
+  margin: 0 0 1rem;
+  padding: 0 1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.rappel-commande[open] {
+  padding-bottom: 1rem;
+}
+
+.rappel-commande summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--cible);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rappel-commande summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.rappel-commande blockquote {
+  margin: 0 0 0.8rem;
+}
+
+.atelier-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "modeles" "fonctions" "apercu" "confort";
+  gap: 0 1.5rem;
+}
+
+.atelier-modeles { grid-area: modeles; }
+.atelier-fonctions { grid-area: fonctions; }
+.atelier-apercu { grid-area: apercu; }
+.atelier-confort { grid-area: confort; }
+
+/* Sur tablette en largeur : l'aperçu reste visible à droite pendant qu'on
+   fait défiler les étapes. */
+@media (min-width: 900px) {
+  .atelier-grille {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+    grid-template-areas: "modeles apercu" "fonctions apercu" "confort apercu";
+  }
+
+  .atelier-apercu {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+}
+
+.atelier-confort > h4 {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+}
+
+.atelier-apercu {
+  margin: 0 0 1.4rem;
+  padding: 0.9rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.atelier-apercu > h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* La jauge de charge : un mot (légère, équilibrée…) ET une barre. */
+.jauge {
+  margin: 0 0 0.9rem;
+}
+
+.jauge-texte {
+  margin: 0 0 0.4rem;
+}
+
+.jauge-barre {
+  position: relative;
+  height: 1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.jauge-remplissage {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--succes);
+  transition: width var(--duree) ease-out;
+}
+
+.jauge-remplissage[data-etat="unPeu"] { background: var(--attention); }
+.jauge-remplissage[data-etat="trop"] { background: var(--erreur); }
+.jauge-remplissage[data-etat="aucun"] { background: none; }
+
+/* Le trait : la limite de ce que l'application supporte. */
+.jauge-repere {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: var(--texte);
+}
+
+/* --- L'aperçu : l'application dans un téléphone --- */
+.apercu-telephone {
+  width: min(100%, 15rem);
+  margin: 0 auto;
+  padding: 0.7rem 0.45rem 1rem;
+  border-radius: 1.6rem;
+  background: var(--apercu-cadre);
+}
+
+.apercu-ecran {
+  min-height: 17rem;
+  padding: 0 0 0.7rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--apercu-fond);
+  color: var(--apercu-texte);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+.apercu-barre {
+  margin: 0 0 0.6rem;
+  padding: 0.6em 0.8em;
+  background: var(--apercu-titre-fond);
+  color: var(--apercu-titre-texte);
+  font-weight: 700;
+}
+
+.apercu-lignes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin: 0;
+  padding: 0 0.8em;
+  list-style: none;
+}
+
+.apercu-lignes li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.5em;
+  border: 1px solid var(--apercu-bordure);
+  border-radius: 0.4em;
+  background: var(--apercu-bloc);
+}
+
+.apercu-case {
+  flex: none;
+  width: 0.9em;
+  height: 0.9em;
+  border: 2px solid currentColor;
+  border-radius: 0.2em;
+}
+
+.apercu-modele-minuteur .apercu-lignes li:first-child {
+  justify-content: center;
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+.apercu-fonction {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0.45em 0.8em 0;
+  padding: 0.4em 0.5em;
+  border-radius: 0.4em;
+  background: var(--apercu-accent-fond);
+  color: var(--apercu-accent-texte);
+  font-weight: 600;
+}
+
+.apercu-fonction .icone {
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.apercu-vide {
+  margin: 0;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+/* Les réglages de confort de l'application, appliqués à l'aperçu. */
+.apercu-texte-grand { font-size: 1rem; }
+.apercu-texte-tres-grand { font-size: 1.25rem; }
+
+.apercu-contraste-eleve {
+  background: var(--apercu-fort-fond);
+  color: var(--apercu-fort-texte);
+}
+
+.apercu-contraste-eleve .apercu-barre {
+  background: var(--apercu-fort-texte);
+  color: var(--apercu-fort-fond);
+}
+
+.apercu-contraste-eleve .apercu-lignes li,
+.apercu-contraste-eleve .apercu-fonction {
+  border: 2px solid var(--apercu-fort-texte);
+  background: var(--apercu-fort-fond);
+  color: var(--apercu-fort-texte);
+}
+
+.apercu-police-lisible {
+  font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+}
+
+.apercu-espacement-aere {
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+}
+
+.apercu-espacement-aere .apercu-lignes {
+  gap: 0.75em;
+}
+
+/* « Animées » : les icônes remuent un instant (jamais en boucle, et pas du
+   tout si le joueur a choisi des animations réduites). */
+.apercu-animations-oui .apercu-fonction .icone {
+  animation: apercu-remue 0.8s ease-in-out 3;
+}
+
+[data-animations="reduites"] .apercu-animations-oui .apercu-fonction .icone {
+  animation: none;
+}
+
+@keyframes apercu-remue {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-14deg); }
+  75% { transform: rotate(14deg); }
+}
+
+/* --- « Tester » et « Livrer » : les remarques de la personne --- */
+.liste-avis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.avis {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.avis > .icone {
+  margin-top: 0.15em;
+}
+
+.avis-etiquette {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.avis-ok > .icone, .avis-ok .avis-etiquette { color: var(--succes); }
+.avis-mineur > .icone, .avis-mineur .avis-etiquette { color: var(--attention); }
+.avis-bloquant > .icone, .avis-bloquant .avis-etiquette { color: var(--erreur); }
+.avis-bonus > .icone, .avis-bonus .avis-etiquette { color: var(--info); }
+.avis-absent > .icone, .avis-absent .avis-etiquette { color: var(--texte-doux); }
+
+@media (max-width: 480px) {
+  .avis {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .avis-texte {
+    grid-column: 1 / -1;
+  }
+}
+
+.titre-remarques {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* --- La visio --- */
+.visio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 760px) {
+  .visio {
+    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .visio-cadre {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.visio-cadre {
+  max-width: 22rem;
+  margin: 0;
+  padding: 0.5rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.visio-cadre .portrait {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--rayon) - 4px);
+}
+
+.visio-cadre figcaption {
+  margin-top: 0.4rem;
+  font-weight: 700;
+}
+
+.visio-sans-image {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+}
+
+.visio-sans-image .icone {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* --- Les comptes --- */
+.ligne-compte {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.progression {
+  display: block;
+  width: 100%;
+  height: 1rem;
+  margin: 0.3rem 0 1.2rem;
+  accent-color: var(--accent);
+}
+
+/* Fenêtres « Tester » et « Livraison » : des blocs bien séparés. */
+.resultat-livraison {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.resultat-livraison .encadre,
+.resultat-livraison .titre-remarques {
+  margin: 0;
+}
+
+/* --- Petits écrans : les boutons du bas tiennent sur deux lignes --- */
+.carte-commande-entete .etiquette,
+.carte-commande-client .etiquette {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .fenetre-ordinateur .fenetre-pied {
+    gap: 0.5rem;
+  }
+
+  .fenetre-ordinateur .fenetre-pied .bouton {
+    flex: 1 1 auto;
+  }
+
+  .complement-etroit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Le bandeau de charge : visible seulement quand l'aperçu n'est pas à côté. */
+.atelier-bandeau {
+  position: sticky;
+  top: -1rem;
+  z-index: 1;
+  margin: 0 -1.2rem 1rem;
+  padding: 0.6rem 1.2rem;
+  border-bottom: 1px solid var(--bordure);
+  background: var(--surface);
+}
+
+.atelier-bandeau .jauge-texte {
+  margin: 0 0 0.3rem;
+}
+
+.atelier-bandeau .jauge-barre {
+  height: 0.7rem;
+}
+
+@media (min-width: 900px) {
+  .atelier-bandeau {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .atelier-bandeau {
+    margin: 0 -12px 1rem;
+    padding: 0.5rem 12px;
+  }
+}
+
+/* Le bandeau ne cache jamais l'élément sélectionné au clavier. */
+@media (max-width: 899px) {
+  .fenetre-atelier .fenetre-corps {
+    scroll-padding-top: 5rem;
+  }
+}

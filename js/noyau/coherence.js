@@ -10,11 +10,16 @@
 //     grille, meubles qui ne se chevauchent pas…
 //   - ACCESSIBILITÉ : depuis le point de départ, chaque pièce, chaque meuble
 //     qu'on peut examiner et chaque point d'intérêt est atteignable à pied
-//     ET en fauteuil roulant (passages d'au moins 1 m).
+//     ET en fauteuil roulant (passages d'au moins 1 m) ;
+//   - chaque commande (jalon 3) cite des clients, des apports et des
+//     réglages qui existent, peut être réussie « parfaitement », et finit
+//     par se débloquer même si l'on n'obtient que des « Bien ».
 //
 // Ce module n'utilise ni la 3D ni la page (testé avec node --test).
 // =============================================================================
 
+import { etatDesCommandes } from '../jeu/commandes.js';
+import { meilleurProjet, recompensePour } from '../jeu/creation.js';
 import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personnage.js';
 import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
 import { heureEnMinutes } from './format-sauvegarde.js';
@@ -253,7 +258,81 @@ export function verifierCoherence(donnees) {
   }
   for (const lieu of Object.values(donnees.lieux || {})) verifierLieu(lieu, donnees, signaler);
   verifierPnj(donnees, signaler);
+  verifierCommandes(donnees, signaler);
   return problemes;
+}
+
+// Les commandes : tout ce qu'elles citent existe, chacune peut être
+// parfaite, et toutes finissent par se débloquer (même avec des « Bien »).
+function verifierCommandes(donnees, signaler) {
+  const chemin = 'data/commandes.json';
+  const creation = donnees.creation;
+  const commandes = donnees.commandes?.commandes;
+  if (!creation || !commandes) return;
+  const clients = new Set((donnees.pnj?.pnj || []).map((pnj) => pnj.id));
+  const modeles = new Set(creation.modeles.map((modele) => modele.id));
+  const fonctions = new Set(creation.fonctions.map((fonction) => fonction.id));
+  const apportsConnus = new Set([...creation.modeles, ...creation.fonctions].flatMap((element) => element.apporte));
+  const reglages = new Map(creation.confort.map((reglage) => [reglage.id, new Set(reglage.valeurs.map((v) => v.id))]));
+  const ids = new Set(commandes.map((commande) => commande.id));
+  const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
+
+  for (const commande of commandes) {
+    const ou = `commandes › ${commande.id}`;
+    if (!clients.has(commande.client)) signaler(chemin, `${ou} › client : « ${commande.client} » n'existe pas dans data/pnj.json`);
+    for (const groupe of ['besoins', 'bonus', 'aEviter']) {
+      for (const attente of commande[groupe]) {
+        if (!apportsConnus.has(attente.apporte)) {
+          signaler(chemin, `${ou} › ${groupe} : aucun modèle ni aucune fonction n'apporte « ${attente.apporte} » (data/creation.json)`);
+        }
+      }
+    }
+    for (const attente of commande.confort) {
+      const valeurs = reglages.get(attente.reglage);
+      if (!valeurs) signaler(chemin, `${ou} › confort : le réglage « ${attente.reglage} » n'existe pas dans data/creation.json`);
+      else for (const valeur of attente.valeurs) {
+        if (!valeurs.has(valeur)) signaler(chemin, `${ou} › confort › ${attente.reglage} : la valeur « ${valeur} » n'existe pas`);
+      }
+    }
+    for (const id of Object.keys(commande.avis || {})) {
+      if (!fonctions.has(id)) signaler(chemin, `${ou} › avis : la fonction « ${id} » n'existe pas dans data/creation.json`);
+    }
+    for (const id of Object.keys(commande.apercu || {})) {
+      if (!modeles.has(id)) signaler(chemin, `${ou} › apercu : le modèle « ${id} » n'existe pas dans data/creation.json`);
+    }
+    for (const id of commande.debloquee?.apres || []) {
+      if (!ids.has(id)) signaler(chemin, `${ou} › debloquee › apres : la commande « ${id} » n'existe pas`);
+    }
+    if ((commande.debloquee?.niveau || 1) > niveauMax) {
+      signaler(chemin, `${ou} › debloquee › niveau : il n'y a que ${niveauMax} niveaux de réputation (data/jeu.json)`);
+    }
+    if (!meilleurProjet(commande, creation)) {
+      signaler(chemin, `${ou} : aucune application ne peut la réussir « parfaitement » (besoins impossibles à couvrir, ou trop chargés)`);
+    }
+  }
+
+  // Une partie qui n'obtiendrait que des « Bien » : tout doit se débloquer.
+  if (!donnees.jeu) return;
+  const paliers = donnees.jeu.reputation.paliers;
+  const partie = {
+    drapeaux: new Proxy({}, { get: () => true }), // tous les drapeaux (appel du mentor…)
+    reputation: donnees.jeu.depart.reputation,
+    commandes: { enCours: {}, livrees: [] },
+  };
+  for (let tour = 0; tour <= commandes.length; tour += 1) {
+    const { offres } = etatDesCommandes(partie, commandes, paliers);
+    if (offres.length === 0) break;
+    for (const commande of offres) {
+      partie.reputation += recompensePour('bien', commande, 0, creation.bareme).reputation;
+      partie.commandes.livrees.push({ id: commande.id });
+    }
+  }
+  const livrees = new Set(partie.commandes.livrees.map((livraison) => livraison.id));
+  for (const commande of commandes) {
+    if (!livrees.has(commande.id)) {
+      signaler(chemin, `commandes › ${commande.id} : ne se débloque jamais si l'on n'obtient que des « Bien » (vérifier « debloquee »)`);
+    }
+  }
 }
 
 // Les personnages non joueurs : apparence connue, routine dans la journée,

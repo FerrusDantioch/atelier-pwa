@@ -114,10 +114,110 @@
       }
     },
     {
+      "id": "madeleine",
+      "nom": "Madeleine",
+      "presentation": "Retraitée, elle s'occupe du jardin partagé du quartier. Sa vue baisse : il lui faut des textes grands et bien contrastés.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "apparence": {
+        "teint": "clair",
+        "lunettes": "rondes",
+        "coiffure": "chignon",
+        "cheveux": "blanc",
+        "barbe": "aucune",
+        "silhouette": "moyenne",
+        "taille": "petite",
+        "haut": "rose",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "jupe",
+        "bas": "marine",
+        "couvreChef": "aucun",
+        "couleurCouvreChef": "noir",
+        "aide": "aucune",
+        "couleurAide": "noir"
+      },
+      "routine": []
+    },
+    {
+      "id": "samia",
+      "nom": "Samia",
+      "presentation": "Boulangère au coin de la rue. Ses journées commencent avant l'aube : il lui faut des outils simples, qui ne la ralentissent pas.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "apparence": {
+        "teint": "mat",
+        "lunettes": "aucune",
+        "coiffure": "chignon",
+        "cheveux": "brun",
+        "barbe": "aucune",
+        "silhouette": "moyenne",
+        "taille": "moyenne",
+        "haut": "blanc",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "pantalon",
+        "bas": "beige",
+        "couvreChef": "aucun",
+        "couleurCouvreChef": "noir",
+        "aide": "aucune",
+        "couleurAide": "noir"
+      },
+      "routine": []
+    },
+    {
+      "id": "karim",
+      "nom": "Karim",
+      "presentation": "Menuisier, il fabrique des meubles sur mesure. Il est sourd : ce qui compte doit se voir ou se sentir, pas seulement s'entendre.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "apparence": {
+        "teint": "brun",
+        "lunettes": "carrees",
+        "coiffure": "courte",
+        "cheveux": "noir",
+        "barbe": "courte",
+        "silhouette": "large",
+        "taille": "grande",
+        "haut": "bleu",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "pantalon",
+        "bas": "kaki",
+        "couvreChef": "aucun",
+        "couleurCouvreChef": "noir",
+        "aide": "aucune",
+        "couleurAide": "noir"
+      },
+      "routine": []
+    },
+    {
+      "id": "hugo",
+      "nom": "Hugo",
+      "presentation": "Livreur à vélo, toujours entre deux courses. Il aime les applications qui vont droit au but.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "apparence": {
+        "teint": "fonce",
+        "lunettes": "aucune",
+        "coiffure": "boucles",
+        "cheveux": "noir",
+        "barbe": "aucune",
+        "silhouette": "fine",
+        "taille": "moyenne",
+        "haut": "orange",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "short",
+        "bas": "noir",
+        "couvreChef": "casquette",
+        "couleurCouvreChef": "noir",
+        "aide": "aucune",
+        "couleurAide": "noir"
+      },
+      "routine": []
+    },
+    {
       "id": "ferrus",
       "modele": "ferrus",
       "presentation": "Ferrus Dantioch, qui a imaginé ce jeu, passe de temps en temps voir comment avance l'atelier.",
-      "aValider": "Répliques du mentor proposées par Claude, validées par Ferrus le 14/11/2026. Quand on joue Ferrus, le mentor n'apparaît qu'en visio (jalon 3).",
+      "aValider": "Répliques du mentor proposées par Claude : celles des visites validées par Ferrus le 14/11/2026 ; celles de la visio (jalon 3) à valider par Ferrus. Quand on joue Ferrus, le mentor n'apparaît qu'en visio, comme « le vrai Ferrus, depuis le monde réel ».",
       "absentSiJoueur": "ferrus",
       "routine": [
         { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" }
@@ -131,6 +231,31 @@
       "repliques": {
         "rencontre": ["Bienvenue dans l'atelier ! Ici, on crée des applications qui facilitent la vie des gens. Je passerai de temps en temps voir comment ça avance."],
         "salut": ["Salut ! Tout se passe bien à l'atelier ?"]
+      },
+      "visio": {
+        "accueil": {
+          "joueurFerrus": "Bonjour ! Ici Ferrus, le vrai, depuis le monde réel. Toi, tu es mon double dans le jeu : c'est toi qui fais tourner l'atelier, maintenant.",
+          "autre": "Bonjour {nom} ! Ici Ferrus. Je t'appelle pour t'expliquer comment fonctionne l'atelier."
+        },
+        "tutoriel": [
+          "Ici, tu crées des applications web pour les gens autour de toi. Elles s'ouvrent dans un navigateur, sur un téléphone ou une tablette, et fonctionnent même sans internet.",
+          "Chaque commande dit ce dont la personne a besoin. Lis-la bien : c'est elle qui sait ce qui l'aide.",
+          "Choisis un modèle, puis ajoute les fonctions utiles, pas plus : chaque fonction ajoute de la charge, et une application trop chargée fatigue.",
+          "Règle ensuite le confort : taille du texte, contraste, police… L'aperçu te montre le résultat. Teste comme la personne, puis livre quand tout te semble bon.",
+          "Si ce n'est pas encore ça, rien n'est perdu : ton projet t'attend, tu corriges et tu livres à nouveau. Pour t'entraîner, je t'envoie une petite commande. À toi de jouer !"
+        ],
+        "conseils": {
+          "aRetravailler": ["Relis les remarques de la personne : souvent, il suffit d'enlever une fonction ou de changer un réglage."],
+          "enCours": ["Tu as un projet en cours. Prends ton temps : rien ne presse, personne ne part."],
+          "offres": ["Des commandes t'attendent. Commence par celle qui te parle le plus."],
+          "general": [
+            "Un texte bien contrasté aide tout le monde, pas seulement les personnes qui voient mal.",
+            "Moins de fonctions, c'est souvent mieux : chaque bouton de plus est une question de plus.",
+            "Une information donnée seulement par un son échappe à qui ne l'entend pas. Double-la toujours d'un signal visible.",
+            "Une application qui fonctionne sans internet rend service partout : dans le métro, à la campagne, au fond d'un atelier."
+          ]
+        },
+        "auRevoir": "À bientôt ! Rappelle-moi quand tu veux, depuis ton ordinateur."
       }
     }
   ]

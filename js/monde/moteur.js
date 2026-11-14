@@ -179,6 +179,32 @@ export function creerMoteur(conteneur, { qualite = 'standard', surPerte, surReto
       else ajusterTaille();
     },
 
+    // Une « photo » d'une autre scène (le portrait de la visio…), rendue dans
+    // un coin de la zone de dessin puis recopiée dans une petite toile 2D.
+    // Tout se passe dans la même tâche : la scène du jeu est redessinée
+    // aussitôt, l'écran n'a jamais le temps de montrer la photo à sa place.
+    // Renvoie la toile 2D, ou null si la 3D n'est pas disponible.
+    photographier(autreScene, autreCamera, largeurVoulue, hauteurVoulue) {
+      const toile = rendu.domElement;
+      const ratio = rendu.getPixelRatio();
+      const l = Math.max(1, Math.min(Math.round(largeurVoulue * ratio), toile.width));
+      const h = Math.max(1, Math.min(Math.round(hauteurVoulue * ratio), toile.height));
+      if (rendu.getContext().isContextLost()) return null;
+      autreCamera.updateProjectionMatrix();
+      rendu.setScissorTest(true);
+      rendu.setScissor(0, 0, l / ratio, h / ratio);
+      rendu.setViewport(0, 0, l / ratio, h / ratio);
+      rendu.render(autreScene, autreCamera);
+      const photo = document.createElement('canvas');
+      photo.width = l;
+      photo.height = h;
+      photo.getContext('2d').drawImage(toile, 0, toile.height - h, l, h, 0, 0, l, h);
+      rendu.setScissorTest(false);
+      rendu.setViewport(0, 0, largeur, hauteur);
+      if (scene && camera) rendu.render(scene, camera);
+      return photo;
+    },
+
     // Les informations de la carte graphique (pour les tests).
     get infos() { return rendu.info; },
 

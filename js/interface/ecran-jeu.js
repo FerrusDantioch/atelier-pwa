@@ -17,6 +17,7 @@
 // de l'écran.
 // =============================================================================
 
+import { objectifDuMoment } from '../jeu/commandes.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
 import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
@@ -29,6 +30,7 @@ import { el } from './dom.js';
 import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
 import { direAuxLecteurs, notifier } from './notifications.js';
+import { ouvrirOrdinateur } from './ordinateur.js';
 
 // Le monde 3D affiché (pour les tests automatiques et la fenêtre « Aller à… »).
 let mondeActuel = null;
@@ -58,21 +60,27 @@ function boutonCamera(nomIcone, libelle, raccourci, surClic) {
 /**
  * Affiche l'écran de jeu dans « parent ».
  *   jeu           data/jeu.json
+ *   donnees       toutes les données (commandes, personnages…)
+ *   portrait      (apparence, taille) → toile 2D : les portraits de la visio
  *   creerMonde    fabrique le monde 3D : creerMonde(rappels) → monde
  *   menu          { surReglages, surSauvegarde, surAPropos, surAccueil, surPersonnage }
  * Renvoie { element, monde, detruire() }.
  */
-export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
+export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerMonde, menu }) {
   // --- Barre du haut ---------------------------------------------------------------
   const argent = indicateur('piece', t('hud.argent'));
   const reputation = indicateur('etoile', t('hud.reputation'));
   const moment = indicateur('horloge', t('hud.moment'));
 
+  // L'objectif du moment (en attendant le journal des quêtes) : le toucher
+  // mène à l'endroit où il se joue (le bureau).
+  const texteObjectif = el('span', {}, t('hud.aucunObjectif'));
+  let objectifActuel = null;
   const objectif = el('button', {
     class: 'bouton bouton-discret objectif',
     type: 'button',
-    onClick: () => notifier(t('hud.journalBientot'), { type: 'info' }),
-  }, icone('cible'), el('span', { class: 'objectif-texte' }, el('strong', {}, `${t('hud.objectif')} `), t('hud.aucunObjectif')));
+    onClick: () => allerVersObjectif(),
+  }, icone('cible'), el('span', { class: 'objectif-texte' }, el('strong', {}, `${t('hud.objectif')} `), texteObjectif));
 
   const boutonPause = el('button', {
     class: 'bouton bouton-pause',
@@ -122,13 +130,19 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     hidden: true,
     onClick: () => dormir(),
   }, icone('lune'), t('actions.dormir'));
+  const boutonOrdinateur = el('button', {
+    class: 'bouton',
+    type: 'button',
+    hidden: true,
+    onClick: () => utiliserOrdinateur(),
+  }, icone('ordinateur'), t('actions.ordinateur'));
 
   const texteLieu = el('span', {});
   const lieuActuel = el('p', { class: 'lieu-actuel' },
     icone('lieu'), el('span', { class: 'visuellement-cache' }, t('jeu.lieuActuel')), texteLieu);
 
   const barreBas = el('footer', { class: 'barre-bas' },
-    el('div', { class: 'barre-zone' }, boutonAllerA, boutonAction, boutonDormir),
+    el('div', { class: 'barre-zone' }, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur),
     lieuActuel);
 
   const camera = el('div', { class: 'commandes-camera', role: 'group', 'aria-label': t('jeu.camera.titre') },
@@ -184,6 +198,25 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     else examiner();
   }
 
+  // L'ordinateur du bureau : commandes, atelier de création, visio, comptes.
+  function utiliserOrdinateur() {
+    fermerBulle();
+    ouvrirOrdinateur({ donnees, portrait });
+  }
+
+  // Toucher l'objectif : on part vers l'endroit où il se joue.
+  function allerVersObjectif() {
+    const destination = objectifActuel?.destination
+      ? mondeActuel?.destinations().find((d) => d.id === objectifActuel.destination)
+      : null;
+    if (!destination) {
+      notifier(t('hud.journalBientot'), { type: 'info' });
+      return;
+    }
+    fermerBulle();
+    if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('objectifs.enRoute'));
+  }
+
   // Dormir : la journée suivante commence au matin (avec une copie de
   // secours de la partie, comme à chaque nouveau jour).
   async function dormir() {
@@ -220,8 +253,9 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
         iconeAction.replaceChildren(icone(personne ? 'parler' : 'examiner'));
         boutonAction.hidden = false;
         boutonDormir.hidden = !infos.actions?.includes('dormir');
+        boutonOrdinateur.hidden = !infos.actions?.includes('ordinateur');
       } else {
-        for (const bouton of [boutonAction, boutonDormir]) {
+        for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur]) {
           if (bouton === document.activeElement) bouton.blur();
           bouton.hidden = true;
         }
@@ -334,6 +368,15 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     reputation.court.textContent = t('hud.niveauCourt', { niveau: niveau.niveau });
     const heure = formaterHeure(partie.temps.minute);
     moment.valeur.textContent = `${t('hud.jour', { jour: partie.temps.jour })} · ${heure}`;
+    // L'objectif du moment.
+    objectifActuel = donnees ? objectifDuMoment(partie, donnees.commandes.commandes, jeu.reputation.paliers) : null;
+    const nomClient = (id) => {
+      const pnj = donnees.pnj.pnj.find((p) => p.id === id);
+      return pnj?.modele === 'ferrus' ? donnees.personnages.ferrus.nom : pnj?.nom || '';
+    };
+    texteObjectif.textContent = objectifActuel
+      ? t(`objectifs.${objectifActuel.cle}`, { client: objectifActuel.commande ? nomClient(objectifActuel.commande.client) : '' })
+      : t('hud.aucunObjectif');
     moment.court.textContent = `${t('hud.jourCourt', { jour: partie.temps.jour })} · ${heure}`;
     adapterBarres();
   }

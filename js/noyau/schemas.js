@@ -118,7 +118,7 @@ export const SCHEMA_MEUBLES = {
           emprise: { type: 'liste', element: { type: 'nombre', entier: true, min: 1, max: 20 }, min: 2, max: 2 },
           bloque: { type: 'booleen', facultatif: true },
           // Actions en plus de « Examiner » (ex. « dormir » pour un lit).
-          actions: { type: 'liste', facultatif: true, element: { type: 'choix', valeurs: ['dormir'] } },
+          actions: { type: 'liste', facultatif: true, element: { type: 'choix', valeurs: ['dormir', 'ordinateur'] } },
           formes: { type: 'liste', min: 1, element: SCHEMA_FORME },
         },
       },
@@ -328,11 +328,27 @@ export const SCHEMA_PNJ = {
               },
             },
           },
+          // Activités et répliques : seulement pour qui vient dans un lieu.
           activites: {
             type: 'objet',
+            facultatif: true,
             valeurs: { type: 'objet', champs: { description: texte, repliques: listeDeTextes } },
           },
-          repliques: { type: 'objet', champs: { rencontre: listeDeTextes, salut: listeDeTextes } },
+          repliques: { type: 'objet', facultatif: true, champs: { rencontre: listeDeTextes, salut: listeDeTextes } },
+          // Les appels en visio (le mentor, jalon 3).
+          visio: {
+            type: 'objet',
+            facultatif: true,
+            champs: {
+              accueil: { type: 'objet', champs: { joueurFerrus: texte, autre: texte } },
+              tutoriel: listeDeTextes,
+              conseils: {
+                type: 'objet',
+                champs: { aRetravailler: listeDeTextes, enCours: listeDeTextes, offres: listeDeTextes, general: listeDeTextes },
+              },
+              auRevoir: texte,
+            },
+          },
         },
       },
     },
@@ -352,12 +368,152 @@ function verifierPnjEnPlus(fichier) {
     if (!ferrus && !pnj.nom) erreurs.push(`${ou} : il faut un « nom »`);
     if (!ferrus && !pnj.apparence) erreurs.push(`${ou} : il faut une « apparence »`);
     for (const message of verifierRoutine(pnj.routine || [], { debut: 0, fin: 24 * 60 })) erreurs.push(`${ou} › ${message}`);
+    if ((pnj.routine || []).length > 0 && !pnj.repliques) erreurs.push(`${ou} : il faut des « repliques » (rencontre, salut) pour qui vient dans un lieu`);
     (pnj.routine || []).forEach((creneau, n) => {
       if (creneau.activite && !pnj.activites?.[creneau.activite]) {
         erreurs.push(`${ou} › routine › n°${n + 1} : l'activité « ${creneau.activite} » n'est pas décrite dans « activites »`);
       }
     });
   });
+  return erreurs;
+}
+
+// --- data/creation.json : les pièces du mini-jeu de création (jalon 3) -------
+const listeDApports = { type: 'liste', min: 1, element: texte };
+export const SCHEMA_CREATION = {
+  type: 'objet',
+  champs: {
+    modeles: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: texte,
+          description: texte,
+          apporte: listeDApports,
+          capacite: { type: 'nombre', entier: true, min: 1, max: 20 },
+          apercu: listeDeTextes,
+        },
+      },
+    },
+    fonctions: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: texte,
+          description: texte,
+          apporte: listeDApports,
+          charge: { type: 'nombre', entier: true, min: 0, max: 10 },
+          icone: { ...texte, facultatif: true },
+          apercu: texte,
+        },
+      },
+    },
+    confort: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: texte,
+          valeurs: { type: 'liste', min: 2, element: { type: 'objet', champs: { id: texte, nom: texte } } },
+          defaut: texte,
+        },
+      },
+    },
+    bareme: {
+      type: 'objet',
+      champs: {
+        toleranceCharge: { type: 'nombre', entier: true, min: 0, max: 10 },
+        bien: {
+          type: 'objet',
+          champs: { argent: { type: 'nombre', min: 0, max: 1 }, reputation: { type: 'nombre', min: 0, max: 1 } },
+        },
+      },
+    },
+  },
+};
+
+function verifierCreationEnPlus(creation) {
+  const erreurs = [];
+  for (const groupe of ['modeles', 'fonctions', 'confort']) {
+    const vus = new Set();
+    for (const element of creation?.[groupe] || []) {
+      if (vus.has(element.id)) erreurs.push(`${groupe} › ${element.id} : identifiant en double`);
+      vus.add(element.id);
+    }
+  }
+  for (const reglage of creation?.confort || []) {
+    if (!(reglage.valeurs || []).some((valeur) => valeur.id === reglage.defaut)) {
+      erreurs.push(`confort › ${reglage.id} › defaut : « ${reglage.defaut} » n'est pas une des valeurs`);
+    }
+  }
+  return erreurs;
+}
+
+// --- data/commandes.json : les commandes des clients (jalon 3) ---------------
+const SCHEMA_ATTENTE = { type: 'objet', champs: { apporte: texte, texte } };
+export const SCHEMA_COMMANDES = {
+  type: 'objet',
+  champs: {
+    aValider: { ...texte, facultatif: true },
+    commandes: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          client: texte,
+          titre: texte,
+          resume: texte,
+          demande: texte,
+          besoins: { type: 'liste', min: 1, element: SCHEMA_ATTENTE },
+          bonus: { type: 'liste', element: SCHEMA_ATTENTE },
+          aEviter: { type: 'liste', element: SCHEMA_ATTENTE },
+          avis: { type: 'objet', facultatif: true, valeurs: texte },
+          chargeMax: { type: 'nombre', entier: true, min: 0, max: 20, facultatif: true },
+          confort: {
+            type: 'liste',
+            element: {
+              type: 'objet',
+              champs: { reglage: texte, valeurs: { type: 'liste', min: 1, element: texte }, texte },
+            },
+          },
+          apercu: { type: 'objet', facultatif: true, valeurs: listeDeTextes },
+          recompense: {
+            type: 'objet',
+            champs: { argent: entierPositif, reputation: entierPositif, bonus: entierPositif },
+          },
+          debloquee: {
+            type: 'objet',
+            facultatif: true,
+            champs: {
+              drapeau: { ...texte, facultatif: true },
+              apres: { type: 'liste', facultatif: true, element: texte },
+              niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+            },
+          },
+          reactions: { type: 'objet', champs: { parfait: texte, bien: texte, aRetravailler: texte } },
+        },
+      },
+    },
+  },
+};
+
+function verifierCommandesEnPlus(fichier) {
+  const erreurs = [];
+  const vus = new Set();
+  for (const commande of fichier?.commandes || []) {
+    if (vus.has(commande.id)) erreurs.push(`commandes › ${commande.id} : identifiant en double`);
+    vus.add(commande.id);
+  }
   return erreurs;
 }
 
@@ -370,5 +526,7 @@ export const FICHIERS_DONNEES = [
   { nom: 'meubles', chemin: 'data/meubles.json', schema: SCHEMA_MEUBLES, enPlus: verifierMeublesEnPlus },
   { nom: 'personnages', chemin: 'data/personnages.json', schema: SCHEMA_PERSONNAGES },
   { nom: 'pnj', chemin: 'data/pnj.json', schema: SCHEMA_PNJ, enPlus: verifierPnjEnPlus },
+  { nom: 'creation', chemin: 'data/creation.json', schema: SCHEMA_CREATION, enPlus: verifierCreationEnPlus },
+  { nom: 'commandes', chemin: 'data/commandes.json', schema: SCHEMA_COMMANDES, enPlus: verifierCommandesEnPlus },
   { nom: 'indexLieux', chemin: 'data/lieux/index.json', schema: SCHEMA_INDEX_LIEUX },
 ];

@@ -1,0 +1,175 @@
+{
+  "aValider": "Commandes proposées par Claude : clients fictifs et applications fictives. La commande d'essai vient du mentor : ses répliques sont à valider par Ferrus.",
+  "commandes": [
+    {
+      "id": "essai-courses",
+      "client": "ferrus",
+      "titre": "Ma liste de courses",
+      "resume": "Une liste de courses toute simple, pour t'entraîner.",
+      "demande": "Pour t'entraîner, une petite commande de ma part : une liste de courses toute simple, que je coche au fur et à mesure dans le magasin.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher ce que j'ai déjà pris" }
+      ],
+      "bonus": [
+        { "apporte": "partager", "texte": "Envoyer la liste à quelqu'un qui fait les courses à ma place" }
+      ],
+      "aEviter": [
+        { "apporte": "compte", "texte": "Pas de compte à créer : je veux juste ma liste" }
+      ],
+      "confort": [],
+      "apercu": { "liste": ["Pain", "Pommes", "Lait d'avoine"] },
+      "recompense": { "argent": 20, "reputation": 5, "bonus": 5 },
+      "debloquee": { "drapeau": "visio-accueil" },
+      "reactions": {
+        "parfait": "Parfait ! Simple, claire, sans compte : elle fait ce qu'on lui demande, et rien de plus. C'est ça, une bonne application.",
+        "bien": "Elle marche ! Regarde les remarques : avec un petit ajustement, elle serait parfaite.",
+        "aRetravailler": "Pas encore tout à fait. Ce n'est pas grave : relis les remarques, ton projet t'attend tel quel."
+      }
+    },
+    {
+      "id": "theo-changements",
+      "client": "theo",
+      "titre": "Prévenu à l'avance",
+      "resume": "Un agenda qui annonce les changements la veille.",
+      "demande": "Mes cours changent parfois d'horaire ou de salle, et je l'apprends au dernier moment. Ça me met mal à l'aise. Je voudrais une application qui me prévient à l'avance, calmement.",
+      "besoins": [
+        { "apporte": "planifier", "texte": "Voir ce qui est prévu chaque jour" },
+        { "apporte": "prevoir", "texte": "Être prévenu la veille quand quelque chose change" }
+      ],
+      "bonus": [
+        { "apporte": "vue-ensemble", "texte": "Voir toute la semaine d'un coup d'œil" }
+      ],
+      "aEviter": [
+        { "apporte": "rappel-son", "texte": "Pas de sonnerie soudaine : ça me fait sursauter" }
+      ],
+      "confort": [
+        { "reglage": "animations", "valeurs": ["reduites"], "texte": "Les écrans qui bougent tout le temps me fatiguent" }
+      ],
+      "apercu": { "agenda": ["Lundi · 9 h · Maths, salle 12", "Mardi · 14 h · Bibliothèque", "Jeudi · 10 h · Anglais"] },
+      "recompense": { "argent": 60, "reputation": 12, "bonus": 10 },
+      "debloquee": { "apres": ["essai-courses"] },
+      "reactions": {
+        "parfait": "C'est exactement ce qu'il me fallait. Je sais ce qui m'attend demain : je dors mieux.",
+        "bien": "Elle m'aide déjà beaucoup. Il reste quelques détails, mais je vais m'en servir dès ce soir.",
+        "aRetravailler": "Je préfère attendre une version qui me convient. Ce n'est pas pressé : je la prendrai quand elle sera prête."
+      }
+    },
+    {
+      "id": "madeleine-medicaments",
+      "client": "madeleine",
+      "titre": "Mes médicaments",
+      "resume": "Une liste très lisible, pour ne plus se demander si c'est pris.",
+      "demande": "Je prends des médicaments le matin et le soir, et parfois je ne sais plus si je les ai déjà pris. Avec ma vue qui baisse, les petites applications, je n'arrive plus à les lire.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher ce que j'ai pris, pour ne pas le prendre deux fois" },
+        { "apporte": "rappel-ecran", "texte": "Un rappel bien visible le matin et le soir" }
+      ],
+      "bonus": [
+        { "apporte": "ecouter", "texte": "Entendre le nom du médicament, pour en être bien sûre" }
+      ],
+      "aEviter": [
+        { "apporte": "statistiques", "texte": "Pas de graphiques : je veux juste savoir si c'est pris" }
+      ],
+      "confort": [
+        { "reglage": "texte", "valeurs": ["grand", "tres-grand"], "texte": "Les petits caractères, je ne les lis plus" },
+        { "reglage": "contraste", "valeurs": ["eleve"], "texte": "Le gris clair sur fond blanc, je ne le vois pas" },
+        { "reglage": "police", "valeurs": ["lisible"], "texte": "Une écriture bien nette, où l'on ne confond pas les lettres" }
+      ],
+      "apercu": { "liste": ["Matin · comprimé rond", "Soir · gélule bleue"] },
+      "recompense": { "argent": 70, "reputation": 14, "bonus": 10 },
+      "debloquee": { "apres": ["essai-courses"] },
+      "reactions": {
+        "parfait": "Je lis tout sans ma loupe ! Et elle me dit les noms à voix haute. Merci, vraiment.",
+        "bien": "Je m'en sors avec. Un ou deux détails me gênent encore, mais c'est déjà bien mieux qu'avant.",
+        "aRetravailler": "Je n'y arrive pas encore. Prends ton temps : je ne suis pas pressée."
+      }
+    },
+    {
+      "id": "samia-fournees",
+      "client": "samia",
+      "titre": "Les fournées",
+      "resume": "Un minuteur qu'on lance d'un geste, même les mains dans la farine.",
+      "demande": "À la boulangerie, j'enfourne toute la matinée. Il me faut un minuteur que je lance d'un seul geste, même avec les mains pleines de farine, et que je lis depuis le four.",
+      "besoins": [
+        { "apporte": "chronometrer", "texte": "Savoir quand sortir chaque fournée" },
+        { "apporte": "un-geste", "texte": "Le lancer d'un seul geste" }
+      ],
+      "bonus": [
+        { "apporte": "temps-visuel", "texte": "Voir de loin le temps qui reste" },
+        { "apporte": "rappel-son", "texte": "Une sonnerie quand c'est prêt, pour l'entendre depuis l'arrière-boutique" }
+      ],
+      "aEviter": [
+        { "apporte": "compte", "texte": "Pas de mot de passe à taper avec les mains dans la pâte" }
+      ],
+      "confort": [
+        { "reglage": "texte", "valeurs": ["grand", "tres-grand"], "texte": "Je lis l'écran depuis le four, à deux mètres" }
+      ],
+      "apercu": { "minuteur": ["Baguettes · 12 min", "Croissants · 18 min"] },
+      "recompense": { "argent": 60, "reputation": 12, "bonus": 5 },
+      "debloquee": { "apres": ["essai-courses"] },
+      "reactions": {
+        "parfait": "Un geste, et c'est parti ! Plus une seule fournée trop cuite. Passe à la boutique, je t'offre un croissant.",
+        "bien": "Elle me rend déjà service. Avec un ou deux réglages de plus, ce serait idéal.",
+        "aRetravailler": "Je ne peux pas encore m'en servir au fournil. Reviens vers moi quand elle sera prête : je garde ma commande."
+      }
+    },
+    {
+      "id": "karim-atelier",
+      "client": "karim",
+      "titre": "Les pauses de l'atelier",
+      "resume": "Des rappels qui se voient et se sentent, sans compter sur le son.",
+      "demande": "Je suis sourd, et dans mon atelier les machines tournent toute la journée. Je voudrais des rappels pour mes pauses et pour l'entretien des machines : des rappels que je vois ou que je sens, puisque je ne les entends pas.",
+      "besoins": [
+        { "apporte": "planifier", "texte": "Noter les pauses et l'entretien des machines" },
+        { "apporte": "rappel-ecran", "texte": "Voir le rappel en grand à l'écran" },
+        { "apporte": "rappel-vibration", "texte": "Le sentir quand je ne regarde pas l'écran" }
+      ],
+      "bonus": [
+        { "apporte": "verifier", "texte": "Retrouver la date du dernier entretien" }
+      ],
+      "aEviter": [],
+      "avis": {
+        "alarme-sonore": "Une sonnerie, je ne l'entends pas : elle ne m'aide pas.",
+        "lecture-voix": "La lecture à voix haute ne me sert à rien."
+      },
+      "confort": [
+        { "reglage": "contraste", "valeurs": ["eleve"], "texte": "Avec la sciure et la lumière de l'atelier, il me faut un écran bien contrasté" }
+      ],
+      "apercu": { "agenda": ["10 h · Pause", "12 h · Huiler la scie", "15 h 30 · Pause"] },
+      "recompense": { "argent": 70, "reputation": 14, "bonus": 10 },
+      "debloquee": { "apres": ["essai-courses"] },
+      "reactions": {
+        "parfait": "Je la sens vibrer, je la vois de loin : enfin des rappels faits pour moi. Merci !",
+        "bien": "Elle me sert déjà. Quelques détails à revoir, mais je la garde.",
+        "aRetravailler": "Telle quelle, elle ne m'aide pas encore. Ce n'est pas grave : reprends-la, j'attendrai."
+      }
+    },
+    {
+      "id": "hugo-notes",
+      "client": "hugo",
+      "titre": "Droit au but",
+      "resume": "Un carnet de notes réduit au strict minimum.",
+      "demande": "On m'a parlé de ton atelier. Je suis livreur à vélo : entre deux courses, j'ai dix secondes pour noter une adresse ou un code de porte. Fais-moi une application qui va droit au but, avec le moins de boutons possible.",
+      "besoins": [
+        { "apporte": "noter", "texte": "Noter une adresse en quelques secondes" }
+      ],
+      "bonus": [
+        { "apporte": "un-geste", "texte": "Tout faire d'un seul geste, d'une seule main" }
+      ],
+      "aEviter": [
+        { "apporte": "compte", "texte": "Pas de compte : je n'ai pas le temps" },
+        { "apporte": "statistiques", "texte": "Pas de graphiques, je ne les regarderai jamais" }
+      ],
+      "chargeMax": 1,
+      "confort": [],
+      "apercu": { "carnet": ["12 rue des Lilas · code 4B27", "Bâtiment C, 3e étage"] },
+      "recompense": { "argent": 50, "reputation": 10, "bonus": 10 },
+      "debloquee": { "niveau": 2 },
+      "reactions": {
+        "parfait": "J'ouvre, je note, c'est fini. Exactement ce que je voulais !",
+        "bien": "Pas mal ! Encore un peu trop de choses à mon goût, mais ça ira.",
+        "aRetravailler": "Trop compliquée pour moi, ou il manque l'essentiel. Allège-la et renvoie-la-moi."
+      }
+    }
+  ]
+}

@@ -254,6 +254,7 @@
       "nom": "Bureau",
       "designation": "ton bureau",
       "description": "Ton bureau et ton ordinateur. C'est ici que tu créeras des applications pour tes voisins.",
+      "actions": ["ordinateur"],
       "emprise": [3, 1],
       "formes": [
         { "forme": "boite", "taille": [1.46, 0.04, 0.48], "position": [0, 0.74, 0], "couleur": "bois-clair" },

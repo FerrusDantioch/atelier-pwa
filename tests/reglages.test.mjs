@@ -67,7 +67,7 @@ test('chaque taille de texte et chaque police ont leur règle dans les styles', 
 });
 
 test('les couleurs ne sont écrites que dans themes.css', () => {
-  for (const fichier of ['css/base.css', 'css/interface.css']) {
+  for (const fichier of ['css/base.css', 'css/interface.css', 'css/ordinateur.css']) {
     const sansCommentaires = lire(fichier).replace(/\/\*[\s\S]*?\*\//g, '');
     assert.doesNotMatch(sansCommentaires, /#[0-9a-fA-F]{3,8}\b|rgba?\(/, `${fichier} contient une couleur écrite en dur`);
   }
