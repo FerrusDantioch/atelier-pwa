@@ -1,5 +1,112 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 1 — Le domicile en 3D (version 0.2.0, 14 novembre 2026) — à valider
+
+### Ce qui est fait
+
+- **Choix du personnage** au début d'une partie : jouer **Ferrus Dantioch**
+  (apparence provisoire, en attendant sa description) ou **son personnage** :
+  prénom, teint (dont un teint « neutre »), coiffure, couleur des cheveux,
+  barbe, lunettes, silhouette, taille, haut, bas (pantalon, jupe, short),
+  couvre-chef (bonnet, casquette, foulard) et une **aide à la mobilité
+  facultative** (fauteuil roulant, canne) avec sa couleur. Aperçu 3D mis à
+  jour à chaque choix, bouton « Tout au hasard » (qui ne touche jamais à
+  l'aide à la mobilité). Modifiable à tout moment : Pause › Ton personnage.
+- **Le domicile en 3D**, vu de trois quarts : chambre, salle d'eau, cuisine
+  ouverte et séjour avec le coin bureau ; 25 meubles dessinés par code
+  (`data/meubles.json`). Portes de 1 m sans marche, douche à l'italienne,
+  lavabo et évier sous lesquels on glisse les genoux, espace de demi-tour
+  dans chaque pièce. Les murs du devant et les cloisons sont « coupés » pour
+  voir à l'intérieur ; ceux du fond restent entiers, avec leurs fenêtres.
+- **Caméra** : 4 angles (boutons ou A / E), zoom limité (pincer, molette,
+  + / −, boutons), « Recentrer » (C). Quand toute la maison tient à l'écran,
+  la caméra ne bouge pas ; sinon elle suit le personnage, doucement, ou par
+  paliers (sans glissement) avec les animations réduites ou le mode calme.
+- **Déplacements** : toucher (ou cliquer) le sol ou un meuble, le
+  personnage trouve son chemin ; glisser pour déplacer la vue ; clavier
+  Z Q S D ou flèches (positions QWERTY acceptées) ; « Aller à… » liste les
+  pièces et les objets. En fauteuil roulant, le chemin ne passe que par des
+  passages d'au moins 1 m.
+- **Examiner** : près d'un meuble, « Examiner le lit » (ou Entrée) ouvre une
+  bulle de description. Tout est aussi annoncé aux lecteurs d'écran (pièce
+  où l'on entre, objet devant soi, description).
+- **Barres fixes** posées sur la 3D ; version **compacte** automatique sur
+  petit écran ou avec un très grand texte (libellés courts, objectif sur sa
+  propre ligne, valeurs complètes toujours lues par les lecteurs d'écran).
+- **Réglages** : luminosité de la scène, qualité graphique (économie,
+  standard, haute).
+- **Commandes** : fenêtre d'aide (Pause › Commandes) pour le doigt, la
+  souris et le clavier.
+- **Sauvegarde** (format 2) : personnage, position, angle et zoom de la vue.
+  Une partie du jalon 0 est mise à niveau : le personnage est choisi en la
+  reprenant.
+- **Données vérifiées au démarrage** : lieux, meubles, personnages et
+  couleurs de la 3D (`data/`), y compris l'accessibilité : chaque pièce et
+  chaque objet à examiner doit être atteignable à pied ET en fauteuil
+  roulant, sinon le jeu explique précisément ce qui coince.
+
+### Vérifications faites
+
+- 73 tests sans navigateur, dont : grille, recherche de chemin, passages
+  de 1 m en fauteuil, accessibilité complète du domicile (pièces, meubles,
+  demi-tour), vérification croisée des données avec messages clairs,
+  personnage (prénom, apparence, Ferrus), déplacement pas à pas, sauvegarde
+  au format 2 et mise à niveau du format 1.
+- 32 tests dans Chromium (tablette tactile 1180 × 820) : scène 3D dessinée,
+  toucher le sol puis rechargement (position gardée), toucher un meuble puis
+  « Examiner » (bouton, Entrée, Échap), « Aller à… » en fauteuil roulant,
+  clavier, boutons de caméra, Ferrus, « Ton personnage » depuis la Pause,
+  « Retour » sans rien perdre, qualité « Économie » en cours de partie,
+  téléphone avec texte « Énorme », partie du jalon 0 reprise, animations
+  réduites et mode calme, et tous les tests du jalon 0 (hors ligne, mise à
+  jour, sauvegarde, contrastes…).
+- Captures : tablette en paysage et en portrait, téléphone avec texte
+  « Énorme », contraste élevé avec thème clair (les meubles ont alors un
+  contour sombre).
+- Légèreté : environ 14 dessins et 6 000 triangles par image ; rien n'est
+  redessiné quand rien ne bouge (la batterie est ménagée).
+
+### Comment tester sur tablette
+
+1. **Nouvelle partie** : crée ton personnage (essaie le fauteuil roulant,
+   « Tout au hasard », les flèches pour tourner l'aperçu), ou choisis Ferrus.
+2. **Se déplacer** : touche le sol ; touche le lit. Quand « Examiner le lit »
+   apparaît en bas, touche-le : la bulle s'ouvre.
+3. **La vue** : glisse un doigt pour la déplacer, pince pour zoomer, essaie
+   les boutons à droite (tourner, éloigner, rapprocher, recentrer).
+4. **Aller à…** : choisis « Douche », puis « Aller dans la cuisine ».
+5. **Pause › Ton personnage** : change de coiffure, puis « Enregistrer » ;
+   le personnage reste au même endroit.
+6. **Sauvegarde** : ferme le jeu, rouvre-le : « Continuer » te remet au même
+   endroit, avec le même angle de vue.
+7. **Réglages › Scène 3D** : « Économie » si la tablette chauffe ou rame ;
+   essaie aussi la luminosité, le contraste élevé et le mode calme.
+8. **Hors ligne** : en mode avion, tout marche (la 3D est gardée sur la
+   tablette).
+9. **Clavier** (si un clavier est branché) : Z Q S D, A / E, + / −, C,
+   Entrée, Échap.
+
+### Limites connues
+
+- Le temps ne passe pas encore (jour 1, 8 h 00) : il arrive au jalon 2 avec
+  les personnages et leurs routines (le lit servira alors à dormir).
+- Ferrus a une apparence **provisoire et neutre** (teint lilas, sans
+  cheveux) en attendant sa description.
+- La porte d'entrée ne mène encore nulle part (les bureaux arrivent au
+  jalon 5).
+- Sur téléphone en portrait avec le texte « Énorme », les barres prennent
+  encore environ 40 % de la hauteur de l'écran.
+- Testé dans Chromium (le moteur de Brave sur Android). Sur iPad, Brave
+  utilise le moteur de Safari, qui n'a pas pu être essayé ici.
+
+### En attente de Ferrus
+
+- La validation de ce jalon, puis la fusion dans `main` (publiée par GitHub
+  Pages).
+- La description de son apparence pour le personnage « Ferrus » (repère
+  `TODO_FERRUS` dans `data/personnages.json`).
+- La fiche de la PNJ n°1 (avant le jalon 2).
+
 ## ✅ Jalon 0 — Squelette PWA (version 0.1.0, 14 novembre 2026)
 
 ### Ce qui est fait

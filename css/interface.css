@@ -267,12 +267,20 @@
   display: inline;
 }
 
-.barre-haut.compacte .barre-gauche {
+/* Les indicateurs se suivent et passent à la ligne d'eux-mêmes ; Pause reste
+   à droite, l'objectif prend la dernière ligne. */
+.barre-haut.compacte .barre-gauche,
+.barre-haut.compacte .barre-droite {
+  display: contents;
+}
+
+.barre-haut.compacte .indicateur {
   order: 1;
 }
 
-.barre-haut.compacte .barre-droite {
+.barre-haut.compacte .bouton-pause {
   order: 2;
+  margin-left: auto;
 }
 
 .barre-haut.compacte .barre-centre {
@@ -380,6 +388,29 @@
   gap: 0.4em;
   margin: 0;
   font-weight: 700;
+}
+
+/* Barre du bas compacte : la pièce actuelle n'est plus affichée (elle reste
+   annoncée aux lecteurs d'écran et indiquée dans « Aller à… »), ni le
+   rappel de la touche Entrée. */
+.barre-bas.compacte .lieu-actuel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.barre-bas.compacte .raccourci {
+  display: none;
+}
+
+/* Un bouton peut passer à la ligne entre les mots, jamais au milieu d'un mot. */
+.barre-bas .bouton {
+  overflow-wrap: normal;
+  hyphens: manual;
 }
 
 /* Les boutons de la caméra : icônes de taille fixe (ils ne grossissent pas
@@ -498,6 +529,7 @@
 .perso-panneau {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   border-left: var(--epaisseur-bordure) solid var(--bordure);
   background: var(--surface);
@@ -555,7 +587,7 @@
 /* Les deux grandes cartes : Ferrus ou ton personnage. */
 .cartes-modele {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
   gap: 0.7rem;
 }
 
@@ -621,6 +653,7 @@
 
 .champ-texte {
   flex: 1 1 10rem;
+  width: 10rem;
   min-width: 0;
   min-height: var(--cible);
   padding: 0.4em 0.7em;
@@ -649,8 +682,8 @@
 /* Écran étroit ou en hauteur : l'aperçu en haut, les choix en dessous. */
 @media (max-width: 760px), (orientation: portrait) and (max-width: 1000px) {
   .ecran-perso {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(9rem, 34vh) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: clamp(150px, 30vh, 320px) minmax(0, 1fr);
   }
   .perso-panneau {
     border-left: 0;
@@ -658,7 +691,7 @@
     box-shadow: 0 -8px 32px var(--ombre);
   }
   .perso-tourner {
-    top: calc(34vh - 60px);
+    top: calc(clamp(150px, 30vh, 320px) - 60px);
     bottom: auto;
   }
 }

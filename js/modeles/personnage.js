@@ -266,12 +266,14 @@ export function construirePersonnage(apparence, personnages, palette) {
     for (const x of [-0.29, 0.29]) {
       const roue = new Group();
       roue.position.set(x, 0.3, -0.06);
+      // Une roue « ajourée » : pneu, jante, main courante, rayons et moyeu.
       const forme = creerConstructeur();
-      forme.cylindre({ rayon: 0.3, hauteur: 0.035, cotes: 16 }, [0, 0, 0], couleurs.pneu, [0, 0, 90]);
-      forme.cylindre({ rayon: 0.23, hauteur: 0.04, cotes: 16 }, [0, 0, 0], couleurs.metal, [0, 0, 90]);
-      forme.boite([0.045, 0.44, 0.03], [0, 0, 0], tube);
-      forme.boite([0.045, 0.03, 0.44], [0, 0, 0], tube);
-      forme.cylindre({ rayon: 0.27, hauteur: 0.012, cotes: 16 }, [x > 0 ? 0.035 : -0.035, 0, 0], couleurs.metal, [0, 0, 90]);
+      const dehors = x > 0 ? 1 : -1;
+      forme.tore({ rayon: 0.275, epaisseur: 0.027 }, [0, 0, 0], couleurs.pneu, [0, 90, 0]);
+      forme.tore({ rayon: 0.245, epaisseur: 0.012 }, [0, 0, 0], couleurs.metal, [0, 90, 0]);
+      forme.tore({ rayon: 0.26, epaisseur: 0.01 }, [dehors * 0.04, 0, 0], couleurs.metal, [0, 90, 0]);
+      for (const angle of [0, 60, 120]) forme.boite([0.012, 0.49, 0.016], [0, 0, 0], couleurs.metal, [angle, 0, 0]);
+      forme.cylindre({ rayon: 0.04, hauteur: 0.06, cotes: 8 }, [0, 0, 0], tube, [0, 0, 90]);
       roue.add(mesh(forme));
       groupe.add(roue);
       roues.push(roue);

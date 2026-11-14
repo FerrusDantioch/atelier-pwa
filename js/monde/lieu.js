@@ -150,11 +150,18 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     const examinable = Boolean(emprise.place.description || meuble.description);
     if (!emprise.bloque && !examinable) continue; // un tapis : on marche dessus
     const hauteur = Math.max(atelier.hauteur(meuble.id), 0.3);
+    // Pour savoir précisément si le doigt touche le meuble, on garde sa
+    // vraie forme (pas seulement la boîte qui l'entoure).
+    const forme = new Mesh(atelier.geometrie(meuble.id), matiereDecor());
+    forme.matrixAutoUpdate = false;
+    forme.matrix.copy(atelier.matrice(emprise.place));
+    forme.updateMatrixWorld(true);
     cibles.push({
       type: 'meuble',
       id,
       examinable,
       hauteur,
+      forme,
       boite: new Box3(
         new Vector3(emprise.x * TAILLE_CASE, 0, emprise.z * TAILLE_CASE),
         new Vector3((emprise.x + emprise.largeur) * TAILLE_CASE, hauteur, (emprise.z + emprise.profondeur) * TAILLE_CASE),

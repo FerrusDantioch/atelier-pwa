@@ -21,12 +21,32 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | Jalon | Contenu | État |
 |---|---|---|
 | J0 | Squelette : installation, hors ligne, réglages, sauvegarde | ✅ livré (version 0.1.0) |
-| J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | à venir |
+| J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | 🧪 livré, à valider (version 0.2.0) |
 | J2 | Personnages, routines, dialogues | à venir |
 | J3 | L'ordinateur : commandes et création d'applications | à venir |
 | J4 | Quêtes et journal (premier livrable jouable) | à venir |
 | J5 | Progression, bureaux, nouveaux lieux | à venir |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
+
+## Jouer
+
+- **Ton personnage** : joue Ferrus Dantioch, ou crée ton personnage (prénom,
+  apparence, et une aide à la mobilité facultative : fauteuil roulant ou
+  canne, sans effet sur les règles du jeu).
+- **Se déplacer** : touche (ou clique) le sol ou un meuble ; ou choisis une
+  destination dans « Aller à… » ; ou utilise le clavier.
+- **Examiner** : près d'un meuble, touche « Examiner » (ou Entrée).
+- **La vue** : glisse un doigt pour la déplacer, pince ou utilise la molette
+  pour zoomer ; les boutons à droite tournent, zooment et recentrent.
+
+| Clavier (AZERTY ; positions QWERTY acceptées) | Effet |
+|---|---|
+| Z Q S D ou flèches | se déplacer |
+| A / E | tourner la vue d'un quart de tour |
+| + / − | rapprocher / éloigner la vue |
+| C | recentrer la vue |
+| Entrée ou Espace | examiner l'objet proche |
+| Échap | pause, ou fermer une fenêtre |
 
 ## Confort et accessibilité
 
@@ -38,7 +58,14 @@ Dès le premier lancement, puis à tout moment (menu Pause) :
 - animations réduites (suit le réglage de l'appareil par défaut) ;
 - son coupé, ou trois volumes séparés (musique, effets, voix) ;
 - mode daltonien (rouge-vert, bleu-jaune) ;
-- mode calme (pas d'événements imprévus, moins de mouvements).
+- mode calme (pas d'événements imprévus, moins de mouvements) ;
+- luminosité de la scène 3D et qualité graphique (« Économie » pour les
+  appareils modestes et la batterie).
+
+Le domicile est accessible en fauteuil roulant (passages d'au moins 1 m,
+douche à l'italienne, espace de demi-tour dans chaque pièce) : le jeu le
+vérifie lui-même pour chaque lieu. Tout ce que montre la 3D existe aussi en
+texte (« Aller à… », descriptions, annonces pour les lecteurs d'écran).
 
 Grands boutons (48 px), contour de focus bien visible, navigation complète au
 clavier, Échap pour fermer une fenêtre, textes lus par les lecteurs d'écran.
@@ -92,8 +119,8 @@ accord, et la partie est sauvegardée juste avant.
 
 ### Modifier le contenu sans coder
 
-Tout le contenu (textes, équilibrage, puis personnages, quêtes, meubles,
-lieux, applications) est dans `data/`. Mode d'emploi :
+Tout le contenu (textes, équilibrage, lieux, meubles, personnages, couleurs
+de la 3D, puis quêtes et applications) est dans `data/`. Mode d'emploi :
 [`docs/CONTENU.md`](docs/CONTENU.md). Si un fichier contient une erreur, le
 jeu ne démarre pas à moitié : il affiche la liste précise des problèmes.
 
@@ -103,8 +130,11 @@ jeu ne démarre pas à moitié : il affiche la liste précise des problèmes.
 index.html, manifest.webmanifest, sw.js   la page, l'installation, le hors-ligne
 css/          themes.css (seul fichier avec des couleurs), base.css, interface.css
 js/config.js  nom, version, contact, préfixe de stockage
-js/noyau/     données, textes, réglages, sauvegarde, sons, mises à jour
-js/interface/ les écrans HTML (accueil, réglages, sauvegarde, À propos…)
+js/noyau/     données (et leur vérification), textes, réglages, sauvegarde, sons, mises à jour
+js/jeu/       les règles du jeu, sans 3D (personnage…)
+js/monde/     la 3D : moteur, caméra, lieu, grille, chemins, gestes, clavier
+js/modeles/   les modèles 3D fabriqués par code (formes, meubles, personnage)
+js/interface/ les écrans HTML (accueil, choix du personnage, jeu, réglages…)
 data/         tout le contenu modifiable
 lib/three/    Three.js (moteur 3D), copié tel quel
 assets/       icônes, logo de l'Omni-système, polices

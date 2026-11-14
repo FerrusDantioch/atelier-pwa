@@ -78,9 +78,22 @@ export async function nouvellePartie(page, { modele = 'perso', aide = null } = {
   await attendreMonde(page);
 }
 
-// Attend que la scène 3D soit prête (le monde est créé et dessiné).
+// Attend qu'une condition (fonction exécutée dans la page, qui peut être
+// « async » et importer les modules du jeu) devienne vraie.
+// (page.waitForFunction n'attend pas les fonctions async : on interroge la
+// page nous-mêmes.)
+export async function attendre(page, condition, argument, { timeout = 15000 } = {}) {
+  const limite = Date.now() + timeout;
+  for (;;) {
+    if (await page.evaluate(condition, argument)) return;
+    if (Date.now() > limite) throw new Error(`condition jamais remplie : ${condition.toString().slice(0, 160)}`);
+    await new Promise((resoudre) => { setTimeout(resoudre, 100); });
+  }
+}
+
+// Attend que la scène 3D soit prête (le monde est créé).
 export async function attendreMonde(page) {
-  await page.waitForFunction(async () => {
+  await attendre(page, async () => {
     const ecran = await import('/js/interface/ecran-jeu.js');
     return Boolean(ecran.mondeAffiche());
   });
@@ -123,7 +136,7 @@ export async function positionDeCase(page, x, z) {
 
 // Attend que le personnage soit arrivé (plus de déplacement en cours).
 export async function attendreArrivee(page, { x, z } = {}) {
-  await page.waitForFunction(async ([cx, cz]) => {
+  await attendre(page, async ([cx, cz]) => {
     const ecran = await import('/js/interface/ecran-jeu.js');
     const monde = ecran.mondeAffiche();
     const etat = await import('/js/noyau/etat.js');
@@ -131,7 +144,7 @@ export async function attendreArrivee(page, { x, z } = {}) {
     if (!monde || !position) return false;
     if (cx === undefined) return true;
     return position.x === cx && position.z === cz && monde.case.x === cx && monde.case.z === cz;
-  }, [x, z], { timeout: 15000 });
+  }, [x, z]);
 }
 
 // Le texte de la barre fixe, sur une seule ligne.

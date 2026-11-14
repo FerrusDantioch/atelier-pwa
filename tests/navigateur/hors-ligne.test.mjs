@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { chargerConfig, fichiersDuServiceWorker } from '../aides.mjs';
-import { nouvellePartie, ouvrirJeu, preparer } from './aides-navigateur.mjs';
+import { gagnerPieces, nouvellePartie, ouvrirJeu, preparer } from './aides-navigateur.mjs';
 
 const config = chargerConfig();
 let outils;
@@ -29,7 +29,7 @@ test('après une première visite, le jeu se lance en mode avion', async () => {
   await page.locator('#chargement').waitFor({ state: 'hidden' });
   await page.getByRole('heading', { level: 1, name: 'Atelier PWA' }).waitFor();
   await nouvellePartie(page);
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
+  await gagnerPieces(page, 10);
   assert.match(await page.locator('.barre-haut').innerText(), /110/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();

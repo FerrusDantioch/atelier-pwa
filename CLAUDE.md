@@ -57,9 +57,12 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   directement dans le HTML, pas de `style="…"`, pas de `innerHTML`, pas de
   `eval`. Les styles passent par les classes CSS ou `element.style.x = …`
   (`tests/securite.test.mjs`).
-- **`css/themes.css` est le seul fichier avec des couleurs** (test). Les
+- **`css/themes.css` est le seul fichier CSS avec des couleurs** (test). Les
   contrastes de toutes les combinaisons (thème × contraste élevé ×
-  daltonisme) sont vérifiés par `tests/navigateur/themes.test.mjs`.
+  daltonisme) sont vérifiés par `tests/navigateur/themes.test.mjs`. Les
+  couleurs de la **3D** sont dans `data/palette.json` ; les repères 3D
+  (destination, objet ciblé) et le fond de scène reprennent les variables
+  du thème (`--focus`, `--fond-scene`).
 - **Tous les textes visibles sont dans `data/textes.json`** et passent par
   `t('groupe.cle')` (typographie française automatique). Exception voulue :
   « Chargement… » et l'écran de secours dans `index.html`. Les tests
@@ -71,8 +74,26 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   `outils/embarquer-tiers.mjs`, avec leurs empreintes SHA-256 dans
   `licences-tierces.txt` (vérifiées par `tests/tiers.test.mjs`). Jamais de
   CDN, jamais de téléchargement pendant la publication.
-- **Les règles du jeu** (`js/jeu/`, à partir de J2) restent du JavaScript
-  pur, sans 3D ni HTML, pour être testées avec `node --test`.
+- **Les règles du jeu** (`js/jeu/`) restent du JavaScript pur, sans 3D ni
+  HTML, pour être testées avec `node --test`. Même chose pour
+  `js/monde/grille.js`, `chemin.js` et `deplacement.js` (grille de 50 cm,
+  A*, avancée pas à pas).
+- **3D** (Three.js) : chargée seulement au moment de jouer
+  (`preparer3D()` dans `main.js`), un seul moteur pour tout le jeu. Le
+  moteur ne redessine que si quelque chose bouge (`moteur.animer()`,
+  `moteur.redessiner()`). Le décor fixe est fusionné en une géométrie
+  (couleurs par sommet) : garder peu de dessins par image (test : moins de
+  40). Pas d'ombres calculées.
+- **Accessibilité des lieux** : `js/noyau/coherence.js` refuse au démarrage
+  un lieu où une pièce ou un objet à examiner n'est pas atteignable à pied
+  ET en fauteuil roulant (passages ≥ 1 m = 2 cases). Tout nouveau lieu ou
+  meuble doit passer ce contrôle.
+- **Le personnage « Ferrus »** a une apparence provisoire (`TODO_FERRUS` dans
+  `data/personnages.json`) : ne rien inventer, attendre sa description.
+  Son apparence n'est jamais copiée dans les parties.
+- **Tests navigateur** : pour attendre une condition qui importe des modules
+  du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
+  `page.waitForFunction` (qui n'attend pas les fonctions async).
 - **Fenêtres** : toujours `ouvrirFenetre()` (`js/interface/fenetres.js`) :
   titre + croix, contenu qui défile, boutons en bas, Échap, Tab qui reste
   dans la fenêtre, focus rendu à la fermeture. Une fenêtre ouverte rend le
@@ -97,4 +118,6 @@ Les tests navigateur demandent Playwright (`cd tests/navigateur && npm
 install && npx playwright install chromium`). Ils couvrent : démarrage,
 accessibilité de base, réglages, sauvegarde/export/import/copies, copie
 d'urgence, hors ligne, mise à jour proposée, absence de requête externe,
-contrastes. Petit serveur local : `node outils/serveur.mjs`.
+contrastes, et (jalon 1) la scène 3D, le toucher, le clavier, « Aller à… »,
+« Examiner », la caméra, le choix du personnage, le petit écran.
+Petit serveur local : `node outils/serveur.mjs`.

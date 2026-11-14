@@ -361,23 +361,30 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   }
 
   // --- Doigt, souris, clavier ------------------------------------------------------
-  const rayonVers = (x, y) => camera.rayon(x, y).ray;
 
   // Ce qui se trouve sous le doigt : un objet, sinon une case du sol.
+  // Un meuble est touché seulement si le doigt est sur sa vraie forme : on
+  // peut toucher le sol juste devant un canapé sans viser le canapé.
   function sousLeDoigt(x, y) {
-    const rayon = rayonVers(x, y);
+    const lanceur = camera.rayon(x, y);
+    const rayon = lanceur.ray;
     const point = new Vector3();
     const sol = rayon.intersectPlane(SOL, new Vector3());
     const distanceSol = sol ? rayon.origin.distanceTo(sol) : Infinity;
     let meilleure = null;
     let distanceMeilleure = distanceSol;
     for (const cible of cibles) {
-      if (rayon.intersectBox(cible.boite, point)) {
-        const distance = rayon.origin.distanceTo(point);
-        if (distance < distanceMeilleure) {
-          meilleure = cible;
-          distanceMeilleure = distance;
-        }
+      // D'abord la boîte (rapide), puis la forme exacte si besoin.
+      if (!rayon.intersectBox(cible.boite, point)) continue;
+      let distance = rayon.origin.distanceTo(point);
+      if (cible.forme) {
+        const touche = lanceur.intersectObject(cible.forme, false)[0];
+        if (!touche) continue;
+        distance = touche.distance;
+      }
+      if (distance < distanceMeilleure) {
+        meilleure = cible;
+        distanceMeilleure = distance;
       }
     }
     if (meilleure) return { cible: meilleure };
@@ -569,6 +576,8 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     },
     get rotation() { return camera.rotation; },
     get zoom() { return camera.zoom; },
+    // Pour les tests : ce que la carte graphique a dessiné à la dernière image.
+    get infosRendu() { return { ...moteur.infos.render }; },
 
     liberer() {
       clearTimeout(minuteurVue);

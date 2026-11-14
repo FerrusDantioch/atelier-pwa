@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { after, before, test } from 'node:test';
-import { nouvellePartie, ouvrirJeu, preparer, texteBarre } from './aides-navigateur.mjs';
+import { gagnerPieces, jourSuivant, nouvellePartie, ouvrirJeu, preparer, texteBarre } from './aides-navigateur.mjs';
 
 let outils;
 before(async () => { outils = await preparer(); });
@@ -19,9 +19,9 @@ test('la partie est retrouvée après rechargement (« Continuer »)', async () 
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
-  await page.getByRole('button', { name: /Passer au jour suivant/ }).click();
+  await gagnerPieces(page, 10);
+  await gagnerPieces(page, 10);
+  await jourSuivant(page);
   await page.waitForFunction(() => document.querySelector('.barre-haut').innerText.includes('Jour 2'));
   assert.match(await texteBarre(page), /120 pièces/);
   // Retour à l'accueil : la partie est sauvegardée.
@@ -40,7 +40,7 @@ test('une modification faite juste avant de fermer le jeu n\'est pas perdue', as
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
+  await gagnerPieces(page, 10);
   // Rechargement immédiat, sans laisser le temps à la sauvegarde régulière.
   await page.reload();
   await page.locator('#chargement').waitFor({ state: 'hidden' });
@@ -54,7 +54,7 @@ test('exporter, puis réimporter la partie dans une nouvelle partie', async () =
   const contexte = await outils.contexte({ acceptDownloads: true });
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
+  await gagnerPieces(page, 10);
 
   // Export.
   let fenetre = await ouvrirFenetreSauvegarde(page);
@@ -118,9 +118,9 @@ test('reprendre une copie de secours', async () => {
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
   // Jour 2 : une copie est faite au passage (état du jour 1, 100 pièces).
-  await page.getByRole('button', { name: /Passer au jour suivant/ }).click();
+  await jourSuivant(page);
   await page.waitForFunction(() => document.querySelector('.barre-haut').innerText.includes('Jour 2'));
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
+  await gagnerPieces(page, 10);
   const fenetre = await ouvrirFenetreSauvegarde(page);
   await fenetre.getByRole('button', { name: /Copies de secours/ }).click();
   await page.getByRole('dialog', { name: 'Copies de secours' }).getByRole('button', { name: 'Reprendre cette copie' }).first().click();

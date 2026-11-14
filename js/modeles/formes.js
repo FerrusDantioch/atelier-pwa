@@ -13,7 +13,7 @@
 
 import {
   BoxGeometry, BufferGeometry, Color, CylinderGeometry, Euler, Float32BufferAttribute, IcosahedronGeometry,
-  Matrix3, Matrix4, MeshLambertMaterial, Quaternion, SphereGeometry, Vector3,
+  Matrix3, Matrix4, MeshLambertMaterial, Quaternion, SphereGeometry, TorusGeometry, Vector3,
 } from '../../lib/three/three.module.js';
 
 const DEGRES = Math.PI / 180;
@@ -87,6 +87,11 @@ export function creerConstructeur() {
     sphere({ rayon, details = 0, echelle = [1, 1, 1] }, position, couleur, rotation) {
       ajouterGeometrie(new IcosahedronGeometry(rayon, details),
         matricePlacement(position, rotation, echelle), () => couleur);
+    },
+
+    // Un anneau (roues du fauteuil), à plat dans le plan XY.
+    tore({ rayon, epaisseur, cotes = 16 }, position, couleur, rotation) {
+      ajouterGeometrie(new TorusGeometry(rayon, epaisseur, 4, cotes), matricePlacement(position, rotation), () => couleur);
     },
 
     // Une partie de sphère (calotte, sphère ouverte devant…), pour les

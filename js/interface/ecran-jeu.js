@@ -20,7 +20,7 @@
 import { ecouter } from '../noyau/evenements.js';
 import { niveauDeReputation } from '../noyau/format-sauvegarde.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
-import { clesDuGroupe, formaterHeure, t, tPluriel } from '../noyau/textes.js';
+import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel } from '../noyau/textes.js';
 import { el } from './dom.js';
 import { fenetreOuverte, ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
@@ -238,7 +238,7 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     argent.valeur.textContent = tPluriel('monnaie.montant', partie.argent, {
       singulier: jeu.monnaie.singulier, pluriel: jeu.monnaie.pluriel,
     });
-    argent.court.textContent = argent.valeur.textContent;
+    argent.court.textContent = formaterNombre(partie.argent);
     const niveau = niveauDeReputation(partie.reputation, jeu.reputation.paliers);
     reputation.valeur.textContent = t('hud.niveau', { niveau: niveau.niveau, nom: niveau.nom });
     reputation.court.textContent = t('hud.niveauCourt', { niveau: niveau.niveau });
@@ -251,8 +251,10 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
   // Barre compacte si elle prend plus d'une ligne ; la caméra évite les barres.
   function adapterBarres() {
     barre.classList.remove('compacte');
+    barreBas.classList.remove('compacte');
     const hauteurLigne = boutonPause.offsetHeight || 48;
     if (barre.offsetHeight > hauteurLigne * 1.9) barre.classList.add('compacte');
+    if (barreBas.offsetHeight > (boutonAllerA.offsetHeight || 48) * 1.9) barreBas.classList.add('compacte');
     const marges = { haut: barre.offsetHeight, bas: barreBas.offsetHeight, gauche: 0, droite: 0 };
     document.documentElement.style.setProperty('--hauteur-barre-haut', `${marges.haut}px`);
     document.documentElement.style.setProperty('--hauteur-barre-bas', `${marges.bas}px`);

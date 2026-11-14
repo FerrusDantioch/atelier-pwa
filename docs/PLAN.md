@@ -30,21 +30,23 @@ index.html · manifest.webmanifest · sw.js · LICENSE · licences-tierces.txt
 README.md · CLAUDE.md · .nojekyll
 css/      themes.css (seules couleurs) · base.css · interface.css · ordinateur.css (J3)
 js/       config.js · avant-affichage.js · secours.js · main.js
-  noyau/      evenements, etat, donnees, schemas, verification, textes,
-              reglages, hasard, format-sauvegarde, sauvegarde, audio, pwa
-  jeu/        (J2+) economie, commandes, creation, quetes, generateur,
-              dialogues, routines, progression, amenagement
-  monde/      (J1+) scene, camera, lieu, grille, chemin, entites, pointage,
-              controles, reperes
-  modeles/    (J1+) formes, materiaux, meubles, personnage, animations
+  noyau/      evenements, etat, donnees, schemas, coherence, verification,
+              textes, reglages, hasard, format-sauvegarde, sauvegarde,
+              audio, pwa
+  jeu/        personnage (J1) ; (J2+) economie, commandes, creation, quetes,
+              generateur, dialogues, routines, progression, amenagement
+  monde/      (J1) moteur, camera-iso, lieu, lumieres, grille, chemin,
+              deplacement, pointage, controles, reperes, studio, monde
+  modeles/    (J1) formes, palette, meubles, personnage
   interface/  dom, icones, fenetres, notifications, accueil, reglages-ecran,
               sauvegarde-ecran, a-propos, installation, ecran-jeu
               (+ choix-perso J1, dialogue-ecran J2, ordinateur et
               atelier-app J3, journal J4, aller-a J1, fiche-app J6)
 data/     jeu.json · textes.json (J0)
-          personnages.json · pnj.json · dialogues.json (J1-J2)
+          personnages.json · palette.json · meubles.json (J1)
+          pnj.json · dialogues.json (J2)
           commandes.json · creation.json (J3) · quetes.json · modeles-quetes.json (J4)
-          meubles.json (J5) · apps.json · mentions.json (J6)
+          prix et déblocages des meubles (J5) · apps.json · mentions.json (J6)
           lieux/index.json + un fichier par lieu (J1+)
 lib/three/    three.module.js · three.core.js · LICENSE
 assets/       icônes · logo de l'Omni-système · polices + licences
@@ -60,8 +62,12 @@ Chaque fichier de `data/` est décrit par un schéma dans
 
 - **jeu.json** : monnaie, valeurs de départ, paliers de réputation, sauvegarde.
 - **textes.json** : tous les textes de l'interface, rangés par groupes.
-- **personnages.json** : options de personnalisation (teints, coiffures,
-  tenues, aides à la mobilité : aucune, fauteuil roulant, canne).
+- **personnages.json** : Ferrus (apparence à décrire par lui) et les options
+  de personnalisation (teints, coiffures, barbe, lunettes, silhouette,
+  tenues, couvre-chefs, aides à la mobilité : aucune, fauteuil roulant,
+  canne), avec les valeurs par défaut.
+- **palette.json** : les couleurs de la 3D, rangées par nom (« bois-clair »).
+  Les couleurs de l'interface restent dans `css/themes.css`.
 - **pnj.json** : identité, apparence, profil de confort, routine
   (`{ de, a, lieu, point, activite }`), besoins, répliques courtes.
   `"lieu": "ailleurs"` = un lieu non dessiné : le PNJ est simplement absent.
@@ -73,10 +79,14 @@ Chaque fichier de `data/` est décrit par un schéma dans
 - **commandes.json** / **creation.json** : cahier des charges (attendus,
   bonus, à éviter, confort) et pièces du mini-jeu (modèles d'appli,
   fonctionnalités avec ce qu'elles « apportent » et leur « charge », barème).
-- **meubles.json** : prix, déblocage, emprise au sol, effets, « recette » 3D
-  (liste de formes simples).
-- **lieux/*.json** : taille de la grille, murs, pièces, portes, meubles fixes,
-  points d'activité, emplacements de la vitrine, point de départ.
+- **meubles.json** : nom, description (à examiner), emprise au sol,
+  « recette » 3D (liste de formes simples) ; prix, déblocage et effets au
+  jalon 5.
+- **lieux/*.json** : taille de la grille, pièces (zones et sol), murs,
+  ouvertures (portes, porte d'entrée, fenêtres), meubles posés, points
+  d'intérêt, point de départ ; plus tard, emplacements de la vitrine. Au
+  démarrage, le jeu vérifie que chaque pièce et chaque objet à examiner est
+  atteignable à pied et en fauteuil roulant.
 - **apps.json** : vraies applications (id, nom, description, public, url,
   statut). Jamais d'adresse inventée : `TODO_URL` tant qu'elle n'est pas
   confirmée.
@@ -86,7 +96,10 @@ Chaque fichier de `data/` est décrit par un schéma dans
 La **sauvegarde** (IndexedDB, base `atelier-pwa`, et fichier exporté de même
 forme) : `format`, `versionFormat`, `versionJeu`, dates, `graine`, `joueur`,
 `temps { jour, minute }`, `argent`, `reputation`, `quetes`, `commandes`,
-`possessions`, `lieux { actuel, debloques, amenagements }`, `drapeaux`.
+`possessions`, `lieux { actuel, debloques, amenagements }`, `drapeaux`,
+`vue { rotation, zoom }` (format 2, jalon 1). Le joueur :
+`{ modele: 'ferrus' | 'perso', nom, apparence, position { x, z, angle } }`
+(l'apparence de Ferrus n'est jamais copiée : elle vient des données).
 Toute évolution de forme passe par `versionFormat` + une étape de migration.
 Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 
@@ -158,6 +171,13 @@ le jalon suivant.
 
 ## 7. Décisions et questions
 
+Décidé avec Ferrus (14 novembre 2026) :
+
+- **Deux Ferrus** : si le joueur choisit Ferrus, le mentor n'apparaît qu'en
+  visio, comme « le vrai Ferrus, depuis le monde réel ».
+- **Test et publication** : tablette avec le navigateur **Brave** ; chaque
+  jalon validé est **fusionné dans `main`**, publiée par GitHub Pages.
+
 Recommandations appliquées en attendant une réponse contraire :
 
 - Monnaie fictive (« pièces ») plutôt que des euros, pour qu'aucun montant ne
@@ -170,13 +190,14 @@ Recommandations appliquées en attendant une réponse contraire :
 
 Questions ouvertes (à trancher avant le jalon indiqué) :
 
-1. **Deux Ferrus** (avant J1) : si le joueur choisit Ferrus, proposition :
-   le mentor n'apparaît qu'en visio, « le vrai Ferrus, depuis le monde réel ».
+1. **Apparence de Ferrus** : comment le représenter quand on le joue (teint,
+   cheveux, barbe, lunettes, tenue, aide éventuelle) ? En attendant :
+   apparence neutre, marquée provisoire (`TODO_FERRUS`).
 2. **PNJ n°1** (avant J2) : fiche à valider (nom fictif, présentation).
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
    portfolio ? lesquelles en affiche au domicile ? quels statuts ?
 4. **Mentions légales** (avant J6) : statut et champs à compléter.
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.
-6. **Test sur tablette** : quelle tablette, quel navigateur ; GitHub Pages
-   sur la branche de travail ou fusion dans `main` après chaque jalon ?
+6. **Tablette** : Android ou iPad ? (Brave n'utilise pas le même moteur sur
+   les deux.)

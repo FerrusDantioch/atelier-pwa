@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { chargerConfig } from '../aides.mjs';
-import { nouvellePartie, ouvrirJeu, preparer } from './aides-navigateur.mjs';
+import { gagnerPieces, nouvellePartie, ouvrirJeu, preparer } from './aides-navigateur.mjs';
 
 const config = chargerConfig();
 const NOUVELLE = '9.9.9';
@@ -26,7 +26,7 @@ test('mise à jour : proposée avec sa version, partie sauvegardée, puis rechar
   const page = await ouvrirJeu(contexte, outils.adresse);
   await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 30000 });
   await nouvellePartie(page);
-  await page.getByRole('button', { name: /Gagner 10 pièces/ }).click();
+  await gagnerPieces(page, 10);
 
   // « Publication » d'une nouvelle version, puis retour sur le jeu.
   versionServie = NOUVELLE;
