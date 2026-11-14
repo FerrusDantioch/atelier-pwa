@@ -43,6 +43,9 @@
   un petit nez et un reflet clair dans les yeux (visibles sur tous les
   teints). La lumière qui « remonte du sol » est plus chaude : la peau
   n'a plus de reflet violet. Le corps garde son style à facettes.
+- **Teint clair** pour Ferrus et pour Halaé : leur choix (le teint
+  « neutre », lilas, avait été mis faute d'information ; il reste au choix
+  des joueurs).
 
 ### Vérifications faites
 

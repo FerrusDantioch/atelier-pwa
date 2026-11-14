@@ -136,7 +136,8 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 
 - **PNJ n°1 : Halaé** (nom fictif choisi par Ferrus). Elle vit au domicile
   et c'est la première cliente ; créatrice de vidéos ; fauteuil roulant
-  rouge. Apparence détaillée à décrire par elle (neutre en attendant).
+  rouge ; teint clair (choisi par elle le 14/11). Le reste de l'apparence
+  est à décrire par elle (neutre en attendant).
   Fiche (présentation, journée, répliques) **validée par elle et par Ferrus
   le 14 novembre 2026** ; toute modification ou tout ajout la concernant
   lui est de nouveau soumis avant publication (dépôt public).
@@ -183,7 +184,7 @@ Décidé avec Ferrus (14 novembre 2026) :
   GitHub Pages.
 - **Apparence de Ferrus** (décrite par lui) : cheveux très courts, sombres
   voire noirs, lunettes rondes, chemise noire à rayures blanches verticales,
-  pantalon bleu, pas de barbe ; teint non précisé, donc « neutre ».
+  pantalon bleu, pas de barbe ; teint clair (choisi par lui le 14/11).
 - **Jalon 2** : fiche d'Halaé et répliques du mentor validées « pour
   l'instant » ; d'éventuelles corrections seront vues plus tard.
 

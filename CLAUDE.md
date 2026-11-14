@@ -90,7 +90,7 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   ET en fauteuil roulant (passages ≥ 1 m = 2 cases). Tout nouveau lieu ou
   meuble doit passer ce contrôle.
 - **Le personnage « Ferrus »** a l'apparence décrite par lui (voir
-  `docs/PLAN.md` § 7) ; teint non précisé, donc « neutre ». Ne rien changer
+  `docs/PLAN.md` § 7), teint clair choisi par lui. Ne rien changer
   ni ajouter sans sa demande. Son apparence n'est jamais copiée dans les
   parties.
 - **Le temps et les habitants** : l'horloge (`js/jeu/temps.js`) ne tourne

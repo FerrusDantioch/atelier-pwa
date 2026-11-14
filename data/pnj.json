@@ -4,10 +4,10 @@
       "id": "halae",
       "nom": "Halaé",
       "presentation": "Créatrice de vidéos. Elle vit ici, et c'est ta toute première cliente.",
-      "aValider": "Fiche validée par Halaé et Ferrus le 14/11/2026 : nom, rôle (vit au domicile et première cliente), fauteuil roulant rouge, vidéos, présentation, journée et répliques. Apparence neutre en attendant qu'Halaé la décrive. Toute modification ou tout ajout la concernant doit de nouveau être validé par elle avant d'être publié.",
+      "aValider": "Fiche validée par Halaé et Ferrus le 14/11/2026 : nom, rôle (vit au domicile et première cliente), fauteuil roulant rouge, vidéos, présentation, journée et répliques. Teint clair choisi par Halaé (via Ferrus) le 14/11/2026 ; le reste de l'apparence reste neutre en attendant qu'elle le décrive. Toute modification ou tout ajout la concernant doit de nouveau être validé par elle avant d'être publié.",
       "apparenceProvisoire": true,
       "apparence": {
-        "teint": "neutre",
+        "teint": "clair",
         "lunettes": "aucune",
         "coiffure": "aucune",
         "cheveux": "noir",
