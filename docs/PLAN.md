@@ -134,9 +134,10 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 
 ## 5. Personnages
 
-- **PNJ n°1** : fiche (nom fictif, apparence, activités, répliques) en
-  attente de validation. **Rien la concernant n'est poussé dans le dépôt
-  (public) avant cette validation.**
+- **PNJ n°1 : Halaé** (nom fictif choisi par Ferrus). Elle vit au domicile
+  et c'est la première cliente ; créatrice de vidéos ; fauteuil roulant
+  rouge. Apparence détaillée à décrire par elle ; répliques proposées par
+  Claude, **à valider par elle avant toute publication** (dépôt public).
 - **Ferrus, le mentor** : présent dans les lieux et en visio sur
   l'ordinateur ; présente l'activité de Ferrus Dantioch, sert de tutoriel,
   commente les vraies applications. Ses répliques sur les applications
@@ -195,9 +196,8 @@ Recommandations appliquées en attendant une réponse contraire :
 Questions ouvertes (à trancher avant le jalon indiqué) :
 
 1. *(Réglée : apparence de Ferrus, voir plus haut.)*
-2. **PNJ n°1** (avant J2) : nom fictif choisi par Ferrus (gardé hors du
-   dépôt) ; fiche complète (apparence, rôle, répliques) à faire valider par
-   elle avant toute publication.
+2. **Halaé** : validation de sa fiche par elle (répliques, présentation,
+   apparence) avant de publier le jalon 2.
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
    portfolio ? lesquelles en affiche au domicile ? quels statuts ?
 4. **Mentions légales** (avant J6) : statut et champs à compléter.

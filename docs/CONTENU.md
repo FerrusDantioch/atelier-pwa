@@ -122,6 +122,29 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
   de couleur, ou renommer ; les formes (coiffures, couvre-chefs, aides…)
   doivent être connues du jeu : le test le vérifie.
 
+## Les personnages non joueurs : `data/pnj.json`
+
+| Champ | Rôle |
+|---|---|
+| `id`, `nom` | identifiant et nom affiché (le mentor prend le nom de Ferrus : `"modele": "ferrus"`) |
+| `presentation` | une phrase lue dans la fenêtre de dialogue |
+| `apparence` | comme celle d'un personnage joueur (voir `data/personnages.json`) ; l'aide à la mobilité décide de la façon de se déplacer |
+| `absentSiJoueur` | `"ferrus"` : absent quand on joue Ferrus (le mentor) |
+| `routine` | les créneaux `{ "de": "08:00", "a": "12:00", "lieu": "domicile", "point": "montage", "activite": "montage" }`, dans l'ordre, entre 7 h et 23 h. Hors créneau : la personne n'est pas là |
+| `activites` | pour chaque activité : `description` (« monte sa prochaine vidéo ») et ses `repliques` |
+| `repliques` | `rencontre` (la première fois) et `salut` (ensuite) |
+
+Les `point` sont des places définies dans le lieu (liste `points`, sans
+description). Le jeu vérifie que chacune est atteignable **depuis la porte
+d'entrée** avec la façon de se déplacer de la personne (en fauteuil
+roulant : passages d'au moins 1 m). Les visiteurs entrent et sortent par
+le point `porte-entree`.
+
+Dans `data/jeu.json`, `temps` règle la journée : `debutJournee`,
+`finJournee` et `minutesParSeconde` (1 = une minute de jeu par seconde).
+Un meuble peut avoir des `actions` en plus de « Examiner » : `"dormir"`
+pour un lit.
+
 ## Les couleurs de la 3D : `data/palette.json`
 
 Toutes les couleurs des meubles, des sols, des murs et des personnages,

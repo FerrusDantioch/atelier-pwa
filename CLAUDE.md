@@ -25,9 +25,10 @@ l'avancement dans `docs/JOURNAL.md`. Lire les deux avant de travailler.
 - **Jamais l'identité civile de Ferrus** dans le code, les données, la
   documentation ou les commits. Les mentions légales (jalon 6) utiliseront
   des champs à compléter par lui.
-- **PNJ n°1** : sa fiche doit être validée avant toute publication. Ce dépôt
-  est public : rien la concernant (nom, apparence, rôle, répliques) n'y est
-  poussé avant la validation. Voir `docs/PLAN.md` § 5.
+- **PNJ n°1 (Halaé)** : sa fiche doit être validée par elle avant toute
+  publication. Ce dépôt est public : rien la concernant (nom, apparence,
+  rôle, répliques) n'y est poussé avant la validation. Voir `docs/PLAN.md`
+  § 5.
 - **Rien d'inventé sur Ferrus** : les répliques du mentor sur les vraies
   applications reprennent le portfolio et sont marquées à valider ; tout ce
   qui est personnel reste un emplacement « À ÉCRIRE PAR FERRUS ».
@@ -92,6 +93,11 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   `docs/PLAN.md` § 7) ; teint non précisé, donc « neutre ». Ne rien changer
   ni ajouter sans sa demande. Son apparence n'est jamais copiée dans les
   parties.
+- **Le temps et les habitants** : l'horloge (`js/jeu/temps.js`) ne tourne
+  que si aucune fenêtre n'est ouverte ; les routines (`js/jeu/routines.js`)
+  sont fixes et prévisibles (pas d'imprévu). Chaque place d'une routine
+  doit être atteignable depuis `porte-entree` avec la façon de se déplacer
+  du personnage (`coherence.js`).
 - **Tests navigateur** : pour attendre une condition qui importe des modules
   du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
   `page.waitForFunction` (qui n'attend pas les fonctions async).

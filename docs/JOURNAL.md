@@ -1,5 +1,68 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 2 — Les habitants et le temps qui passe (version 0.3.0) — à valider
+
+### Ce qui est fait
+
+- **Le temps passe** : 1 seconde = 1 minute de jeu (réglage « Vitesse du
+  temps » : normale, lente, arrêtée). L'horloge s'arrête dès qu'une fenêtre
+  est ouverte (Pause, dialogue…) et quand le jeu est en arrière-plan. La
+  journée va de 7 h à 23 h ; à 23 h l'horloge s'arrête simplement, avec un
+  message doux. **Dormir** (près du lit) mène au matin suivant, avec une
+  copie de secours de la partie.
+- **Les habitants** (`data/pnj.json`), chacun avec sa routine fixe et
+  prévisible :
+  - **Halaé** vit au domicile et sera la première cliente : petit-déjeuner,
+    montage de ses vidéos le matin, tournage l'après-midi (nouveaux coin
+    tournage et bureau de montage), repas, détente, repos. Elle se déplace
+    en fauteuil roulant rouge (passages d'au moins 1 m, vérifiés).
+    Apparence détaillée à venir (neutre en attendant).
+  - **Théo**, étudiant voisin, passe chaque jour de 16 h à 17 h.
+  - **Ferrus, le mentor**, passe de 10 h à 11 h, sauf quand on joue Ferrus
+    (il ne viendra alors qu'en visio, au jalon 3).
+  Les visiteurs entrent et sortent par la porte d'entrée ; leurs arrivées
+  et départs sont annoncés aux lecteurs d'écran.
+- **Parler** : toucher quelqu'un, puis « Parler à Halaé » (ou Entrée). La
+  personne s'arrête et se tourne vers toi ; la première fois elle se
+  présente, ensuite elle te salue ; « Qu'est-ce que tu fais ? » donne son
+  activité du moment. Les personnes présentes sont dans « Aller à… ».
+- Les textes des données (descriptions, répliques) suivent maintenant la
+  typographie française (espaces fines avant « : ! ? »).
+
+### Vérifications faites
+
+- 80 tests sans navigateur, dont l'horloge (fractions de minute, arrêt à
+  23 h, vitesses), les routines, les répliques (toujours les mêmes pour un
+  même moment), et les places de chaque personnage atteignables avec SA
+  façon de se déplacer (un recoin trop étroit pour un fauteuil est refusé).
+- 38 tests dans Chromium, dont : le temps passe et s'arrête en Pause,
+  vitesse « arrêtée », 23 h puis « Dormir » (jour 2, copie de secours),
+  parler à Halaé (rencontre puis salutation), Théo qui arrive à 16 h et
+  repart à 17 h, le mentor absent quand on joue Ferrus.
+
+### Comment tester sur tablette
+
+1. Nouvelle partie : regarde l'heure avancer en haut à droite.
+2. « Aller à… » › Halaé, puis « Parler à Halaé » et « Qu'est-ce que tu fais ? ».
+3. Attends 10 h (ou règle « Vitesse du temps ») : le mentor passe près du
+   bureau (si tu ne joues pas Ferrus).
+4. Vers 16 h, Théo entre par la porte et s'installe dans la cuisine.
+5. Le soir, va au lit : « Dormir » › le jour 2 commence à 7 h.
+
+### Limites connues
+
+- Les personnages peuvent se croiser ou se frôler en marchant (ils ne
+  s'évitent pas encore).
+- Pas encore de commandes ni d'argent à gagner : l'ordinateur arrive au
+  jalon 3.
+
+### En attente
+
+- **La validation de sa fiche par Halaé** (répliques, présentation,
+  apparence) : rien la concernant n'est publié avant. Ce jalon reste donc
+  sur l'appareil de travail, pas encore sur GitHub.
+- La description de l'apparence d'Halaé.
+
 ## ✅ Jalon 1 — Le domicile en 3D (version 0.2.0, 14 novembre 2026)
 
 Validé par Ferrus le 14 novembre 2026, puis fusionné dans `main`.
