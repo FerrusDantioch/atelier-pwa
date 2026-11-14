@@ -1,6 +1,9 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.0) — à valider
+## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.0) — publié, à valider
+
+Fusionné dans `main` le 14 novembre 2026 à la demande de Ferrus, pour
+l'essayer sur sa tablette. Sa validation est en attente.
 
 ### Ce qui est fait
 
