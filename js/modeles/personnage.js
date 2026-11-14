@@ -1,9 +1,10 @@
 // =============================================================================
 // personnage.js — un personnage low-poly fabriqué d'après son apparence
 // -----------------------------------------------------------------------------
-// Le personnage est un assemblage de formes simples (boîtes, sphères à
-// facettes). Les parties qui bougent (jambes, genoux, bras, roues) sont des
-// groupes séparés, que animer() fait pivoter.
+// Le personnage est un assemblage de formes simples (boîtes, cylindres), avec
+// une tête bien ronde (formes « lisses », sans arêtes). Les parties qui
+// bougent (jambes, genoux, bras, roues) sont des groupes séparés, que
+// animer() fait pivoter.
 //
 // Repères : les pieds touchent le sol (y = 0) et le personnage regarde vers
 // +z. Il mesure environ 1,74 m (taille « moyenne »).
@@ -16,7 +17,7 @@
 import {
   CircleGeometry, Group, Mesh, MeshBasicMaterial,
 } from '../../lib/three/three.module.js';
-import { creerConstructeur, matiereDecor } from './formes.js';
+import { creerConstructeur, matierePersonnage } from './formes.js';
 
 const ECHELLES_TAILLE = { petite: 0.92, moyenne: 1, grande: 1.07 };
 const LARGEURS = { fine: 0.85, moyenne: 1, large: 1.28 };
@@ -34,34 +35,49 @@ function couleurDe(champ, apparence, personnages, palette) {
 }
 
 function mesh(constructeur) {
-  return new Mesh(constructeur.construire(), matiereDecor());
+  return new Mesh(constructeur.construire(), matierePersonnage());
 }
 
 // --- La tête : visage, cheveux, barbe, lunettes, couvre-chef -------------------
+// La tête, les cheveux et les couvre-chefs sont « lisses » : bien ronds, sans
+// arêtes (le corps garde ses facettes low-poly). Le visage regarde vers +z.
+const ECHELLE_TETE = [0.96, 1.08, 1]; // un peu plus haute que large
+const LISSE = { lisse: true, segments: 28, echelle: ECHELLE_TETE };
+
 function construireTete(apparence, couleurs) {
   const tete = creerConstructeur();
-  tete.sphere({ rayon: 0.15, details: 1, echelle: [1, 1.08, 1] }, [0, 0, 0], couleurs.peau);
-  // Les yeux : ils montrent dans quelle direction le personnage regarde.
-  tete.boite([0.035, 0.05, 0.02], [-0.055, 0.015, 0.138], couleurs.yeux);
-  tete.boite([0.035, 0.05, 0.02], [0.055, 0.015, 0.138], couleurs.yeux);
+  tete.sphere({ rayon: 0.15, ...LISSE, anneaux: 20 }, [0, 0, 0], couleurs.peau);
+  // Le nez : une petite bosse, qui donne du relief au visage.
+  tete.sphere({ rayon: 0.024, lisse: true, segments: 12, anneaux: 8, echelle: [0.8, 1, 0.85] }, [0, -0.012, 0.146], couleurs.peau);
+  // Les yeux : ils montrent dans quelle direction le personnage regarde. Un
+  // petit reflet clair les rend bien visibles, quel que soit le teint.
+  for (const x of [-0.055, 0.055]) {
+    tete.sphere({ rayon: 0.021, lisse: true, segments: 12, anneaux: 8, echelle: [0.85, 1.15, 0.6] }, [x, 0.022, 0.135], couleurs.yeux);
+    tete.sphere({ rayon: 0.0065, lisse: true, segments: 8, anneaux: 6 }, [x + 0.006, 0.031, 0.1475], couleurs.reflet);
+  }
 
   const cheveux = couleurs.cheveux;
   const foulard = apparence.couvreChef === 'foulard';
+  // Sous un bonnet ou une casquette, la frange ne dépasse pas.
+  const chapeauSurLaTete = apparence.couvreChef === 'bonnet' || apparence.couvreChef === 'casquette';
   // Les cheveux : une calotte sur le dessus (jusqu'au front), puis l'arrière
   // et les côtés plus bas. Le visage (devant, +z) reste toujours dégagé.
   const OUVERTURE_VISAGE = Math.PI * 0.75;
   const calotte = (rayon, longueur = 0.55) => {
-    tete.calotte({ rayon, thetaLongueur: Math.PI * 0.3, segments: 10, anneaux: 3, echelle: [1, 1.08, 1] }, [0, 0, -0.004], cheveux);
+    tete.calotte({ rayon, thetaLongueur: Math.PI * 0.3, ...LISSE, anneaux: 6 }, [0, 0, -0.004], cheveux);
     tete.calotte({
       rayon,
       phiDebut: Math.PI / 2 + OUVERTURE_VISAGE / 2,
       phiLongueur: Math.PI * 2 - OUVERTURE_VISAGE,
       thetaLongueur: Math.PI * longueur,
-      segments: 10,
-      anneaux: 4,
-      echelle: [1, 1.08, 1],
+      ...LISSE,
+      anneaux: 12,
     }, [0, 0, -0.004], cheveux);
   };
+  // Une mèche ou un volume de cheveux : une forme arrondie, étirée.
+  const volume = (rayon, echelle, position, rotation) => tete.sphere({
+    rayon, lisse: true, segments: 18, anneaux: 12, echelle,
+  }, position, cheveux, rotation);
   if (!foulard) {
     switch (apparence.coiffure) {
       case 'rasee':
@@ -72,29 +88,27 @@ function construireTete(apparence, couleurs) {
         break;
       case 'courte':
         calotte(0.162);
-        tete.boite([0.2, 0.05, 0.06], [0, 0.135, 0.1], cheveux, [35, 0, 0]);
+        if (!chapeauSurLaTete) volume(0.1, [1, 0.32, 0.5], [0, 0.128, 0.092], [28, 0, 0]); // la frange
         break;
       case 'mi-longue':
-        calotte(0.165);
-        tete.boite([0.3, 0.26, 0.1], [0, -0.05, -0.1], cheveux);
-        tete.boite([0.05, 0.22, 0.14], [-0.145, -0.04, 0.0], cheveux);
-        tete.boite([0.05, 0.22, 0.14], [0.145, -0.04, 0.0], cheveux);
+        calotte(0.165, 0.66);
+        volume(0.16, [0.95, 0.85, 0.5], [0, -0.06, -0.085]);
+        for (const x of [-0.138, 0.138]) volume(0.06, [0.55, 1.8, 1], [x, -0.07, -0.005]);
         break;
       case 'longue':
-        calotte(0.165);
-        tete.boite([0.31, 0.5, 0.1], [0, -0.17, -0.11], cheveux);
-        tete.boite([0.05, 0.36, 0.13], [-0.15, -0.1, 0.0], cheveux);
-        tete.boite([0.05, 0.36, 0.13], [0.15, -0.1, 0.0], cheveux);
+        calotte(0.165, 0.68);
+        volume(0.16, [0.98, 1.75, 0.5], [0, -0.17, -0.095]);
+        for (const x of [-0.142, 0.142]) volume(0.065, [0.55, 2.5, 1], [x, -0.13, -0.005]);
         break;
       case 'chignon':
         calotte(0.158);
-        tete.sphere({ rayon: 0.075, details: 1 }, [0, 0.12, -0.13], cheveux);
+        volume(0.075, [1, 1, 1], [0, 0.12, -0.13]);
         break;
       case 'boucles': {
         calotte(0.17, 0.6);
         const boucles = [[0, 0.16, 0], [0.1, 0.12, 0.05], [-0.1, 0.12, 0.05], [0.13, 0.04, -0.05],
           [-0.13, 0.04, -0.05], [0, 0.1, -0.12], [0.08, 0.0, -0.13], [-0.08, 0.0, -0.13], [0.06, 0.15, -0.07], [-0.06, 0.15, -0.07]];
-        for (const position of boucles) tete.sphere({ rayon: 0.075 }, position, cheveux);
+        for (const position of boucles) tete.sphere({ rayon: 0.075, lisse: true, segments: 12, anneaux: 8 }, position, cheveux);
         break;
       }
       default:
@@ -102,48 +116,54 @@ function construireTete(apparence, couleurs) {
     }
   }
 
-  if (apparence.barbe === 'courte') {
-    tete.boite([0.22, 0.08, 0.06], [0, -0.11, 0.11], cheveux);
-    tete.boite([0.04, 0.1, 0.1], [-0.12, -0.06, 0.07], cheveux);
-    tete.boite([0.04, 0.1, 0.1], [0.12, -0.06, 0.07], cheveux);
-  } else if (apparence.barbe === 'longue') {
-    tete.boite([0.2, 0.18, 0.08], [0, -0.15, 0.1], cheveux);
-    tete.boite([0.04, 0.12, 0.1], [-0.12, -0.07, 0.07], cheveux);
-    tete.boite([0.04, 0.12, 0.1], [0.12, -0.07, 0.07], cheveux);
+  // La barbe : une bande arrondie sur la mâchoire, devant (et plus bas si longue).
+  if (apparence.barbe === 'courte' || apparence.barbe === 'longue') {
+    const longue = apparence.barbe === 'longue';
+    tete.calotte({
+      rayon: 0.156,
+      phiDebut: Math.PI / 2 - Math.PI * 0.45,
+      phiLongueur: Math.PI * 0.9,
+      thetaDebut: Math.PI * 0.6,
+      thetaLongueur: Math.PI * (longue ? 0.34 : 0.28),
+      ...LISSE,
+      anneaux: 8,
+    }, [0, 0, 0], cheveux);
+    if (longue) volume(0.07, [1.15, 1.35, 0.75], [0, -0.18, 0.085]);
+    else volume(0.055, [1.3, 0.8, 0.8], [0, -0.135, 0.1]);
   }
 
   // Lunettes : seulement la monture (on voit les yeux à travers), pour ne
   // pas ressembler à des lunettes de soleil.
   const monture = couleurs.monture;
   if (apparence.lunettes === 'rondes') {
-    for (const x of [-0.058, 0.058]) tete.tore({ rayon: 0.04, epaisseur: 0.007, cotes: 12 }, [x, 0.015, 0.152], monture);
-    tete.boite([0.034, 0.01, 0.01], [0, 0.025, 0.154], monture);
+    for (const x of [-0.058, 0.058]) tete.tore({ rayon: 0.04, epaisseur: 0.007, cotes: 20, lisse: true }, [x, 0.02, 0.152], monture);
+    tete.boite([0.034, 0.01, 0.01], [0, 0.03, 0.154], monture);
   } else if (apparence.lunettes === 'carrees') {
     for (const x of [-0.058, 0.058]) {
-      tete.boite([0.085, 0.011, 0.012], [x, 0.046, 0.152], monture);
-      tete.boite([0.085, 0.011, 0.012], [x, -0.016, 0.152], monture);
-      tete.boite([0.011, 0.062, 0.012], [x - 0.037, 0.015, 0.152], monture);
-      tete.boite([0.011, 0.062, 0.012], [x + 0.037, 0.015, 0.152], monture);
+      tete.boite([0.085, 0.011, 0.012], [x, 0.051, 0.152], monture);
+      tete.boite([0.085, 0.011, 0.012], [x, -0.011, 0.152], monture);
+      tete.boite([0.011, 0.062, 0.012], [x - 0.037, 0.02, 0.152], monture);
+      tete.boite([0.011, 0.062, 0.012], [x + 0.037, 0.02, 0.152], monture);
     }
-    tete.boite([0.034, 0.01, 0.01], [0, 0.025, 0.154], monture);
+    tete.boite([0.034, 0.01, 0.01], [0, 0.03, 0.154], monture);
   }
 
   const chapeau = couleurs.couvreChef;
   if (apparence.couvreChef === 'bonnet') {
-    tete.calotte({ rayon: 0.172, thetaLongueur: Math.PI * 0.5, echelle: [1, 1.12, 1] }, [0, 0.01, 0], chapeau);
-    tete.cylindre({ rayon: 0.176, hauteur: 0.05, cotes: 12 }, [0, 0.02, 0], chapeau);
-    tete.sphere({ rayon: 0.045 }, [0, 0.2, 0], chapeau);
+    tete.calotte({ rayon: 0.172, thetaLongueur: Math.PI * 0.5, ...LISSE, anneaux: 10, echelle: [1, 1.12, 1] }, [0, 0.05, 0], chapeau);
+    tete.cylindre({ rayon: 0.174, hauteur: 0.045, cotes: 28, lisse: true }, [0, 0.07, 0], chapeau);
+    tete.sphere({ rayon: 0.045, lisse: true, segments: 14, anneaux: 10 }, [0, 0.24, 0], chapeau);
   } else if (apparence.couvreChef === 'casquette') {
-    tete.calotte({ rayon: 0.168, thetaLongueur: Math.PI * 0.5, echelle: [1, 1.05, 1] }, [0, 0.02, 0], chapeau);
-    tete.boite([0.2, 0.02, 0.13], [0, 0.04, 0.2], chapeau, [-6, 0, 0]);
+    tete.calotte({ rayon: 0.168, thetaLongueur: Math.PI * 0.5, ...LISSE, anneaux: 10, echelle: [1, 1.05, 1] }, [0, 0.05, 0], chapeau);
+    tete.boite([0.2, 0.02, 0.13], [0, 0.065, 0.2], chapeau, [-6, 0, 0]);
   } else if (foulard) {
     // Un foulard ouvert devant le visage, qui tombe sur les épaules.
     tete.calotte({
       rayon: 0.175, phiDebut: Math.PI / 2 + Math.PI * 0.32, phiLongueur: Math.PI * 1.36,
-      thetaLongueur: Math.PI * 0.82, segments: 12, anneaux: 6, echelle: [1, 1.08, 1],
+      thetaLongueur: Math.PI * 0.82, ...LISSE, anneaux: 14, echelle: [1, 1.08, 1],
     }, [0, 0, -0.005], chapeau);
-    tete.calotte({ rayon: 0.176, thetaLongueur: Math.PI * 0.35, echelle: [1, 1.08, 1] }, [0, 0, -0.005], chapeau);
-    tete.cylindre({ rayon: 0.24, rayonHaut: 0.13, hauteur: 0.2, cotes: 10 }, [0, -0.2, -0.01], chapeau);
+    tete.calotte({ rayon: 0.176, thetaLongueur: Math.PI * 0.35, ...LISSE, anneaux: 6, echelle: [1, 1.08, 1] }, [0, 0, -0.005], chapeau);
+    tete.cylindre({ rayon: 0.24, rayonHaut: 0.13, hauteur: 0.2, cotes: 24, lisse: true }, [0, -0.2, -0.01], chapeau);
   }
   return mesh(tete);
 }
@@ -164,6 +184,7 @@ export function construirePersonnage(apparence, personnages, palette) {
     couvreChef: couleurDe('couleurCouvreChef', apparence, personnages, palette),
     aide: couleurDe('couleurAide', apparence, personnages, palette),
     yeux: palette.couleur('yeux'),
+    reflet: palette.couleur('blanc'),
     monture: palette.couleur('noir'),
     chaussures: palette.couleur('chaussures'),
     pneu: palette.couleur('pneu'),
@@ -188,7 +209,7 @@ export function construirePersonnage(apparence, personnages, palette) {
   const buste = creerConstructeur();
   buste.boite([0.32 * largeur, 0.15, 0.19 * epaisseur], [0, hanches, 0], couleurs.bas);
   buste.boite([0.36 * largeur, 0.48, 0.21 * epaisseur], [0, hanches + 0.3, 0], couleurs.haut);
-  buste.cylindre({ rayon: 0.055, hauteur: 0.1, cotes: 8 }, [0, hanches + 0.57, 0], couleurs.peau);
+  buste.cylindre({ rayon: 0.055, hauteur: 0.1, cotes: 16, lisse: true }, [0, hanches + 0.57, 0], couleurs.peau);
   const rayures = apparence.motifHaut === 'rayures';
   if (rayures) {
     // Rayures verticales devant, derrière et sur les côtés du buste.

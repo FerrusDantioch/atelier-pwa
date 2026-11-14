@@ -38,6 +38,11 @@
   plan) sont dans `data/pnj.json` ; ils ne viennent pas encore au domicile.
 - Au démarrage, le jeu vérifie que chaque commande peut être réussie
   « parfaitement », et que toutes se débloquent même avec des « Bien ».
+- **Les visages**, à la demande de Ferrus : la tête est maintenant bien
+  ronde, sans arêtes (cheveux, barbe, lunettes et couvre-chefs aussi), avec
+  un petit nez et un reflet clair dans les yeux (visibles sur tous les
+  teints). La lumière qui « remonte du sol » est plus chaude : la peau
+  n'a plus de reflet violet. Le corps garde son style à facettes.
 
 ### Vérifications faites
 

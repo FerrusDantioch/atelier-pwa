@@ -18,7 +18,7 @@ const FORCES = { douce: 0.8, normale: 1, vive: 1.22 };
 export function creerLumieres() {
   const groupe = new Group();
   groupe.name = 'lumieres';
-  const ciel = new HemisphereLight(0xfff8ee, 0x7d7094, 2.1);
+  const ciel = new HemisphereLight(0xfff8ee, 0x8a7d72, 2.1);
   const soleil = new DirectionalLight(0xfff1dc, 1.7);
   groupe.add(ciel, soleil);
   let luminosite = 'normale';

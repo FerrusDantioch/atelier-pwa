@@ -9,6 +9,8 @@
 // la carte graphique dessine tout d'un coup.
 //
 // Les facettes bien visibles (« flat shading ») donnent le style low-poly.
+// Exception : les formes « lisses » (la tête des personnages, les cheveux)
+// gardent des ombres douces, sans arêtes (voir matierePersonnage()).
 // =============================================================================
 
 import {
@@ -23,6 +25,15 @@ let matiere = null;
 export function matiereDecor() {
   if (!matiere) matiere = new MeshLambertMaterial({ vertexColors: true, flatShading: true });
   return matiere;
+}
+
+// La matière des personnages : les formes ordinaires y restent à facettes
+// (chaque triangle garde sa propre orientation), mais les formes « lisses »
+// (tête, cheveux, couvre-chefs) sont éclairées tout en douceur.
+let matiereDesPersonnages = null;
+export function matierePersonnage() {
+  if (!matiereDesPersonnages) matiereDesPersonnages = new MeshLambertMaterial({ vertexColors: true, flatShading: false });
+  return matiereDesPersonnages;
 }
 
 // Une matrice de placement : position, rotation (en degrés, ordre X Y Z), échelle.
@@ -47,10 +58,12 @@ export function creerConstructeur() {
 
   // Ajoute une géométrie Three.js (déjà « à plat », sans index), déplacée par
   // « matrice ». « couleurDe(i) » donne la couleur du triangle n° i.
-  function ajouterGeometrie(geometrie, matrice, couleurDe) {
+  // « lisse » garde l'orientation arrondie de chaque sommet (pas d'arêtes) ;
+  // sinon chaque triangle est une facette bien nette.
+  function ajouterGeometrie(geometrie, matrice, couleurDe, lisse = false) {
     const aPlat = geometrie.index ? geometrie.toNonIndexed() : geometrie;
     const pos = aPlat.getAttribute('position');
-    aPlat.computeVertexNormals();
+    if (!lisse) aPlat.computeVertexNormals();
     const nor = aPlat.getAttribute('normal');
     matriceNormales.getNormalMatrix(matrice);
     for (let i = 0; i < pos.count; i += 1) {
@@ -77,28 +90,35 @@ export function creerConstructeur() {
         (triangle) => (parFace ? parFace[ordre[Math.floor(triangle / 2)]] : couleur));
     },
 
-    // Un cylindre (ou un tronc de cône si rayonHaut ≠ rayon).
-    cylindre({ rayon, rayonHaut = rayon, hauteur, cotes = 8 }, position, couleur, rotation) {
+    // Un cylindre (ou un tronc de cône si rayonHaut ≠ rayon) ; « lisse » :
+    // des côtés arrondis, sans arêtes.
+    cylindre({ rayon, rayonHaut = rayon, hauteur, cotes = 8, lisse = false }, position, couleur, rotation) {
       ajouterGeometrie(new CylinderGeometry(rayonHaut, rayon, hauteur, cotes, 1),
-        matricePlacement(position, rotation), () => couleur);
+        matricePlacement(position, rotation), () => couleur, lisse);
     },
 
-    // Une sphère à facettes (icosaèdre : 20 faces, ou 80 avec details 1).
-    sphere({ rayon, details = 0, echelle = [1, 1, 1] }, position, couleur, rotation) {
-      ajouterGeometrie(new IcosahedronGeometry(rayon, details),
-        matricePlacement(position, rotation, echelle), () => couleur);
+    // Une sphère à facettes (icosaèdre : 20 faces, ou 80 avec details 1),
+    // ou bien ronde et sans arêtes avec « lisse » (segments × anneaux).
+    sphere({ rayon, details = 0, echelle = [1, 1, 1], lisse = false, segments = 24, anneaux = 16 }, position, couleur, rotation) {
+      const geometrie = lisse ? new SphereGeometry(rayon, segments, anneaux) : new IcosahedronGeometry(rayon, details);
+      ajouterGeometrie(geometrie, matricePlacement(position, rotation, echelle), () => couleur, lisse);
     },
 
-    // Un anneau (roues du fauteuil), à plat dans le plan XY.
-    tore({ rayon, epaisseur, cotes = 16 }, position, couleur, rotation) {
-      ajouterGeometrie(new TorusGeometry(rayon, epaisseur, 4, cotes), matricePlacement(position, rotation), () => couleur);
+    // Un anneau (roues du fauteuil, montures de lunettes), à plat dans le
+    // plan XY ; « lisse » : un anneau bien rond.
+    tore({ rayon, epaisseur, cotes = 16, lisse = false }, position, couleur, rotation) {
+      ajouterGeometrie(new TorusGeometry(rayon, epaisseur, lisse ? 8 : 4, cotes),
+        matricePlacement(position, rotation), () => couleur, lisse);
     },
 
     // Une partie de sphère (calotte, sphère ouverte devant…), pour les
     // cheveux et les couvre-chefs. Angles en radians, comme SphereGeometry.
-    calotte({ rayon, phiDebut = 0, phiLongueur = Math.PI * 2, thetaDebut = 0, thetaLongueur = Math.PI / 2, segments = 10, anneaux = 4, echelle = [1, 1, 1] }, position, couleur, rotation) {
+    calotte({
+      rayon, phiDebut = 0, phiLongueur = Math.PI * 2, thetaDebut = 0, thetaLongueur = Math.PI / 2,
+      segments = 10, anneaux = 4, echelle = [1, 1, 1], lisse = false,
+    }, position, couleur, rotation) {
       const geometrie = new SphereGeometry(rayon, segments, anneaux, phiDebut, phiLongueur, thetaDebut, thetaLongueur);
-      ajouterGeometrie(geometrie, matricePlacement(position, rotation, echelle), () => couleur);
+      ajouterGeometrie(geometrie, matricePlacement(position, rotation, echelle), () => couleur, lisse);
     },
 
     // Un simple quadrilatère horizontal (sol), vu du dessus.
