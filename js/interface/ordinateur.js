@@ -62,9 +62,11 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
   // Les boutons du bas : ceux de l'écran, puis « Fermer ».
   function pied(actions = []) {
     vider(fenetre.pied);
+    // Le texte est dans un seul élément : « Tester » et « comme Madeleine »
+    // restent séparés par une seule espace (et lus ensemble).
     const boutons = actions.map(({ texte, icone: nomIcone, principal, surClic }) => el('button', {
       class: ['bouton', principal && 'bouton-principal'], type: 'button', onClick: surClic,
-    }, nomIcone ? icone(nomIcone) : null, texte));
+    }, nomIcone ? icone(nomIcone) : null, el('span', {}, texte)));
     fenetre.pied.append(...boutons, el('button', { class: 'bouton', type: 'button', onClick: () => fenetre.fermer() }, t('commun.fermer')));
     return boutons;
   }

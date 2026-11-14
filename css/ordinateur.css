@@ -609,3 +609,17 @@
     scroll-padding-top: 5rem;
   }
 }
+
+/* Quand le bandeau est là, la jauge de l'aperçu n'est plus montrée deux
+   fois : elle reste seulement pour les lecteurs d'écran. */
+@media (max-width: 899px) {
+  .atelier-apercu .jauge {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
