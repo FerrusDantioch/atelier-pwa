@@ -1,0 +1,5 @@
+{
+  "lieux": [
+    { "id": "domicile", "fichier": "data/lieux/domicile.json" }
+  ]
+}

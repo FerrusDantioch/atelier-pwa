@@ -1,0 +1,374 @@
+{
+  "meubles": [
+    {
+      "id": "lit-double",
+      "nom": "Lit",
+      "designation": "le lit",
+      "description": "Un grand lit à bonne hauteur : on s'y installe sans effort.",
+      "emprise": [3, 4],
+      "formes": [
+        { "forme": "boite", "taille": [1.46, 0.2, 1.96], "position": [0, 0.25, 0.02], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.08, 0.15, 0.08], "position": [-0.66, 0.075, 0.9], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.08, 0.15, 0.08], "position": [0.66, 0.075, 0.9], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.08, 0.15, 0.08], "position": [-0.66, 0.075, -0.86], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.08, 0.15, 0.08], "position": [0.66, 0.075, -0.86], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [1.38, 0.18, 1.86], "position": [0, 0.44, 0.04], "couleur": "blanc" },
+        { "forme": "boite", "taille": [1.42, 0.07, 1.2], "position": [0, 0.56, 0.38], "couleur": "bleu" },
+        { "forme": "boite", "taille": [1.42, 0.08, 0.14], "position": [0, 0.565, -0.26], "couleur": "bleu-clair" },
+        { "forme": "boite", "taille": [0.55, 0.12, 0.32], "position": [-0.34, 0.59, -0.68], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.55, 0.12, 0.32], "position": [0.34, 0.59, -0.68], "couleur": "blanc" },
+        { "forme": "boite", "taille": [1.5, 1.0, 0.08], "position": [0, 0.5, -0.96], "couleur": "bois-sombre" }
+      ]
+    },
+    {
+      "id": "table-chevet",
+      "nom": "Table de chevet",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.42, 0.48, 0.4], "position": [0, 0.24, -0.02], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.34, 0.02, 0.01], "position": [0, 0.33, 0.185], "couleur": "bois-sombre" },
+        { "forme": "cylindre", "rayon": 0.07, "hauteur": 0.03, "position": [0.06, 0.495, -0.06], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.012, "hauteur": 0.2, "position": [0.06, 0.61, -0.06], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.12, "rayonHaut": 0.08, "hauteur": 0.14, "position": [0.06, 0.78, -0.06], "couleur": "abat-jour" },
+        { "forme": "boite", "taille": [0.12, 0.03, 0.16], "position": [-0.1, 0.495, 0.07], "couleur": "rouge", "rotation": [0, 12, 0] }
+      ]
+    },
+    {
+      "id": "armoire",
+      "nom": "Armoire",
+      "designation": "l'armoire",
+      "description": "Une armoire avec des penderies à hauteur de bras. Le désordre est caché à l'intérieur, promis.",
+      "emprise": [3, 1],
+      "formes": [
+        { "forme": "boite", "taille": [1.46, 0.06, 0.46], "position": [0, 0.03, -0.01], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [1.44, 1.86, 0.46], "position": [0, 0.99, -0.01], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [1.48, 0.06, 0.48], "position": [0, 1.95, -0.01], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.015, 1.76, 0.01], "position": [0, 1.0, 0.225], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.03, 0.24, 0.03], "position": [-0.07, 1.05, 0.235], "couleur": "poignee" },
+        { "forme": "boite", "taille": [0.03, 0.24, 0.03], "position": [0.07, 1.05, 0.235], "couleur": "poignee" }
+      ]
+    },
+    {
+      "id": "lavabo",
+      "nom": "Lavabo",
+      "designation": "le lavabo",
+      "description": "Un lavabo suspendu : on peut s'en approcher assis, les genoux passent dessous. Le miroir est incliné pour s'y voir de toutes les hauteurs.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.7, 0.14, 0.42], "position": [0, 0.8, -0.03], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.5, 0.02, 0.28], "position": [0, 0.865, -0.01], "couleur": "eau" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.14, "position": [0, 0.94, -0.19], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.03, 0.03, 0.12], "position": [0, 1.0, -0.14], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.03, "hauteur": 0.36, "position": [0, 0.55, -0.18], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.64, 0.79, 0.015], "position": [0, 1.5, -0.235], "couleur": "blanc", "rotation": [-6, 0, 0] },
+        { "forme": "boite", "taille": [0.58, 0.72, 0.012], "position": [0, 1.5, -0.226], "couleur": "miroir", "rotation": [-6, 0, 0] }
+      ]
+    },
+    {
+      "id": "wc",
+      "nom": "Toilettes",
+      "designation": "les toilettes",
+      "description": "Des toilettes à bonne hauteur, avec une barre d'appui rabattable et de la place à côté pour s'installer.",
+      "emprise": [1, 2],
+      "formes": [
+        { "forme": "boite", "taille": [0.36, 0.38, 0.5], "position": [0, 0.19, 0.02], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.4, 0.04, 0.48], "position": [0, 0.4, 0.04], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.42, 0.4, 0.17], "position": [0, 0.62, -0.38], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.08, 0.02, 0.05], "position": [0, 0.83, -0.38], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.04, 0.04, 0.62], "position": [0.3, 0.72, -0.12], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.04, 0.2, 0.04], "position": [0.3, 0.64, -0.44], "couleur": "metal" }
+      ]
+    },
+    {
+      "id": "douche-italienne",
+      "nom": "Douche",
+      "designation": "la douche",
+      "description": "Une douche à l'italienne, sans marche, avec un siège rabattable et des barres d'appui.",
+      "emprise": [3, 3],
+      "formes": [
+        { "forme": "boite", "taille": [1.46, 0.02, 1.46], "position": [0, 0.012, 0], "couleur": "carrelage-douche" },
+        { "forme": "boite", "taille": [0.14, 0.006, 0.14], "position": [0, 0.024, 0.1], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.03, 1.1, 0.03], "position": [-0.3, 1.45, -0.71], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.03, 0.03, 0.12], "position": [-0.3, 2.0, -0.66], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.09, "hauteur": 0.03, "position": [-0.3, 1.98, -0.58], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.45, 0.05, 0.4], "position": [0.45, 0.48, -0.5], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.04, 0.3, 0.04], "position": [0.45, 0.33, -0.69], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.6, 0.04, 0.04], "position": [0.38, 0.9, -0.71], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.04, 0.04, 0.6], "position": [0.71, 0.9, -0.3], "couleur": "metal" }
+      ]
+    },
+    {
+      "id": "plaques",
+      "nom": "Plaques de cuisson",
+      "designation": "les plaques de cuisson",
+      "description": "Les plaques de cuisson, avec des commandes à l'avant : on cuisine assis ou debout.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.98, 0.8, 0.48], "position": [0, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [1.0, 0.06, 0.5], "position": [0, 0.83, 0], "couleur": "plan-travail" },
+        { "forme": "boite", "taille": [0.6, 0.012, 0.4], "position": [0, 0.866, -0.02], "couleur": "noir" },
+        { "forme": "cylindre", "rayon": 0.08, "hauteur": 0.006, "position": [-0.14, 0.875, -0.1], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.08, "hauteur": 0.006, "position": [0.14, 0.875, 0.06], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.9, 0.012, 0.01], "position": [0, 0.55, 0.245], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.3, 0.025, 0.025], "position": [0, 0.7, 0.25], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.3, 0.025, 0.025], "position": [0, 0.42, 0.25], "couleur": "metal" }
+      ]
+    },
+    {
+      "id": "evier",
+      "nom": "Évier",
+      "designation": "l'évier",
+      "description": "L'évier, sous la fenêtre, avec de la place dessous pour les genoux. La vaisselle attend son tour, comme toujours.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [1.0, 0.06, 0.5], "position": [0, 0.83, 0], "couleur": "plan-travail" },
+        { "forme": "boite", "taille": [0.5, 0.012, 0.3], "position": [0, 0.866, 0.02], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.18, "position": [0, 0.95, -0.19], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.03, 0.03, 0.14], "position": [0, 1.03, -0.13], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.04, 0.8, 0.48], "position": [-0.48, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.04, 0.8, 0.48], "position": [0.48, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.92, 0.8, 0.02], "position": [0, 0.4, -0.24], "couleur": "gris-clair" },
+        { "forme": "boite", "taille": [0.16, 0.05, 0.12], "position": [0.32, 0.885, -0.08], "couleur": "bleu-clair" }
+      ]
+    },
+    {
+      "id": "plan-travail",
+      "nom": "Plan de travail",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.98, 0.8, 0.48], "position": [0, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [1.0, 0.06, 0.5], "position": [0, 0.83, 0], "couleur": "plan-travail" },
+        { "forme": "boite", "taille": [0.012, 0.74, 0.01], "position": [0, 0.4, 0.245], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.025, 0.2, 0.025], "position": [-0.06, 0.62, 0.25], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.025, 0.2, 0.025], "position": [0.06, 0.62, 0.25], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.32, 0.02, 0.22], "position": [-0.18, 0.87, 0.04], "couleur": "bois-clair" },
+        { "forme": "cylindre", "rayon": 0.05, "hauteur": 0.16, "position": [0.26, 0.94, -0.12], "couleur": "rouge" },
+        { "forme": "cylindre", "rayon": 0.04, "hauteur": 0.12, "position": [0.36, 0.92, -0.04], "couleur": "moutarde" }
+      ]
+    },
+    {
+      "id": "frigo",
+      "nom": "Réfrigérateur",
+      "designation": "le réfrigérateur",
+      "description": "Le réfrigérateur, avec quelques dessins aimantés sur la porte.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.9, 1.8, 0.48], "position": [0, 0.9, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.9, 0.012, 0.01], "position": [0, 1.15, 0.243], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.03, 0.3, 0.03], "position": [0.38, 1.4, 0.255], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.03, 0.4, 0.03], "position": [0.38, 0.8, 0.255], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.14, 0.18, 0.01], "position": [-0.22, 1.42, 0.245], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [0.16, 0.12, 0.01], "position": [-0.02, 1.36, 0.245], "couleur": "bleu-clair" },
+        { "forme": "boite", "taille": [0.12, 0.12, 0.01], "position": [-0.16, 0.9, 0.245], "couleur": "rose" }
+      ]
+    },
+    {
+      "id": "table-repas",
+      "nom": "Table",
+      "designation": "la table",
+      "description": "La table, assez haute pour qu'un fauteuil roulant se glisse dessous.",
+      "emprise": [3, 2],
+      "formes": [
+        { "forme": "boite", "taille": [1.4, 0.05, 0.9], "position": [0, 0.74, 0], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.06, 0.72, 0.06], "position": [-0.62, 0.36, -0.36], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.06, 0.72, 0.06], "position": [0.62, 0.36, -0.36], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.06, 0.72, 0.06], "position": [-0.62, 0.36, 0.36], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.06, 0.72, 0.06], "position": [0.62, 0.36, 0.36], "couleur": "bois" },
+        { "forme": "cylindre", "rayon": 0.12, "rayonHaut": 0.15, "hauteur": 0.07, "position": [0.2, 0.8, 0.05], "couleur": "blanc" },
+        { "forme": "sphere", "rayon": 0.05, "position": [0.16, 0.86, 0.02], "couleur": "orange" },
+        { "forme": "sphere", "rayon": 0.05, "position": [0.25, 0.86, 0.08], "couleur": "rouge" }
+      ]
+    },
+    {
+      "id": "chaise",
+      "nom": "Chaise",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.4, 0.05, 0.4], "position": [0, 0.46, 0.02], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 0.44, 0.04], "position": [-0.17, 0.22, 0.19], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 0.44, 0.04], "position": [0.17, 0.22, 0.19], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 0.9, 0.04], "position": [-0.17, 0.45, -0.16], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 0.9, 0.04], "position": [0.17, 0.45, -0.16], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.38, 0.22, 0.03], "position": [0, 0.76, -0.16], "couleur": "bois-clair" }
+      ]
+    },
+    {
+      "id": "canape",
+      "nom": "Canapé",
+      "designation": "le canapé",
+      "description": "Un canapé moelleux. Parfait pour réfléchir à une nouvelle application… ou faire une sieste.",
+      "emprise": [4, 2],
+      "formes": [
+        { "forme": "boite", "taille": [0.06, 0.07, 0.06], "position": [-0.88, 0.035, -0.36], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.06, 0.07, 0.06], "position": [0.88, 0.035, -0.36], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.06, 0.07, 0.06], "position": [-0.88, 0.035, 0.4], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.06, 0.07, 0.06], "position": [0.88, 0.035, 0.4], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [1.9, 0.3, 0.85], "position": [0, 0.22, 0.03], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.78, 0.13, 0.62], "position": [-0.4, 0.43, 0.13], "couleur": "vert-clair" },
+        { "forme": "boite", "taille": [0.78, 0.13, 0.62], "position": [0.4, 0.43, 0.13], "couleur": "vert-clair" },
+        { "forme": "boite", "taille": [1.9, 0.52, 0.22], "position": [0, 0.56, -0.31], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.16, 0.55, 0.85], "position": [-0.87, 0.36, 0.03], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.16, 0.55, 0.85], "position": [0.87, 0.36, 0.03], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.34, 0.3, 0.1], "position": [0.5, 0.62, -0.15], "couleur": "moutarde", "rotation": [-12, 0, 8] }
+      ]
+    },
+    {
+      "id": "table-basse",
+      "nom": "Table basse",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.92, 0.05, 0.44], "position": [0, 0.4, 0], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.05, 0.38, 0.05], "position": [-0.4, 0.19, -0.17], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.05, 0.38, 0.05], "position": [0.4, 0.19, -0.17], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.05, 0.38, 0.05], "position": [-0.4, 0.19, 0.17], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.05, 0.38, 0.05], "position": [0.4, 0.19, 0.17], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.24, 0.04, 0.17], "position": [-0.2, 0.445, 0.02], "couleur": "bleu", "rotation": [0, 15, 0] },
+        { "forme": "cylindre", "rayon": 0.045, "hauteur": 0.09, "position": [0.25, 0.47, -0.05], "couleur": "rose" }
+      ]
+    },
+    {
+      "id": "meuble-tv",
+      "nom": "Télévision",
+      "designation": "la télévision",
+      "description": "La télévision. Elle attendra : il y a des applications à créer.",
+      "emprise": [4, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [-0.85, 0.04, -0.17], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [0.85, 0.04, -0.17], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [-0.85, 0.04, 0.17], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [0.85, 0.04, 0.17], "couleur": "noir" },
+        { "forme": "boite", "taille": [1.8, 0.42, 0.42], "position": [0, 0.29, 0], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.86, 0.012, 0.01], "position": [-0.45, 0.29, 0.211], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.86, 0.012, 0.01], "position": [0.45, 0.29, 0.211], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.3, 0.03, 0.2], "position": [0, 0.515, -0.04], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.06, 0.16, 0.04], "position": [0, 0.6, -0.08], "couleur": "noir" },
+        { "forme": "boite", "taille": [1.2, 0.7, 0.05], "position": [0, 1.02, -0.08], "couleur": "noir" },
+        { "forme": "boite", "taille": [1.14, 0.64, 0.01], "position": [0, 1.02, -0.052], "couleur": "ecran" },
+        { "forme": "cylindre", "rayon": 0.06, "rayonHaut": 0.07, "hauteur": 0.1, "position": [0.72, 0.55, 0.04], "couleur": "pot" },
+        { "forme": "sphere", "rayon": 0.11, "position": [0.72, 0.68, 0.04], "couleur": "feuille" }
+      ]
+    },
+    {
+      "id": "bureau",
+      "nom": "Bureau",
+      "designation": "ton bureau",
+      "description": "Ton bureau et ton ordinateur. C'est ici que tu créeras des applications pour tes voisins.",
+      "emprise": [3, 1],
+      "formes": [
+        { "forme": "boite", "taille": [1.46, 0.04, 0.48], "position": [0, 0.74, 0], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.44], "position": [-0.69, 0.36, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.44], "position": [0.69, 0.36, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [1.34, 0.3, 0.02], "position": [0, 0.55, -0.21], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.2, 0.02, 0.14], "position": [0, 0.77, -0.12], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.05, 0.22, 0.03], "position": [0, 0.87, -0.15], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.66, 0.4, 0.03], "position": [0, 1.13, -0.13], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.6, 0.34, 0.006], "position": [0, 1.13, -0.114], "couleur": "ecran-allume" },
+        { "forme": "boite", "taille": [0.3, 0.025, 0.004], "position": [-0.1, 1.24, -0.109], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.4, 0.025, 0.004], "position": [-0.05, 1.18, -0.109], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.24, 0.025, 0.004], "position": [-0.13, 1.12, -0.109], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.34, 0.025, 0.004], "position": [-0.08, 1.06, -0.109], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.42, 0.02, 0.14], "position": [-0.02, 0.77, 0.1], "couleur": "gris-clair" },
+        { "forme": "boite", "taille": [0.06, 0.025, 0.09], "position": [0.32, 0.772, 0.1], "couleur": "gris-clair" },
+        { "forme": "cylindre", "rayon": 0.04, "hauteur": 0.1, "position": [0.55, 0.81, -0.05], "couleur": "moutarde" },
+        { "forme": "cylindre", "rayon": 0.05, "rayonHaut": 0.06, "hauteur": 0.09, "position": [-0.58, 0.805, -0.1], "couleur": "pot" },
+        { "forme": "sphere", "rayon": 0.09, "position": [-0.58, 0.92, -0.1], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "chaise-bureau",
+      "nom": "Chaise de bureau",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.06, 0.04, 0.5], "position": [0, 0.05, 0], "couleur": "noir" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.36, "position": [0, 0.25, 0], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.44, 0.08, 0.42], "position": [0, 0.46, 0.01], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.42, 0.46, 0.07], "position": [0, 0.77, -0.19], "couleur": "anthracite", "rotation": [-8, 0, 0] }
+      ]
+    },
+    {
+      "id": "bibliotheque",
+      "nom": "Bibliothèque",
+      "designation": "la bibliothèque",
+      "description": "Des livres, des carnets, et quelques idées d'applications griffonnées dans les marges.",
+      "emprise": [3, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.04, 1.8, 0.42], "position": [-0.71, 0.9, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 1.8, 0.42], "position": [0.71, 0.9, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [1.46, 1.8, 0.02], "position": [0, 0.9, -0.2], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [1.38, 0.03, 0.4], "position": [0, 0.03, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [1.38, 0.03, 0.4], "position": [0, 0.47, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [1.38, 0.03, 0.4], "position": [0, 0.91, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [1.38, 0.03, 0.4], "position": [0, 1.35, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [1.46, 0.04, 0.42], "position": [0, 1.78, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.3, 0.32, 0.26], "position": [-0.5, 0.205, 0], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.16, 0.28, 0.26], "position": [-0.25, 0.185, 0], "couleur": "rouge" },
+        { "forme": "boite", "taille": [0.24, 0.36, 0.26], "position": [0.3, 0.225, 0], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [0.4, 0.3, 0.26], "position": [-0.42, 0.635, 0], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.2, 0.26, 0.26], "position": [0.05, 0.615, 0], "couleur": "lilas" },
+        { "forme": "boite", "taille": [0.2, 0.08, 0.2], "position": [0.45, 0.525, 0], "couleur": "turquoise" },
+        { "forme": "boite", "taille": [0.5, 0.3, 0.26], "position": [0.3, 1.075, 0], "couleur": "turquoise" },
+        { "forme": "boite", "taille": [0.2, 0.24, 0.26], "position": [-0.4, 1.045, 0], "couleur": "rose" },
+        { "forme": "boite", "taille": [0.34, 0.3, 0.26], "position": [-0.3, 1.515, 0], "couleur": "orange" },
+        { "forme": "cylindre", "rayon": 0.06, "rayonHaut": 0.07, "hauteur": 0.1, "position": [0.4, 1.415, 0], "couleur": "pot" },
+        { "forme": "sphere", "rayon": 0.1, "position": [0.4, 1.53, 0], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "plante",
+      "nom": "Plante",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.13, "rayonHaut": 0.17, "hauteur": 0.32, "position": [0, 0.16, 0], "couleur": "pot" },
+        { "forme": "cylindre", "rayon": 0.15, "hauteur": 0.02, "position": [0, 0.31, 0], "couleur": "terreau" },
+        { "forme": "sphere", "rayon": 0.26, "position": [0, 0.6, 0], "couleur": "feuille" },
+        { "forme": "sphere", "rayon": 0.18, "position": [0.1, 0.82, 0.06], "couleur": "feuille-claire" },
+        { "forme": "sphere", "rayon": 0.15, "position": [-0.12, 0.78, -0.05], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "lampe-sol",
+      "nom": "Lampadaire",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.16, "hauteur": 0.03, "position": [0, 0.015, 0], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.015, "hauteur": 1.38, "position": [0, 0.72, 0], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.22, "rayonHaut": 0.14, "hauteur": 0.26, "position": [0, 1.5, 0], "couleur": "abat-jour" }
+      ]
+    },
+    {
+      "id": "tapis",
+      "nom": "Tapis",
+      "emprise": [4, 3],
+      "bloque": false,
+      "formes": [
+        { "forme": "boite", "taille": [1.9, 0.012, 1.4], "position": [0, 0.006, 0], "couleur": "lilas" },
+        { "forme": "boite", "taille": [1.6, 0.014, 1.1], "position": [0, 0.007, 0], "couleur": "creme" },
+        { "forme": "boite", "taille": [1.3, 0.016, 0.8], "position": [0, 0.008, 0], "couleur": "lilas" }
+      ]
+    },
+    {
+      "id": "tapis-petit",
+      "nom": "Petit tapis",
+      "emprise": [3, 2],
+      "bloque": false,
+      "formes": [
+        { "forme": "boite", "taille": [1.4, 0.012, 0.9], "position": [0, 0.006, 0], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [1.1, 0.014, 0.6], "position": [0, 0.007, 0], "couleur": "creme" }
+      ]
+    },
+    {
+      "id": "porte-manteau",
+      "nom": "Porte-manteau",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.14, "hauteur": 0.03, "position": [0, 0.015, 0], "couleur": "bois-sombre" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 1.7, "position": [0, 0.865, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.34, 0.03, 0.03], "position": [0, 1.62, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.03, 0.03, 0.34], "position": [0, 1.58, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.3, 0.6, 0.12], "position": [0.08, 1.25, 0.08], "couleur": "bordeaux", "rotation": [0, 30, 0] },
+        { "forme": "boite", "taille": [0.2, 0.2, 0.2], "position": [-0.1, 1.5, -0.08], "couleur": "moutarde", "rotation": [0, 20, 0] }
+      ]
+    }
+  ]
+}

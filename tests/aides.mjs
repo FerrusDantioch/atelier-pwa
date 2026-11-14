@@ -50,3 +50,12 @@ export function fichiersDuServiceWorker() {
   if (!bloc) throw new Error('liste FICHIERS introuvable dans sw.js');
   return [...bloc[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 }
+
+// Charge toutes les données du jeu depuis le disque, avec les mêmes
+// vérifications qu'au démarrage du jeu (fichier par fichier, puis accord
+// entre les fichiers). Lève une erreur détaillée en cas de problème.
+export async function chargerDonneesDuDisque() {
+  chargerConfig();
+  const { chargerDonnees } = await import('../js/noyau/donnees.js');
+  return chargerDonnees(async (chemin) => lire(chemin));
+}

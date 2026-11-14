@@ -1,0 +1,95 @@
+{
+  "id": "domicile",
+  "nom": "Ton domicile",
+  "designation": "ton domicile",
+  "taille": [20, 16],
+  "hauteurMurs": 2.5,
+  "depart": { "x": 9, "z": 12, "angle": 0 },
+  "pieces": [
+    {
+      "id": "chambre", "nom": "Chambre", "designation": "la chambre",
+      "zones": [[0, 0, 8, 7]],
+      "sol": { "motif": "lames", "couleurs": ["parquet", "parquet-2"] }
+    },
+    {
+      "id": "salle-d-eau", "nom": "Salle d'eau", "designation": "la salle d'eau",
+      "zones": [[8, 0, 5, 7]],
+      "sol": { "motif": "damier", "couleurs": ["carrelage", "carrelage-2"] }
+    },
+    {
+      "id": "cuisine", "nom": "Cuisine", "designation": "la cuisine",
+      "zones": [[13, 0, 7, 7]],
+      "sol": { "motif": "damier", "couleurs": ["tomette", "tomette-2"] }
+    },
+    {
+      "id": "sejour", "nom": "Séjour", "designation": "le séjour",
+      "zones": [[0, 7, 20, 9]],
+      "sol": { "motif": "lames", "couleurs": ["parquet-clair", "parquet-clair-2"] }
+    }
+  ],
+  "murs": [
+    { "de": [0, 0], "a": [20, 0] },
+    { "de": [20, 0], "a": [20, 16] },
+    { "de": [0, 16], "a": [20, 16] },
+    { "de": [0, 0], "a": [0, 16] },
+    { "de": [8, 0], "a": [8, 7] },
+    { "de": [13, 0], "a": [13, 7] },
+    { "de": [0, 7], "a": [13, 7] }
+  ],
+  "ouvertures": [
+    { "type": "porte", "de": [5, 7], "a": [7, 7] },
+    { "type": "porte", "de": [9, 7], "a": [11, 7] },
+    { "type": "porte-entree", "de": [0, 12], "a": [0, 14] },
+    { "type": "fenetre", "de": [2, 0], "a": [5, 0] },
+    { "type": "fenetre", "de": [8, 0], "a": [10, 0] },
+    { "type": "fenetre", "de": [15, 0], "a": [18, 0] },
+    { "type": "fenetre", "de": [0, 2], "a": [0, 5] },
+    { "type": "fenetre", "de": [0, 8], "a": [0, 11] },
+    { "type": "fenetre", "de": [20, 3], "a": [20, 5] },
+    { "type": "fenetre", "de": [20, 7], "a": [20, 9] },
+    { "type": "fenetre", "de": [3, 16], "a": [6, 16] },
+    { "type": "fenetre", "de": [10, 16], "a": [13, 16] }
+  ],
+  "meubles": [
+    { "id": "lit", "meuble": "lit-double", "x": 2, "z": 0, "rotation": 0 },
+    { "id": "chevet-gauche", "meuble": "table-chevet", "x": 1, "z": 0, "rotation": 0 },
+    { "id": "chevet-droit", "meuble": "table-chevet", "x": 5, "z": 0, "rotation": 0 },
+    { "id": "armoire", "meuble": "armoire", "x": 7, "z": 0, "rotation": 270 },
+    { "id": "tapis-chambre", "meuble": "tapis-petit", "x": 2, "z": 4, "rotation": 0 },
+    { "id": "plante-chambre", "meuble": "plante", "x": 0, "z": 6, "rotation": 0 },
+
+    { "id": "lavabo", "meuble": "lavabo", "x": 8, "z": 0, "rotation": 0 },
+    { "id": "douche", "meuble": "douche-italienne", "x": 10, "z": 0, "rotation": 0 },
+    { "id": "wc", "meuble": "wc", "x": 8, "z": 5, "rotation": 90 },
+
+    { "id": "plaques", "meuble": "plaques", "x": 13, "z": 0, "rotation": 0 },
+    { "id": "evier", "meuble": "evier", "x": 15, "z": 0, "rotation": 0 },
+    { "id": "plan-travail", "meuble": "plan-travail", "x": 17, "z": 0, "rotation": 0 },
+    { "id": "frigo", "meuble": "frigo", "x": 19, "z": 0, "rotation": 270 },
+    { "id": "table-repas", "meuble": "table-repas", "x": 14, "z": 4, "rotation": 0 },
+    { "id": "chaise-1", "meuble": "chaise", "x": 14, "z": 6, "rotation": 180 },
+    { "id": "chaise-2", "meuble": "chaise", "x": 16, "z": 6, "rotation": 180 },
+
+    { "id": "bureau", "meuble": "bureau", "x": 0, "z": 8, "rotation": 90 },
+    { "id": "chaise-bureau", "meuble": "chaise-bureau", "x": 1, "z": 9, "rotation": 270 },
+    { "id": "bibliotheque", "meuble": "bibliotheque", "x": 2, "z": 7, "rotation": 0 },
+    { "id": "porte-manteau", "meuble": "porte-manteau", "x": 0, "z": 15, "rotation": 0 },
+    { "id": "tapis-sejour", "meuble": "tapis", "x": 16, "z": 10, "rotation": 90 },
+    { "id": "canape", "meuble": "canape", "x": 14, "z": 10, "rotation": 90 },
+    { "id": "table-basse", "meuble": "table-basse", "x": 17, "z": 11, "rotation": 90 },
+    { "id": "television", "meuble": "meuble-tv", "x": 19, "z": 10, "rotation": 270 },
+    { "id": "lampadaire", "meuble": "lampe-sol", "x": 14, "z": 9, "rotation": 0 },
+    { "id": "plante-sejour-1", "meuble": "plante", "x": 12, "z": 7, "rotation": 0 },
+    { "id": "plante-sejour-2", "meuble": "plante", "x": 19, "z": 15, "rotation": 0 },
+    { "id": "plante-sejour-3", "meuble": "plante", "x": 5, "z": 15, "rotation": 0 }
+  ],
+  "points": [
+    {
+      "id": "porte-entree",
+      "nom": "Porte d'entrée",
+      "designation": "la porte d'entrée",
+      "description": "La porte d'entrée, de plain-pied et assez large pour tout le monde. Pour l'instant, tout se passe ici.",
+      "x": 0, "z": 12, "angle": 270
+    }
+  ]
+}

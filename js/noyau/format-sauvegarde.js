@@ -15,7 +15,7 @@
 // =============================================================================
 
 export const FORMAT = 'atelier-pwa-partie';
-export const VERSION_FORMAT = 1;
+export const VERSION_FORMAT = 2;
 
 // Taille maximale d'un fichier importé (une partie fait quelques kilo-octets).
 export const TAILLE_MAXIMALE_IMPORT = 5 * 1024 * 1024;
@@ -27,7 +27,8 @@ export function heureEnMinutes(heure) {
 }
 
 // Une partie toute neuve, à partir des valeurs de départ de data/jeu.json.
-export function nouvellePartie({ graine, depart, versionJeu, maintenant = new Date() }) {
+// joueur : le personnage choisi (voir js/jeu/personnage.js).
+export function nouvellePartie({ graine, depart, versionJeu, joueur = null, maintenant = new Date() }) {
   const date = maintenant.toISOString();
   return {
     format: FORMAT,
@@ -36,8 +37,7 @@ export function nouvellePartie({ graine, depart, versionJeu, maintenant = new Da
     creeeLe: date,
     enregistreeLe: date,
     graine: graine >>> 0,
-    // Le personnage sera choisi au jalon 1 (écran de choix du personnage).
-    joueur: null,
+    joueur,
     temps: { jour: depart.jour, minute: heureEnMinutes(depart.heure) },
     argent: depart.argent,
     reputation: depart.reputation,
@@ -46,6 +46,9 @@ export function nouvellePartie({ graine, depart, versionJeu, maintenant = new Da
     possessions: [],
     lieux: { actuel: depart.lieu, debloques: [depart.lieu], amenagements: {} },
     drapeaux: {},
+    // La caméra : rotation (0 à 3, par quarts de tour) et zoom (en pixels
+    // par mètre ; null = zoom de départ adapté à l'écran).
+    vue: { rotation: 0, zoom: null },
   };
 }
 
@@ -54,6 +57,22 @@ export function nouvellePartie({ graine, depart, versionJeu, maintenant = new Da
 const estObjet = (valeur) => typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur);
 const estEntier = (valeur, min = 0) => Number.isInteger(valeur) && valeur >= min;
 const estListeDeTextes = (valeur) => Array.isArray(valeur) && valeur.every((v) => typeof v === 'string');
+const estNombre = (valeur) => typeof valeur === 'number' && Number.isFinite(valeur);
+
+// Le joueur : null (pas encore choisi) ou { modele, nom, apparence, position }.
+// Les valeurs de l'apparence sont vérifiées plus tard, à l'usage
+// (js/jeu/personnage.js remplace une valeur inconnue par celle par défaut).
+function joueurValide(joueur) {
+  if (joueur === null) return true;
+  if (!estObjet(joueur)) return false;
+  const position = joueur.position;
+  return ['ferrus', 'perso'].includes(joueur.modele)
+    && typeof joueur.nom === 'string' && joueur.nom.length <= 200
+    && (joueur.apparence === null || (estObjet(joueur.apparence)
+      && Object.values(joueur.apparence).every((valeur) => typeof valeur === 'string')))
+    && (position === null || (estObjet(position) && estEntier(position.x) && estEntier(position.z)
+      && estNombre(position.angle)));
+}
 
 // Renvoie la liste des problèmes (vide si la partie est bien formée).
 export function verifierPartie(partie) {
@@ -66,7 +85,7 @@ export function verifierPartie(partie) {
   exiger(typeof partie.creeeLe === 'string', 'creeeLe invalide');
   exiger(typeof partie.enregistreeLe === 'string', 'enregistreeLe invalide');
   exiger(estEntier(partie.graine), 'graine invalide');
-  exiger(partie.joueur === null || estObjet(partie.joueur), 'joueur invalide');
+  exiger(joueurValide(partie.joueur), 'joueur invalide');
   exiger(estObjet(partie.temps) && estEntier(partie.temps.jour, 1)
     && estEntier(partie.temps.minute) && partie.temps.minute < 24 * 60, 'temps invalide');
   exiger(estEntier(partie.argent), 'argent invalide');
@@ -80,13 +99,18 @@ export function verifierPartie(partie) {
   exiger(estObjet(partie.lieux) && typeof partie.lieux.actuel === 'string'
     && estListeDeTextes(partie.lieux.debloques) && estObjet(partie.lieux.amenagements), 'lieux invalides');
   exiger(estObjet(partie.drapeaux), 'drapeaux invalides');
+  exiger(estObjet(partie.vue) && estEntier(partie.vue.rotation) && partie.vue.rotation <= 3
+    && (partie.vue.zoom === null || (estNombre(partie.vue.zoom) && partie.vue.zoom > 0)), 'vue invalide');
   return problemes;
 }
 
 // --- Mise à niveau des anciennes parties -----------------------------------
 // MIGRATIONS[n] transforme une partie au format n en partie au format n + 1.
-// (Aucune pour l'instant : le format 1 est le premier.)
-const MIGRATIONS = {};
+const MIGRATIONS = {
+  // Format 1 (jalon 0) → 2 (jalon 1) : la caméra est gardée dans la partie.
+  // Le joueur restait à null au jalon 0 : il sera choisi en reprenant la partie.
+  1: (partie) => ({ ...partie, vue: { rotation: 0, zoom: null } }),
+};
 
 export class ErreurSauvegarde extends Error {
   // code : clé du message à afficher (data/textes.json › sauvegarde.erreurs)

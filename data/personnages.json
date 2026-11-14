@@ -1,0 +1,152 @@
+{
+  "ferrus": {
+    "nom": "Ferrus",
+    "nomComplet": "Ferrus Dantioch",
+    "presentation": "Ferrus Dantioch a imaginé ce jeu et crée de vraies applications web pour faciliter la vie des autres.",
+    "apparenceProvisoire": true,
+    "aValider": "TODO_FERRUS : apparence et présentation à valider par Ferrus. En attendant, apparence neutre (teint « neutre », sans cheveux).",
+    "apparence": {
+      "teint": "neutre",
+      "silhouette": "moyenne",
+      "taille": "moyenne",
+      "coiffure": "aucune",
+      "cheveux": "noir",
+      "barbe": "aucune",
+      "lunettes": "aucune",
+      "haut": "violet",
+      "styleBas": "pantalon",
+      "bas": "gris",
+      "couvreChef": "aucun",
+      "couleurCouvreChef": "violet",
+      "aide": "aucune",
+      "couleurAide": "noir"
+    }
+  },
+  "prenomsProposes": [
+    "Camille", "Alex", "Sacha", "Charlie", "Lou", "Noa", "Andréa", "Eden",
+    "Maxime", "Morgan", "Nour", "Yaël", "Kiran", "Ayo", "Sam", "Jo"
+  ],
+  "defaut": {
+    "teint": "mat",
+    "silhouette": "moyenne",
+    "taille": "moyenne",
+    "coiffure": "courte",
+    "cheveux": "brun",
+    "barbe": "aucune",
+    "lunettes": "aucune",
+    "haut": "turquoise",
+    "styleBas": "pantalon",
+    "bas": "jean",
+    "couvreChef": "aucun",
+    "couleurCouvreChef": "moutarde",
+    "aide": "aucune",
+    "couleurAide": "rouge"
+  },
+  "options": {
+    "teint": [
+      { "id": "tres-clair", "nom": "Très clair", "couleur": "peau-1" },
+      { "id": "clair", "nom": "Clair", "couleur": "peau-2" },
+      { "id": "mat", "nom": "Mat", "couleur": "peau-3" },
+      { "id": "brun", "nom": "Brun", "couleur": "peau-4" },
+      { "id": "fonce", "nom": "Foncé", "couleur": "peau-5" },
+      { "id": "tres-fonce", "nom": "Très foncé", "couleur": "peau-6" },
+      { "id": "neutre", "nom": "Neutre (lilas)", "couleur": "peau-neutre" }
+    ],
+    "silhouette": [
+      { "id": "fine", "nom": "Fine" },
+      { "id": "moyenne", "nom": "Moyenne" },
+      { "id": "large", "nom": "Large" }
+    ],
+    "taille": [
+      { "id": "petite", "nom": "Petite" },
+      { "id": "moyenne", "nom": "Moyenne" },
+      { "id": "grande", "nom": "Grande" }
+    ],
+    "coiffure": [
+      { "id": "aucune", "nom": "Sans cheveux" },
+      { "id": "rasee", "nom": "Rasée" },
+      { "id": "courte", "nom": "Courte" },
+      { "id": "mi-longue", "nom": "Mi-longue" },
+      { "id": "longue", "nom": "Longue" },
+      { "id": "chignon", "nom": "Chignon" },
+      { "id": "boucles", "nom": "Boucles" }
+    ],
+    "cheveux": [
+      { "id": "noir", "nom": "Noir", "couleur": "cheveux-noir" },
+      { "id": "brun", "nom": "Brun", "couleur": "cheveux-brun" },
+      { "id": "chatain", "nom": "Châtain", "couleur": "cheveux-chatain" },
+      { "id": "roux", "nom": "Roux", "couleur": "cheveux-roux" },
+      { "id": "blond", "nom": "Blond", "couleur": "cheveux-blond" },
+      { "id": "gris", "nom": "Gris", "couleur": "cheveux-gris" },
+      { "id": "blanc", "nom": "Blanc", "couleur": "cheveux-blanc" },
+      { "id": "bleu", "nom": "Bleu", "couleur": "cheveux-bleu" },
+      { "id": "violet", "nom": "Violet", "couleur": "cheveux-violet" },
+      { "id": "rose", "nom": "Rose", "couleur": "cheveux-rose" }
+    ],
+    "barbe": [
+      { "id": "aucune", "nom": "Aucune" },
+      { "id": "courte", "nom": "Courte" },
+      { "id": "longue", "nom": "Longue" }
+    ],
+    "lunettes": [
+      { "id": "aucune", "nom": "Sans lunettes" },
+      { "id": "rondes", "nom": "Rondes" },
+      { "id": "carrees", "nom": "Carrées" }
+    ],
+    "haut": [
+      { "id": "turquoise", "nom": "Turquoise", "couleur": "turquoise" },
+      { "id": "bleu", "nom": "Bleu", "couleur": "bleu" },
+      { "id": "violet", "nom": "Violet", "couleur": "violet" },
+      { "id": "rose", "nom": "Rose", "couleur": "rose" },
+      { "id": "rouge", "nom": "Rouge", "couleur": "rouge" },
+      { "id": "orange", "nom": "Orange", "couleur": "orange" },
+      { "id": "moutarde", "nom": "Moutarde", "couleur": "moutarde" },
+      { "id": "vert", "nom": "Vert", "couleur": "vert" },
+      { "id": "blanc", "nom": "Blanc", "couleur": "blanc" },
+      { "id": "noir", "nom": "Noir", "couleur": "noir" }
+    ],
+    "styleBas": [
+      { "id": "pantalon", "nom": "Pantalon" },
+      { "id": "jupe", "nom": "Jupe" },
+      { "id": "short", "nom": "Short" }
+    ],
+    "bas": [
+      { "id": "jean", "nom": "Jean", "couleur": "jean" },
+      { "id": "noir", "nom": "Noir", "couleur": "noir" },
+      { "id": "gris", "nom": "Gris", "couleur": "gris" },
+      { "id": "beige", "nom": "Beige", "couleur": "beige" },
+      { "id": "kaki", "nom": "Kaki", "couleur": "kaki" },
+      { "id": "marine", "nom": "Bleu marine", "couleur": "marine" },
+      { "id": "bordeaux", "nom": "Bordeaux", "couleur": "bordeaux" }
+    ],
+    "couvreChef": [
+      { "id": "aucun", "nom": "Aucun" },
+      { "id": "bonnet", "nom": "Bonnet" },
+      { "id": "casquette", "nom": "Casquette" },
+      { "id": "foulard", "nom": "Foulard" }
+    ],
+    "couleurCouvreChef": [
+      { "id": "moutarde", "nom": "Moutarde", "couleur": "moutarde" },
+      { "id": "rouge", "nom": "Rouge", "couleur": "rouge" },
+      { "id": "bleu", "nom": "Bleu", "couleur": "bleu" },
+      { "id": "vert", "nom": "Vert", "couleur": "vert" },
+      { "id": "violet", "nom": "Violet", "couleur": "violet" },
+      { "id": "rose", "nom": "Rose", "couleur": "rose" },
+      { "id": "noir", "nom": "Noir", "couleur": "noir" },
+      { "id": "blanc", "nom": "Blanc", "couleur": "blanc" }
+    ],
+    "aide": [
+      { "id": "aucune", "nom": "Aucune" },
+      { "id": "fauteuil", "nom": "Fauteuil roulant" },
+      { "id": "canne", "nom": "Canne" }
+    ],
+    "couleurAide": [
+      { "id": "rouge", "nom": "Rouge", "couleur": "rouge" },
+      { "id": "bleu", "nom": "Bleu", "couleur": "bleu" },
+      { "id": "violet", "nom": "Violet", "couleur": "violet" },
+      { "id": "vert", "nom": "Vert", "couleur": "vert" },
+      { "id": "noir", "nom": "Noir", "couleur": "noir" },
+      { "id": "argent", "nom": "Argent", "couleur": "metal" }
+    ]
+  }
+}

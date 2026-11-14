@@ -91,3 +91,31 @@ test('résumé d\'une partie', () => {
   assert.equal(resume.argent, jeu.depart.argent);
   assert.equal(resume.nomJoueur, null);
 });
+
+test('une partie du jalon 0 (format 1) est mise à niveau', () => {
+  const ancienne = creer();
+  delete ancienne.vue;
+  ancienne.versionFormat = 1;
+  const lecture = lireFichierPartie(JSON.stringify(ancienne));
+  assert.equal(lecture.ok, true, lecture.details);
+  assert.equal(lecture.partie.versionFormat, VERSION_FORMAT);
+  assert.deepEqual(lecture.partie.vue, { rotation: 0, zoom: null });
+  assert.equal(lecture.partie.joueur, null, 'le personnage sera choisi en reprenant la partie');
+});
+
+test('le joueur et la vue sont vérifiés', () => {
+  const partie = creer();
+  partie.joueur = { modele: 'perso', nom: 'Camille', apparence: { teint: 'mat' }, position: { x: 3, z: 4, angle: 90 } };
+  partie.vue = { rotation: 2, zoom: 80 };
+  assert.deepEqual(verifierPartie(partie), []);
+  assert.equal(resumerPartie(partie).nomJoueur, 'Camille');
+  partie.joueur = { modele: 'pirate', nom: 'X', apparence: null, position: null };
+  assert.match(verifierPartie(partie).join(), /joueur invalide/);
+  partie.joueur = { modele: 'perso', nom: 'X', apparence: { teint: { piege: true } }, position: null };
+  assert.match(verifierPartie(partie).join(), /joueur invalide/);
+  partie.joueur = { modele: 'ferrus', nom: 'Ferrus', apparence: null, position: { x: -1, z: 0, angle: 0 } };
+  assert.match(verifierPartie(partie).join(), /joueur invalide/);
+  partie.joueur = null;
+  partie.vue = { rotation: 7, zoom: null };
+  assert.match(verifierPartie(partie).join(), /vue invalide/);
+});

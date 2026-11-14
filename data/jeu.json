@@ -22,5 +22,8 @@
   "sauvegarde": {
     "intervalleSecondes": 30,
     "copiesDeSecours": 5
+  },
+  "deplacement": {
+    "vitesse": 1.8
   }
 }

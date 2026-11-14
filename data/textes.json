@@ -54,19 +54,124 @@
     "journalBientot": "Le journal des quêtes arrivera avec les premières quêtes.",
     "pause": "Pause",
     "jour": "Jour {jour}",
-    "niveau": "Niveau {niveau} · {nom}"
+    "jourCourt": "J{jour}",
+    "niveau": "Niveau {niveau} · {nom}",
+    "niveauCourt": "Niv. {niveau}"
   },
-  "provisoire": {
-    "titre": "Bientôt : ton domicile en 3D",
-    "texte": "Cette première étape pose les fondations : les réglages de confort, la sauvegarde et le fonctionnement hors ligne. La scène 3D arrive à l'étape suivante.",
-    "testsExplication": "Pour vérifier la sauvegarde, ces deux boutons de test modifient ta partie. Ils disparaîtront à l'étape suivante.",
-    "gagner": "Gagner 10 pièces (test)",
-    "jourSuivant": "Passer au jour suivant (test)"
+  "jeu": {
+    "zoneMonde": "Scène du jeu",
+    "allerA": "Aller à…",
+    "allerATitre": "Aller à…",
+    "allerAAide": "Choisis une pièce ou un objet : ton personnage s'y rend tout seul.",
+    "allerDans": "Aller dans {piece}",
+    "tuEsIci": "tu es ici",
+    "enRoute": "En route vers {destination}.",
+    "examiner": "Examiner {objet}",
+    "toucheAgir": "Entrée",
+    "lieuActuel": "Tu es dans :",
+    "dansPiece": "Tu es dans {piece}.",
+    "arriveDevant": "Devant {objet}.",
+    "rienAProximite": "Rien à examiner ici : approche-toi d'un meuble.",
+    "inaccessible": "Impossible de t'approcher de {objet} pour l'instant.",
+    "camera": {
+      "titre": "Caméra",
+      "tournerGauche": "Tourner la vue vers la gauche",
+      "tournerDroite": "Tourner la vue vers la droite",
+      "toucheGauche": "touche A",
+      "toucheDroite": "touche E",
+      "eloigner": "Éloigner la vue",
+      "rapprocher": "Rapprocher la vue",
+      "recentrer": "Recentrer la vue",
+      "toucheRecentrer": "touche C"
+    }
+  },
+  "choixPerso": {
+    "titre": "Qui veux-tu incarner ?",
+    "titreModification": "Ton personnage",
+    "intro": "Tu pourras changer d'avis à tout moment, depuis le menu Pause.",
+    "modeleLegende": "Personnage",
+    "ferrusProvisoire": "Apparence provisoire, en attendant que Ferrus la décrive.",
+    "persoTitre": "Ton personnage",
+    "persoTexte": "Choisis ton prénom et ton apparence.",
+    "prenom": "Prénom",
+    "autrePrenom": "Un autre prénom",
+    "prenomPropose": "Prénom proposé : {prenom}.",
+    "prenomVide": "Écris un prénom, ou garde celui qui est proposé.",
+    "toutAuHasard": "Tout au hasard",
+    "hasardFait": "Nouvelle apparence tirée au hasard.",
+    "aideMobilite": "Facultative, elle ne change rien à la partie : tout le jeu est accessible, avec ou sans aide.",
+    "commencer": "C'est parti !",
+    "enregistrer": "Enregistrer",
+    "retour": "Retour",
+    "enregistre": "Ton personnage est enregistré.",
+    "tournerApercu": "Tourner l'aperçu",
+    "tournerGauche": "Tourner l'aperçu vers la gauche",
+    "tournerDroite": "Tourner l'aperçu vers la droite",
+    "sections": {
+      "visage": "Visage",
+      "cheveux": "Cheveux",
+      "silhouette": "Silhouette",
+      "tenue": "Tenue",
+      "aide": "Aide à la mobilité"
+    },
+    "champs": {
+      "teint": "Teint",
+      "lunettes": "Lunettes",
+      "coiffure": "Coiffure",
+      "cheveux": "Couleur des cheveux",
+      "barbe": "Barbe",
+      "silhouette": "Silhouette",
+      "taille": "Taille",
+      "haut": "Haut",
+      "styleBas": "Bas",
+      "bas": "Couleur du bas",
+      "couvreChef": "Couvre-chef",
+      "couleurCouvreChef": "Couleur du couvre-chef",
+      "aide": "Aide",
+      "couleurAide": "Couleur de l'aide"
+    }
+  },
+  "commandes": {
+    "titre": "Commandes",
+    "intro": "Tout se fait aussi avec les boutons à l'écran : aucun geste n'est obligatoire.",
+    "toucherTitre": "Au doigt",
+    "toucher": {
+      "aller": { "geste": "Toucher le sol", "effet": "aller à cet endroit" },
+      "objet": { "geste": "Toucher un meuble", "effet": "s'en approcher, puis « Examiner »" },
+      "glisser": { "geste": "Glisser un doigt", "effet": "déplacer la vue" },
+      "pincer": { "geste": "Pincer à deux doigts", "effet": "rapprocher ou éloigner la vue" }
+    },
+    "sourisTitre": "À la souris",
+    "souris": {
+      "clic": { "geste": "Clic sur le sol ou un meuble", "effet": "y aller" },
+      "glisser": { "geste": "Glisser, bouton enfoncé", "effet": "déplacer la vue" },
+      "molette": { "geste": "Molette", "effet": "rapprocher ou éloigner la vue" }
+    },
+    "clavierTitre": "Au clavier",
+    "clavierAide": "Touches d'un clavier AZERTY. Sur un clavier QWERTY, les touches aux mêmes places marchent aussi (W A S D, Q et E).",
+    "clavier": {
+      "deplacer": { "geste": "Z Q S D ou flèches", "effet": "se déplacer" },
+      "tourner": { "geste": "A et E", "effet": "tourner la vue" },
+      "zoom": { "geste": "+ et −", "effet": "rapprocher ou éloigner la vue" },
+      "recentrer": { "geste": "C", "effet": "recentrer la vue" },
+      "agir": { "geste": "Entrée ou Espace", "effet": "examiner l'objet proche" },
+      "naviguer": { "geste": "Tab", "effet": "passer d'un bouton à l'autre" },
+      "pause": { "geste": "Échap", "effet": "pause, ou fermer une fenêtre" }
+    }
+  },
+  "troisD": {
+    "perdue": "La 3D s'est interrompue. Elle revient d'habitude toute seule ; sinon, recharge le jeu : ta partie est sauvegardée.",
+    "retrouvee": "La 3D est revenue.",
+    "indisponibleTitre": "La 3D ne peut pas s'afficher",
+    "indisponible": "Cet appareil ou ce navigateur ne permet pas d'afficher la scène en 3D.",
+    "conseil": "Essaie de mettre le navigateur à jour, ou d'activer l'« accélération matérielle » dans ses réglages. Ta partie reste enregistrée."
   },
   "pause": {
     "titre": "Pause",
     "explication": "Le jeu est en pause : rien ne se passe tant que ce menu est ouvert.",
     "reprendre": "Reprendre",
+    "personnage": "Ton personnage",
+    "commandes": "Commandes",
     "reglages": "Réglages",
     "sauvegarde": "Sauvegarde",
     "aPropos": "À propos",
@@ -78,6 +183,7 @@
     "sections": {
       "affichage": "Affichage",
       "mouvement": "Mouvements",
+      "scene": "Scène 3D",
       "son": "Son",
       "couleurs": "Couleurs",
       "retablir": "Réglages par défaut"
@@ -115,6 +221,16 @@
       "titre": "Mode calme",
       "aide": "Pas d'événements imprévus et moins de mouvements dans le décor. Les nouveautés arrivent sans bruit.",
       "valeurs": { "false": "Désactivé", "true": "Activé" }
+    },
+    "luminosite": {
+      "titre": "Luminosité de la scène",
+      "aide": "Éclaire plus ou moins la maison et les personnages.",
+      "valeurs": { "normale": "Normale", "douce": "Douce", "vive": "Vive" }
+    },
+    "qualite": {
+      "titre": "Qualité graphique",
+      "aide": "« Économie » ménage la batterie et les appareils modestes ; « Haute » dessine des bords plus nets.",
+      "valeurs": { "standard": "Standard", "economie": "Économie", "haute": "Haute" }
     },
     "sonCoupe": {
       "titre": "Son",
@@ -169,6 +285,7 @@
     "reparee": "Ta sauvegarde était abîmée : la copie de secours du {date} a été reprise.",
     "perdue": "Ta sauvegarde était abîmée et aucune copie de secours n'était lisible. Elle a été mise de côté ; tu peux commencer une nouvelle partie.",
     "resume": {
+      "personnage": "Personnage",
       "moment": "Moment",
       "argent": "Argent",
       "reputation": "Réputation",
