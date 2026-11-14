@@ -118,6 +118,20 @@ export async function jourSuivant(page) {
   });
 }
 
+// Règle l'heure de la partie (minutes depuis minuit). Les personnages
+// réagissent à la minute suivante, quand l'horloge avance.
+export async function definirHeure(page, minute) {
+  await page.evaluate(async (m) => {
+    const etat = await import('/js/noyau/etat.js');
+    etat.modifierPartie((partie) => { partie.temps.minute = m; });
+  }, minute);
+}
+
+// Les personnages non joueurs présents dans le lieu ([{ id, case, piece }]).
+export async function habitantsPresents(page) {
+  return page.evaluate(async () => (await import('/js/interface/ecran-jeu.js')).mondeAffiche().habitantsPresents);
+}
+
 // La partie en cours (copie), lue dans le jeu.
 export async function lirePartieEnCours(page) {
   return page.evaluate(async () => {

@@ -168,7 +168,7 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
       ),
     });
   }
-  for (const point of lieu.points || []) {
+  for (const point of (lieu.points || []).filter((p) => p.description)) {
     const angle = point.angle * Math.PI / 180;
     const boite = new Box3(
       new Vector3(point.x * TAILLE_CASE, 0, point.z * TAILLE_CASE),

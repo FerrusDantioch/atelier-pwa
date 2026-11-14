@@ -441,6 +441,31 @@
   width: 100%;
 }
 
+/* Le bouton d'action change d'icône (examiner, parler). */
+.icone-action {
+  display: inline-flex;
+}
+
+/* Fenêtre de dialogue : les répliques se suivent, celles du joueur en retrait. */
+.dialogue-fil {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.replique {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--surface-2);
+}
+
+.replique-joueur {
+  margin-left: 1.5rem;
+  border-left-color: var(--bordure);
+}
+
 /* Fenêtre « Aller à… » : une section par pièce. */
 .groupe-destinations h3 {
   display: flex;

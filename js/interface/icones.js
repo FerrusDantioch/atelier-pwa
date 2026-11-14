@@ -64,6 +64,8 @@ const DESSINS = {
     ['circle', { cx: 9, cy: 15, r: 1.3, fill: 'currentColor' }],
   ],
   lieu: [['path', { d: 'M4 11l8-7 8 7M6 9.5V20h12V9.5' }], ['path', { d: 'M10 20v-5h4v5' }]],
+  lune: [['path', { d: 'M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z' }]],
+  parler: [['path', { d: 'M4 5.5h16v10H10l-4.5 3.5v-3.5H4z' }], ['path', { d: 'M8 9.5h8M8 12.5h5' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

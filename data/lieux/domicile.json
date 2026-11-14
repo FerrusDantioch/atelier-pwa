@@ -81,7 +81,15 @@
     { "id": "lampadaire", "meuble": "lampe-sol", "x": 14, "z": 9, "rotation": 0 },
     { "id": "plante-sejour-1", "meuble": "plante", "x": 12, "z": 7, "rotation": 0 },
     { "id": "plante-sejour-2", "meuble": "plante", "x": 19, "z": 15, "rotation": 0 },
-    { "id": "plante-sejour-3", "meuble": "plante", "x": 5, "z": 15, "rotation": 0 }
+    { "id": "plante-sejour-3", "meuble": "plante", "x": 5, "z": 15, "rotation": 0 },
+    {
+      "id": "coin-tournage", "meuble": "coin-tournage", "x": 6, "z": 15, "rotation": 180,
+      "description": "Le coin tournage d'Halaé : une caméra sur son trépied et une lampe en anneau. Silence, ça tourne !"
+    },
+    {
+      "id": "bureau-montage", "meuble": "bureau-montage", "x": 10, "z": 15, "rotation": 180,
+      "description": "Le bureau de montage d'Halaé : un ordinateur portable, un casque, et beaucoup de patience."
+    }
   ],
   "points": [
     {
@@ -90,6 +98,13 @@
       "designation": "la porte d'entrée",
       "description": "La porte d'entrée, de plain-pied et assez large pour tout le monde. Pour l'instant, tout se passe ici.",
       "x": 0, "z": 12, "angle": 270
-    }
+    },
+    { "id": "table-cuisine", "x": 15, "z": 3, "angle": 0 },
+    { "id": "table-cuisine-est", "x": 17, "z": 4, "angle": 270 },
+    { "id": "montage", "x": 10, "z": 14, "angle": 0 },
+    { "id": "tournage", "x": 6, "z": 13, "angle": 0 },
+    { "id": "devant-television", "x": 16, "z": 13, "angle": 90 },
+    { "id": "chambre-repos", "x": 5, "z": 2, "angle": 270 },
+    { "id": "pres-du-bureau", "x": 2, "z": 10, "angle": 270 }
   ]
 }

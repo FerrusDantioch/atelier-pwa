@@ -181,3 +181,18 @@ test('une couleur ou une option de personnage inconnue est signalée', () => {
   assert.match(problemes, /options › coiffure : « crete » n'est pas une forme connue du jeu/);
   assert.match(problemes, /defaut › teint : « vert-pomme » n'existe pas/);
 });
+
+test('les places des personnages sont atteignables avec LEUR façon de se déplacer', () => {
+  // Halaé (fauteuil roulant) ne peut pas aller dans le recoin d'une case
+  // entre le mur et la table de la cuisine.
+  const pnj = structuredClone(donnees.pnj);
+  const lieu = structuredClone(donnees.lieux.domicile);
+  lieu.points.push({ id: 'recoin', x: 13, z: 5, angle: 90 });
+  pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'recoin';
+  const problemes = verifierCoherence({ ...donnees, pnj, lieux: { domicile: lieu } }).join('\n');
+  assert.match(problemes, /pnj › halae › routine › n°1 : le point « recoin » n'est pas atteignable en fauteuil roulant/);
+  // Théo, à pied, y arriverait.
+  pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'table-cuisine';
+  pnj.pnj.find((p) => p.id === 'theo').routine[0].point = 'recoin';
+  assert.deepEqual(verifierCoherence({ ...donnees, pnj, lieux: { domicile: lieu } }), []);
+});

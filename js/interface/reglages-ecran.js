@@ -124,6 +124,7 @@ function contenuReglages({ surRetablis }) {
       groupeDeChoix('animations'),
       groupeDeChoix('modeCalme'),
     ]),
+    section('rythme', [groupeDeChoix('vitesseTemps')]),
     section('scene', [
       groupeDeChoix('luminosite'),
       groupeDeChoix('qualite'),

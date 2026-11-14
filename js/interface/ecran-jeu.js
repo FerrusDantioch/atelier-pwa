@@ -17,12 +17,16 @@
 // de l'écran.
 // =============================================================================
 
+import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
-import { niveauDeReputation } from '../noyau/format-sauvegarde.js';
+import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
-import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel } from '../noyau/textes.js';
+import { obtenirReglages } from '../noyau/reglages.js';
+import { creerCopieDeSecours } from '../noyau/sauvegarde.js';
+import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
+import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
-import { fenetreOuverte, ouvrirFenetre } from './fenetres.js';
+import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
 import { direAuxLecteurs, notifier } from './notifications.js';
 
@@ -31,9 +35,6 @@ let mondeActuel = null;
 export function mondeAffiche() {
   return mondeActuel;
 }
-
-// Première lettre en majuscule (« le lit » → « Le lit »).
-const majuscule = (texte) => (texte ? texte[0].toLocaleUpperCase('fr-FR') + texte.slice(1) : texte);
 
 function indicateur(nomIcone, libelle) {
   const valeur = el('span', { class: 'libelle-long' });
@@ -105,20 +106,29 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     onClick: () => ouvrirAllerA(),
   }, icone('allerA'), t('jeu.allerA'));
 
+  // L'action du moment : « Examiner le lit » ou « Parler à Halaé » (Entrée),
+  // et parfois une action en plus (« Dormir » près du lit).
   const texteAction = el('span', {});
+  const iconeAction = el('span', { class: 'icone-action' }, icone('examiner'));
   const boutonAction = el('button', {
     class: 'bouton bouton-principal bouton-action',
     type: 'button',
     hidden: true,
-    onClick: () => examiner(),
-  }, icone('examiner'), texteAction, el('kbd', { class: 'raccourci', 'aria-hidden': 'true' }, t('jeu.toucheAgir')));
+    onClick: () => agir(),
+  }, iconeAction, texteAction, el('kbd', { class: 'raccourci', 'aria-hidden': 'true' }, t('jeu.toucheAgir')));
+  const boutonDormir = el('button', {
+    class: 'bouton',
+    type: 'button',
+    hidden: true,
+    onClick: () => dormir(),
+  }, icone('lune'), t('actions.dormir'));
 
   const texteLieu = el('span', {});
   const lieuActuel = el('p', { class: 'lieu-actuel' },
     icone('lieu'), el('span', { class: 'visuellement-cache' }, t('jeu.lieuActuel')), texteLieu);
 
   const barreBas = el('footer', { class: 'barre-bas' },
-    el('div', { class: 'barre-zone' }, boutonAllerA, boutonAction),
+    el('div', { class: 'barre-zone' }, boutonAllerA, boutonAction, boutonDormir),
     lieuActuel);
 
   const camera = el('div', { class: 'commandes-camera', role: 'group', 'aria-label': t('jeu.camera.titre') },
@@ -152,11 +162,48 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
       direAuxLecteurs(t('jeu.rienAProximite'));
       return;
     }
+    const description = typographier(infos.description || '');
     bulleTitre.textContent = infos.nom;
-    bulleTexte.textContent = infos.description || '';
+    bulleTexte.textContent = description;
     bulle.hidden = false;
     element.classList.add('bulle-ouverte');
-    direAuxLecteurs(`${infos.nom}. ${infos.description || ''}`);
+    direAuxLecteurs(`${infos.nom}. ${description}`);
+  }
+
+  // Parler à un personnage : il s'arrête, la fenêtre de dialogue s'ouvre (et
+  // le temps s'arrête tant qu'elle est ouverte).
+  function parler(id) {
+    const infos = mondeActuel?.parler(id);
+    if (!infos) return;
+    fermerBulle();
+    ouvrirDialogue({ infos, pnj: infos.pnj, creneau: infos.creneau, surFermeture: () => mondeActuel?.finParler(id) });
+  }
+
+  function agir() {
+    if (objetProche?.type === 'pnj') parler(objetProche.id);
+    else examiner();
+  }
+
+  // Dormir : la journée suivante commence au matin (avec une copie de
+  // secours de la partie, comme à chaque nouveau jour).
+  async function dormir() {
+    const accord = await confirmer({
+      titre: t('temps.dormirTitre'),
+      message: [
+        t('temps.dormirMessage', { heure: formaterHeure(heureEnMinutes(jeu.temps.debutJournee)) }),
+        t('temps.dormirCopie'),
+      ],
+      oui: t('temps.dormirOui'),
+    });
+    if (!accord || !partieEnCours()) return;
+    fermerBulle();
+    await creerCopieDeSecours(partieEnCours(), 'nouveau-jour');
+    modifierPartie((partie) => { partie.temps = lendemain(partie.temps, jeu.temps); }, { important: true });
+    horloge.reste = 0;
+    horloge.tardAnnonce = false;
+    const temps = partieEnCours().temps;
+    mondeActuel?.nouvelleJournee(temps.minute);
+    notifier(t('temps.bonjour', { jour: temps.jour }), { type: 'succes' });
   }
 
   const rappels = {
@@ -168,13 +215,21 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
     surObjetProche(infos) {
       objetProche = infos;
       if (infos) {
-        texteAction.textContent = t('jeu.examiner', { objet: infos.designation });
+        const personne = infos.type === 'pnj';
+        texteAction.textContent = personne ? t('dialogue.parler', { nom: infos.nom }) : t('jeu.examiner', { objet: infos.designation });
+        iconeAction.replaceChildren(icone(personne ? 'parler' : 'examiner'));
         boutonAction.hidden = false;
+        boutonDormir.hidden = !infos.actions?.includes('dormir');
       } else {
-        if (boutonAction === document.activeElement) boutonAction.blur();
-        boutonAction.hidden = true;
+        for (const bouton of [boutonAction, boutonDormir]) {
+          if (bouton === document.activeElement) bouton.blur();
+          bouton.hidden = true;
+        }
         fermerBulle();
       }
+    },
+    surVisite(evenement) {
+      direAuxLecteurs(t(evenement.type === 'arrive' ? 'pnj.arrive' : 'pnj.part', { nom: evenement.nom }));
     },
     surArrivee(infos) {
       if (infos) direAuxLecteurs(t('jeu.arriveDevant', { objet: infos.designation }));
@@ -191,7 +246,7 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
       notifier(t('jeu.inaccessible', { objet: infos.designation }), { type: 'attention' });
     },
     surAgir() {
-      if (objetProche) examiner();
+      if (objetProche) agir();
       else direAuxLecteurs(t('jeu.rienAProximite'));
     },
   };
@@ -214,8 +269,10 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
         direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
       }
     };
+    const nomDePiece = (id) => pieces.find((p) => p.id === id)?.nom || '';
+    const personnes = destinations.filter((d) => d.type === 'pnj');
     const contenu = pieces.map((piece) => {
-      const objets = destinations.filter((d) => d.type !== 'piece' && d.piece === piece.id);
+      const objets = destinations.filter((d) => d.type !== 'piece' && d.type !== 'pnj' && d.piece === piece.id);
       return el('section', { class: 'groupe-destinations' },
         el('h3', {}, piece.nom, piece.id === ici ? el('span', { class: 'etiquette' }, t('jeu.tuEsIci')) : null),
         el('ul', { class: 'liste-destinations' },
@@ -224,12 +281,45 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
           objets.map((objet) => el('li', {}, el('button', { class: 'bouton', type: 'button', onClick: () => aller(objet) },
             icone('allerA'), objet.nom)))));
     });
+    if (personnes.length > 0) {
+      contenu.unshift(el('section', { class: 'groupe-destinations' },
+        el('h3', {}, t('jeu.personnes')),
+        el('ul', { class: 'liste-destinations' }, personnes.map((personne) => el('li', {},
+          el('button', { class: 'bouton', type: 'button', onClick: () => aller(personne) },
+            icone('personnage'), t('jeu.personneOu', { nom: personne.nom, piece: nomDePiece(personne.piece) })))))));
+    }
     fenetre = ouvrirFenetre({
       titre: t('jeu.allerATitre'),
       contenu: [el('p', { class: 'aide' }, t('jeu.allerAAide')), ...contenu],
       large: true,
     });
   }
+
+  // --- L'horloge ---------------------------------------------------------------------
+  // Le temps passe pendant qu'on joue ; il s'arrête dès qu'une fenêtre est
+  // ouverte (Pause, dialogue…), quand le jeu est en arrière-plan, et à la fin
+  // de la journée (rien ne presse : on va dormir quand on veut).
+  const { fin } = bornesDeLaJournee(jeu.temps);
+  const horloge = { reste: 0, derniereMesure: performance.now(), tardAnnonce: false, minuteur: null };
+  function tic() {
+    const maintenant = performance.now();
+    const secondes = Math.min(1, (maintenant - horloge.derniereMesure) / 1000);
+    horloge.derniereMesure = maintenant;
+    const partie = partieEnCours();
+    if (!partie || !ecranActif || fenetreOuverte() || document.hidden) return;
+    const vitesse = (VITESSES[obtenirReglages().vitesseTemps] ?? 1) * jeu.temps.minutesParSeconde;
+    const resultat = avancerHorloge({ minute: partie.temps.minute, reste: horloge.reste, secondes, vitesse, fin });
+    horloge.reste = resultat.reste;
+    if (resultat.minute !== partie.temps.minute) {
+      modifierPartie((p) => { p.temps.minute = resultat.minute; });
+      mondeActuel?.definirHeure(resultat.minute);
+    }
+    if (resultat.finAtteinte && !horloge.tardAnnonce) {
+      horloge.tardAnnonce = true;
+      notifier(t('temps.tard'), { type: 'info' });
+    }
+  }
+  horloge.minuteur = setInterval(tic, 250);
 
   // --- Mise à jour de la barre du haut -----------------------------------------------
   function rafraichir() {
@@ -296,6 +386,7 @@ export function afficherEcranJeu(parent, { jeu, creerMonde, menu }) {
       if (!oui) requestAnimationFrame(adapterBarres);
     },
     detruire() {
+      clearInterval(horloge.minuteur);
       arrets.forEach((arreter) => arreter());
       observateur.disconnect();
       document.removeEventListener('keydown', surTouche);

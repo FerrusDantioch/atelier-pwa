@@ -1,0 +1,137 @@
+{
+  "pnj": [
+    {
+      "id": "halae",
+      "nom": "Halaé",
+      "presentation": "Créatrice de vidéos. Elle vit ici, et c'est ta toute première cliente.",
+      "aValider": "Nom, rôle (vit au domicile et première cliente), fauteuil roulant rouge et vidéos : validés le 14/11/2026. Apparence détaillée à décrire par Halaé (neutre en attendant). Répliques proposées, à valider par Halaé avant la fusion du jalon 2 dans main.",
+      "apparenceProvisoire": true,
+      "apparence": {
+        "teint": "neutre",
+        "lunettes": "aucune",
+        "coiffure": "aucune",
+        "cheveux": "noir",
+        "barbe": "aucune",
+        "silhouette": "moyenne",
+        "taille": "moyenne",
+        "haut": "violet",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "pantalon",
+        "bas": "gris",
+        "couvreChef": "aucun",
+        "couleurCouvreChef": "violet",
+        "aide": "fauteuil",
+        "couleurAide": "rouge"
+      },
+      "routine": [
+        { "de": "07:00", "a": "08:00", "lieu": "domicile", "point": "table-cuisine", "activite": "petit-dejeuner" },
+        { "de": "08:00", "a": "12:00", "lieu": "domicile", "point": "montage", "activite": "montage" },
+        { "de": "12:00", "a": "13:00", "lieu": "domicile", "point": "table-cuisine", "activite": "dejeuner" },
+        { "de": "13:00", "a": "17:00", "lieu": "domicile", "point": "tournage", "activite": "tournage" },
+        { "de": "17:00", "a": "19:00", "lieu": "domicile", "point": "montage", "activite": "commentaires" },
+        { "de": "19:00", "a": "20:00", "lieu": "domicile", "point": "table-cuisine", "activite": "diner" },
+        { "de": "20:00", "a": "22:30", "lieu": "domicile", "point": "devant-television", "activite": "detente" },
+        { "de": "22:30", "a": "23:00", "lieu": "domicile", "point": "chambre-repos", "activite": "repos" }
+      ],
+      "activites": {
+        "petit-dejeuner": {
+          "description": "prend son petit-déjeuner",
+          "repliques": ["Je prends des forces avant le montage. Une longue matinée m'attend !"]
+        },
+        "montage": {
+          "description": "monte sa prochaine vidéo",
+          "repliques": ["Je monte ma prochaine vidéo. Couper, recouper… et recouper encore."]
+        },
+        "dejeuner": {
+          "description": "déjeune",
+          "repliques": ["Pause déjeuner ! Le montage attendra bien une heure."]
+        },
+        "tournage": {
+          "description": "tourne une vidéo",
+          "repliques": ["Je tourne une vidéo. Si tu passes derrière moi, fais coucou à la caméra !"]
+        },
+        "commentaires": {
+          "description": "lit les commentaires de sa vidéo",
+          "repliques": ["La nouvelle vidéo est en ligne ! Il ne me reste plus qu'à lire les commentaires… courage à moi."]
+        },
+        "diner": {
+          "description": "dîne",
+          "repliques": ["On dîne ? Il reste de la place à table."]
+        },
+        "detente": {
+          "description": "se détend devant la télévision",
+          "repliques": ["Je me repose un peu : grosse journée de tournage."]
+        },
+        "repos": {
+          "description": "se prépare à dormir",
+          "repliques": ["Je vais bientôt dormir. À demain !"]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Salut ! Tu tombes bien : je cherche une appli pour organiser mes vidéos… tu crois que c'est faisable ?"],
+        "salut": ["Salut !", "Coucou ! Ta journée se passe bien ?"]
+      }
+    },
+    {
+      "id": "theo",
+      "nom": "Théo",
+      "presentation": "Étudiant, il habite à côté. Il passe chaque jour à 16 h : il aime savoir à l'avance comment la journée va se dérouler.",
+      "aValider": "Personnage fictif proposé par Claude dans le plan validé.",
+      "apparence": {
+        "teint": "clair",
+        "lunettes": "aucune",
+        "coiffure": "courte",
+        "cheveux": "chatain",
+        "barbe": "aucune",
+        "silhouette": "fine",
+        "taille": "grande",
+        "haut": "vert",
+        "motifHaut": "uni",
+        "couleurMotif": "blanc",
+        "styleBas": "pantalon",
+        "bas": "kaki",
+        "couvreChef": "aucun",
+        "couleurCouvreChef": "noir",
+        "aide": "aucune",
+        "couleurAide": "noir"
+      },
+      "routine": [
+        { "de": "16:00", "a": "17:00", "lieu": "domicile", "point": "table-cuisine-est", "activite": "visite" }
+      ],
+      "activites": {
+        "visite": {
+          "description": "passe dire bonjour",
+          "repliques": [
+            "J'ai plein d'idées d'applications dans mon carnet. Une appli qui annonce les changements à l'avance, ça existerait ?",
+            "Je repars à 17 h. Je préfère quand c'est prévu."
+          ]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Bonjour. Je m'appelle Théo, j'habite à côté. Je passerai tous les jours à 16 h, si ça te va : j'aime bien savoir à l'avance comment la journée va se dérouler."],
+        "salut": ["Bonjour. Il est 16 h, comme prévu.", "Re-bonjour !"]
+      }
+    },
+    {
+      "id": "ferrus",
+      "modele": "ferrus",
+      "presentation": "Ferrus Dantioch, qui a imaginé ce jeu, passe de temps en temps voir comment avance l'atelier.",
+      "aValider": "Répliques du mentor proposées par Claude, à valider par Ferrus. Quand on joue Ferrus, le mentor n'apparaît qu'en visio (jalon 3).",
+      "absentSiJoueur": "ferrus",
+      "routine": [
+        { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" }
+      ],
+      "activites": {
+        "visite": {
+          "description": "passe voir comment avance l'atelier",
+          "repliques": ["Bientôt, ton ordinateur recevra les premières commandes. Prends le temps d'écouter chaque personne : c'est elle qui sait ce dont elle a besoin."]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Bienvenue dans l'atelier ! Ici, on crée des applications qui facilitent la vie des gens. Je passerai de temps en temps voir comment ça avance."],
+        "salut": ["Salut ! Tout se passe bien à l'atelier ?"]
+      }
+    }
+  ]
+}

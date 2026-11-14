@@ -10,6 +10,7 @@
 // =============================================================================
 
 import { CHAMPS_APPARENCE } from '../jeu/personnage.js';
+import { verifierRoutine } from '../jeu/routines.js';
 
 const texte = { type: 'texte' };
 const entierPositif = { type: 'nombre', entier: true, min: 0 };
@@ -61,6 +62,14 @@ export const SCHEMA_JEU = {
         vitesse: { type: 'nombre', min: 0.5, max: 6 },
       },
     },
+    temps: {
+      type: 'objet',
+      champs: {
+        debutJournee: { type: 'heure' },
+        finJournee: { type: 'heure' },
+        minutesParSeconde: { type: 'nombre', min: 0.1, max: 10 },
+      },
+    },
   },
 };
 
@@ -79,12 +88,13 @@ const troisNombres = { type: 'liste', element: { type: 'nombre' }, min: 3, max: 
 const SCHEMA_FORME = {
   type: 'objet',
   champs: {
-    forme: { type: 'choix', valeurs: ['boite', 'cylindre', 'sphere'] },
+    forme: { type: 'choix', valeurs: ['boite', 'cylindre', 'sphere', 'anneau'] },
     position: troisNombres,
     couleur: texte,
     taille: { ...troisNombres, facultatif: true },
     rayon: { type: 'nombre', min: 0.001, max: 10, facultatif: true },
     rayonHaut: { type: 'nombre', min: 0, max: 10, facultatif: true },
+    epaisseur: { type: 'nombre', min: 0.001, max: 2, facultatif: true },
     hauteur: { type: 'nombre', min: 0.001, max: 10, facultatif: true },
     cotes: { type: 'nombre', entier: true, min: 3, max: 32, facultatif: true },
     details: { type: 'nombre', entier: true, min: 0, max: 2, facultatif: true },
@@ -107,6 +117,8 @@ export const SCHEMA_MEUBLES = {
           description: { ...texte, facultatif: true },
           emprise: { type: 'liste', element: { type: 'nombre', entier: true, min: 1, max: 20 }, min: 2, max: 2 },
           bloque: { type: 'booleen', facultatif: true },
+          // Actions en plus de « Examiner » (ex. « dormir » pour un lit).
+          actions: { type: 'liste', facultatif: true, element: { type: 'choix', valeurs: ['dormir'] } },
           formes: { type: 'liste', min: 1, element: SCHEMA_FORME },
         },
       },
@@ -222,12 +234,22 @@ export const SCHEMA_LIEU = {
         },
       },
     },
+    // Points : endroits à examiner (avec description) ou simples places où
+    // se tiennent les personnages (routines de data/pnj.json).
     points: {
       type: 'liste',
       facultatif: true,
       element: {
         type: 'objet',
-        champs: { id: texte, nom: texte, designation: texte, description: texte, x: coordonnee, z: coordonnee, angle },
+        champs: {
+          id: texte,
+          nom: { ...texte, facultatif: true },
+          designation: { ...texte, facultatif: true },
+          description: { ...texte, facultatif: true },
+          x: coordonnee,
+          z: coordonnee,
+          angle,
+        },
       },
     },
   },
@@ -247,7 +269,7 @@ function verifierMeublesEnPlus(fichier) {
       erreurs.push(`${ou} : un meuble avec une description doit avoir une « designation » (ex. « le lit »)`);
     }
     (meuble.formes || []).forEach((forme, n) => {
-      const besoin = { boite: ['taille'], cylindre: ['rayon', 'hauteur'], sphere: ['rayon'] }[forme.forme] || [];
+      const besoin = { boite: ['taille'], cylindre: ['rayon', 'hauteur'], sphere: ['rayon'], anneau: ['rayon', 'epaisseur'] }[forme.forme] || [];
       for (const champ of besoin) {
         if (forme[champ] === undefined) erreurs.push(`${ou} › formes › n°${n + 1} : « ${champ} » manque pour une forme « ${forme.forme} »`);
       }
@@ -274,6 +296,71 @@ function verifierJeuEnPlus(jeu) {
   return erreurs;
 }
 
+// --- data/pnj.json : les personnages non joueurs -----------------------------
+const listeDeTextes = { type: 'liste', min: 1, element: texte };
+export const SCHEMA_PNJ = {
+  type: 'objet',
+  champs: {
+    pnj: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: { ...texte, facultatif: true },
+          modele: { type: 'choix', valeurs: ['ferrus', 'perso'], facultatif: true },
+          presentation: texte,
+          aValider: { ...texte, facultatif: true },
+          apparenceProvisoire: { type: 'booleen', facultatif: true },
+          apparence: { ...SCHEMA_APPARENCE, facultatif: true },
+          absentSiJoueur: { type: 'choix', valeurs: ['ferrus'], facultatif: true },
+          routine: {
+            type: 'liste',
+            element: {
+              type: 'objet',
+              champs: {
+                de: { type: 'heure' },
+                a: { type: 'heure' },
+                lieu: texte,
+                point: { ...texte, facultatif: true },
+                activite: { ...texte, facultatif: true },
+              },
+            },
+          },
+          activites: {
+            type: 'objet',
+            valeurs: { type: 'objet', champs: { description: texte, repliques: listeDeTextes } },
+          },
+          repliques: { type: 'objet', champs: { rencontre: listeDeTextes, salut: listeDeTextes } },
+        },
+      },
+    },
+  },
+};
+
+// Vérifications des PNJ qu'un schéma ne sait pas faire (le reste, lié aux
+// lieux, est dans coherence.js).
+function verifierPnjEnPlus(fichier) {
+  const erreurs = [];
+  const vus = new Set();
+  (fichier?.pnj || []).forEach((pnj) => {
+    const ou = `pnj › ${pnj.id}`;
+    if (vus.has(pnj.id)) erreurs.push(`${ou} : identifiant en double`);
+    vus.add(pnj.id);
+    const ferrus = pnj.modele === 'ferrus';
+    if (!ferrus && !pnj.nom) erreurs.push(`${ou} : il faut un « nom »`);
+    if (!ferrus && !pnj.apparence) erreurs.push(`${ou} : il faut une « apparence »`);
+    for (const message of verifierRoutine(pnj.routine || [], { debut: 0, fin: 24 * 60 })) erreurs.push(`${ou} › ${message}`);
+    (pnj.routine || []).forEach((creneau, n) => {
+      if (creneau.activite && !pnj.activites?.[creneau.activite]) {
+        erreurs.push(`${ou} › routine › n°${n + 1} : l'activité « ${creneau.activite} » n'est pas décrite dans « activites »`);
+      }
+    });
+  });
+  return erreurs;
+}
+
 // La liste des fichiers de données chargés au démarrage. Les fichiers des
 // lieux (data/lieux/*.json) sont ensuite chargés d'après data/lieux/index.json.
 export const FICHIERS_DONNEES = [
@@ -282,5 +369,6 @@ export const FICHIERS_DONNEES = [
   { nom: 'palette', chemin: 'data/palette.json', schema: SCHEMA_PALETTE },
   { nom: 'meubles', chemin: 'data/meubles.json', schema: SCHEMA_MEUBLES, enPlus: verifierMeublesEnPlus },
   { nom: 'personnages', chemin: 'data/personnages.json', schema: SCHEMA_PERSONNAGES },
+  { nom: 'pnj', chemin: 'data/pnj.json', schema: SCHEMA_PNJ, enPlus: verifierPnjEnPlus },
   { nom: 'indexLieux', chemin: 'data/lieux/index.json', schema: SCHEMA_INDEX_LIEUX },
 ];

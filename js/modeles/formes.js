@@ -153,6 +153,8 @@ export function ajouterRecette(constructeur, formes, palette) {
       constructeur.cylindre(forme, forme.position, couleur, forme.rotation);
     } else if (forme.forme === 'sphere') {
       constructeur.sphere(forme, forme.position, couleur, forme.rotation);
+    } else if (forme.forme === 'anneau') {
+      constructeur.tore(forme, forme.position, couleur, forme.rotation);
     }
   }
 }

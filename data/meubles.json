@@ -5,6 +5,7 @@
       "nom": "Lit",
       "designation": "le lit",
       "description": "Un grand lit à bonne hauteur : on s'y installe sans effort.",
+      "actions": ["dormir"],
       "emprise": [3, 4],
       "formes": [
         { "forme": "boite", "taille": [1.46, 0.2, 1.96], "position": [0, 0.25, 0.02], "couleur": "bois" },
@@ -312,6 +313,41 @@
         { "forme": "boite", "taille": [0.34, 0.3, 0.26], "position": [-0.3, 1.515, 0], "couleur": "orange" },
         { "forme": "cylindre", "rayon": 0.06, "rayonHaut": 0.07, "hauteur": 0.1, "position": [0.4, 1.415, 0], "couleur": "pot" },
         { "forme": "sphere", "rayon": 0.1, "position": [0.4, 1.53, 0], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "coin-tournage",
+      "nom": "Coin tournage",
+      "designation": "le coin tournage",
+      "description": "Une caméra sur son trépied et une lampe en anneau : de quoi tourner des vidéos bien éclairées.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.02, 1.2, 0.02], "position": [-0.3, 0.6, -0.04], "couleur": "anthracite", "rotation": [0, 0, -8] },
+        { "forme": "boite", "taille": [0.02, 1.2, 0.02], "position": [-0.14, 0.6, -0.04], "couleur": "anthracite", "rotation": [0, 0, 8] },
+        { "forme": "boite", "taille": [0.02, 1.2, 0.02], "position": [-0.22, 0.6, 0.07], "couleur": "anthracite", "rotation": [-8, 0, 0] },
+        { "forme": "boite", "taille": [0.15, 0.11, 0.11], "position": [-0.22, 1.25, 0.0], "couleur": "noir" },
+        { "forme": "cylindre", "rayon": 0.035, "hauteur": 0.07, "position": [-0.22, 1.25, 0.08], "couleur": "anthracite", "rotation": [90, 0, 0] },
+        { "forme": "cylindre", "rayon": 0.12, "hauteur": 0.03, "position": [0.24, 0.015, 0], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.012, "hauteur": 1.3, "position": [0.24, 0.66, 0], "couleur": "metal" },
+        { "forme": "anneau", "rayon": 0.18, "epaisseur": 0.025, "position": [0.24, 1.45, 0.02], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.065, 0.12, 0.012], "position": [0.24, 1.45, 0.03], "couleur": "noir" }
+      ]
+    },
+    {
+      "id": "bureau-montage",
+      "nom": "Bureau de montage",
+      "designation": "le bureau de montage",
+      "description": "Un petit bureau avec un ordinateur portable et un casque, pour monter des vidéos.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.96, 0.04, 0.46], "position": [0, 0.74, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.42], "position": [-0.45, 0.36, 0], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.42], "position": [0.45, 0.36, 0], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.36, 0.015, 0.25], "position": [0, 0.77, 0.05], "couleur": "gris-clair" },
+        { "forme": "boite", "taille": [0.36, 0.24, 0.015], "position": [0, 0.89, -0.08], "couleur": "gris-clair", "rotation": [-12, 0, 0] },
+        { "forme": "boite", "taille": [0.32, 0.2, 0.004], "position": [0, 0.89, -0.071], "couleur": "ecran-allume", "rotation": [-12, 0, 0] },
+        { "forme": "anneau", "rayon": 0.07, "epaisseur": 0.012, "position": [0.32, 0.79, 0.05], "couleur": "rouge", "rotation": [90, 0, 0] },
+        { "forme": "cylindre", "rayon": 0.04, "hauteur": 0.1, "position": [-0.34, 0.81, -0.05], "couleur": "turquoise" }
       ]
     },
     {

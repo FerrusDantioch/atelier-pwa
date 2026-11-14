@@ -73,6 +73,8 @@
     "arriveDevant": "Devant {objet}.",
     "rienAProximite": "Rien à examiner ici : approche-toi d'un meuble.",
     "inaccessible": "Impossible de t'approcher de {objet} pour l'instant.",
+    "personnes": "Personnes présentes",
+    "personneOu": "{nom} · {piece}",
     "camera": {
       "titre": "Caméra",
       "tournerGauche": "Tourner la vue vers la gauche",
@@ -84,6 +86,27 @@
       "recentrer": "Recentrer la vue",
       "toucheRecentrer": "touche C"
     }
+  },
+  "dialogue": {
+    "parler": "Parler à {nom}",
+    "toi": "Toi",
+    "queFais": "Qu'est-ce que tu fais ?",
+    "aPlusTard": "À plus tard !"
+  },
+  "pnj": {
+    "arrive": "{nom} arrive.",
+    "part": "{nom} s'en va."
+  },
+  "actions": {
+    "dormir": "Dormir"
+  },
+  "temps": {
+    "tard": "La journée est finie : l'horloge s'arrête. Va dormir quand tu veux (le lit, dans la chambre).",
+    "dormirTitre": "Dormir jusqu'à demain ?",
+    "dormirMessage": "Tu te réveilleras demain à {heure}.",
+    "dormirCopie": "Une copie de secours de ta partie est faite au passage.",
+    "dormirOui": "Dormir",
+    "bonjour": "Jour {jour} : bonne journée !"
   },
   "choixPerso": {
     "titre": "Qui veux-tu incarner ?",
@@ -185,6 +208,7 @@
     "sections": {
       "affichage": "Affichage",
       "mouvement": "Mouvements",
+      "rythme": "Rythme du jeu",
       "scene": "Scène 3D",
       "son": "Son",
       "couleurs": "Couleurs",
@@ -223,6 +247,11 @@
       "titre": "Mode calme",
       "aide": "Pas d'événements imprévus et moins de mouvements dans le décor. Les nouveautés arrivent sans bruit.",
       "valeurs": { "false": "Désactivé", "true": "Activé" }
+    },
+    "vitesseTemps": {
+      "titre": "Vitesse du temps",
+      "aide": "« Normale » : une minute de jeu par seconde. « Arrêtée » : l'heure ne bouge plus, et les personnages restent où ils sont. Le temps s'arrête toujours quand une fenêtre est ouverte.",
+      "valeurs": { "normale": "Normale", "lente": "Lente", "arretee": "Arrêtée" }
     },
     "luminosite": {
       "titre": "Luminosité de la scène",

@@ -16,8 +16,10 @@
 // =============================================================================
 
 import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personnage.js';
+import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
+import { heureEnMinutes } from './format-sauvegarde.js';
 import { casesPourAtteindre, distancesDepuis } from '../monde/chemin.js';
-import { PROFILS, creerGrille, empriseTournee } from '../monde/grille.js';
+import { PROFILS, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
 
 const NOMS_PROFILS = { pieton: 'à pied', fauteuil: 'en fauteuil roulant (passages d\'au moins 1 m)' };
 
@@ -183,6 +185,12 @@ function verifierLieu(lieu, donnees, signaler) {
   for (const point of lieu.points || []) {
     if (ids.has(point.id)) probleme(`points › ${point.id} : identifiant déjà utilisé par un meuble ou un point`);
     ids.add(point.id);
+    if (point.description && !(point.nom && point.designation)) {
+      probleme(`points › ${point.id} : un point avec une description doit avoir un « nom » et une « designation »`);
+    }
+    if (point.x >= largeur || point.z >= profondeur || !casesDePiece.has(`${point.x},${point.z}`)) {
+      probleme(`points › ${point.id} : la case ${point.x},${point.z} n'est dans aucune pièce`);
+    }
   }
 
   // L'accessibilité ne se vérifie que si le lieu tient debout.
@@ -211,7 +219,7 @@ function verifierLieu(lieu, donnees, signaler) {
         signaler(chemin, `meubles › ${place.id} : impossible de s'en approcher ${facon}`);
       }
     }
-    for (const point of lieu.points || []) {
+    for (const point of (lieu.points || []).filter((p) => p.description)) {
       if (!distances.has(`${point.x},${point.z}`)) {
         signaler(chemin, `points › ${point.id} : la case ${point.x},${point.z} n'est pas atteignable ${facon}`);
       }
@@ -244,5 +252,59 @@ export function verifierCoherence(donnees) {
     signaler('data/jeu.json', `depart › lieu : le lieu « ${donnees.jeu.depart.lieu} » n'existe pas dans data/lieux/index.json`);
   }
   for (const lieu of Object.values(donnees.lieux || {})) verifierLieu(lieu, donnees, signaler);
+  verifierPnj(donnees, signaler);
   return problemes;
+}
+
+// Les personnages non joueurs : apparence connue, routine dans la journée,
+// et chaque point de leur routine atteignable depuis l'entrée du lieu, avec
+// LEUR façon de se déplacer (en fauteuil roulant : passages d'au moins 1 m).
+function verifierPnj(donnees, signaler) {
+  const chemin = 'data/pnj.json';
+  const personnages = donnees.personnages;
+  const catalogue = new Map((donnees.meubles?.meubles || []).map((meuble) => [meuble.id, meuble]));
+  const journee = donnees.jeu ? {
+    debut: heureEnMinutes(donnees.jeu.temps.debutJournee), fin: heureEnMinutes(donnees.jeu.temps.finJournee),
+  } : null;
+  const grilles = new Map();
+  const grilleDe = (lieu) => {
+    if (!grilles.has(lieu.id)) grilles.set(lieu.id, creerGrille(lieu, catalogue));
+    return grilles.get(lieu.id);
+  };
+  for (const pnj of donnees.pnj?.pnj || []) {
+    const ou = `pnj › ${pnj.id}`;
+    const apparence = pnj.modele === 'ferrus' ? personnages?.ferrus?.apparence : pnj.apparence;
+    if (pnj.apparence && personnages) {
+      for (const champ of CHAMPS_APPARENCE) {
+        if (!personnages.options[champ].some((option) => option.id === pnj.apparence[champ])) {
+          signaler(chemin, `${ou} › apparence › ${champ} : « ${pnj.apparence[champ]} » n'existe pas dans data/personnages.json`);
+        }
+      }
+    }
+    if (journee) for (const message of verifierRoutine(pnj.routine, journee)) signaler(chemin, `${ou} › ${message}`);
+    const profil = profilDeDeplacement(apparence?.aide);
+    pnj.routine.forEach((creneau, n) => {
+      if (creneau.lieu === 'ailleurs') return;
+      const lieu = donnees.lieux?.[creneau.lieu];
+      const ici = `${ou} › routine › n°${n + 1}`;
+      if (!lieu) {
+        signaler(chemin, `${ici} : le lieu « ${creneau.lieu} » n'existe pas`);
+        return;
+      }
+      const points = new Map((lieu.points || []).map((p) => [p.id, p]));
+      const arrivee = points.get(POINT_D_ARRIVEE);
+      const point = points.get(creneau.point);
+      if (!arrivee) signaler(lieu.chemin, `points : il manque le point « ${POINT_D_ARRIVEE} », par où arrivent les visiteurs`);
+      if (!point) {
+        signaler(chemin, `${ici} : le point « ${creneau.point} » n'existe pas dans ${lieu.chemin}`);
+        return;
+      }
+      if (!arrivee) return;
+      const grille = grilleDe(lieu);
+      if (!grille.caseAccessible(arrivee.x, arrivee.z, profil)
+        || !distancesDepuis(grille, arrivee, profil).has(`${point.x},${point.z}`)) {
+        signaler(chemin, `${ici} : le point « ${creneau.point} » n'est pas atteignable ${NOMS_PROFILS[profil]} depuis l'entrée`);
+      }
+    });
+  }
 }

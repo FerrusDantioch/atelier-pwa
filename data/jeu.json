@@ -25,5 +25,10 @@
   },
   "deplacement": {
     "vitesse": 1.8
+  },
+  "temps": {
+    "debutJournee": "07:00",
+    "finJournee": "23:00",
+    "minutesParSeconde": 1
   }
 }

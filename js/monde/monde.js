@@ -23,6 +23,7 @@ import {
 import { brancherClavier } from './controles.js';
 import { creerDeplacement, directionsPourAller } from './deplacement.js';
 import { TAILLE_CASE, angleVers, caseDuPoint, creerGrille, profilDeDeplacement } from './grille.js';
+import { creerHabitants, ecartEnCases } from './habitants.js';
 import { construireLieu } from './lieu.js';
 import { creerLumieres } from './lumieres.js';
 import { brancherPointage } from './pointage.js';
@@ -37,7 +38,7 @@ const SOL = new Plane(new Vector3(0, 1, 0), 0);
  *   palette     les couleurs de la 3D
  *   partie      la partie en cours (lue seulement)
  *   reglages()  les réglages actuels
- *   rappels     { surArrivee, surPiece, surObjetProche, surPosition, surVue, surBloque, actif() }
+ *   rappels     { surArrivee, surPiece, surObjetProche, surPosition, surVue, surBloque, surVisite, actif() }
  */
 export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels }) {
   const lieu = donnees.lieux[partie.lieux.actuel] || donnees.lieux[donnees.jeu.depart.lieu];
@@ -57,6 +58,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   const camera = creerCameraIso({ largeurLieu: construit.largeur, profondeurLieu: construit.profondeur, hauteurLieu: lieu.hauteurMurs });
 
   // --- Le personnage du joueur ---------------------------------------------------
+  let joueurActuel = partie.joueur;
   let apparence = apparenceDuJoueur(partie.joueur, donnees.personnages);
   let profil = profilDeDeplacement(apparence.aide);
   let perso = construirePersonnage(apparence, donnees.personnages, palette);
@@ -94,6 +96,11 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
   const animationsReduites = () => document.documentElement.getAttribute('data-animations') === 'reduites';
 
+  // --- Les personnages non joueurs (PNJ) ------------------------------------------
+  let minuteActuelle = partie.temps.minute;
+  const habitants = creerHabitants({ scene, lieu, grille, donnees, palette, joueur: () => joueurActuel });
+  habitants.placer(minuteActuelle, deplacement.case);
+
   function placerPerso() {
     const { x, z } = deplacement.position;
     perso.groupe.position.set(x, 0, z);
@@ -105,12 +112,27 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   const cibles = construit.cibles;
   const cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
   const pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
+  // Les meubles et points, plus les PNJ présents (qui bougent).
+  const toutesLesCibles = () => [...cibles, ...habitants.cibles()];
 
-  // Les informations d'un objet (meuble ou point) pour l'interface.
+  // Les informations d'un objet (meuble, point ou PNJ) pour l'interface.
   function infosObjet(cible) {
+    if (cible.type === 'pnj') {
+      const habitant = habitants.trouver(cible.id);
+      const activite = habitant.creneau?.activite ? habitant.pnj.activites[habitant.creneau.activite] : null;
+      return {
+        id: habitant.id,
+        type: 'pnj',
+        nom: habitant.nom,
+        designation: habitant.nom,
+        description: habitant.pnj.presentation,
+        activite: activite?.description || null,
+        actions: [],
+      };
+    }
     if (cible.type === 'point') {
       const point = pointParId.get(cible.id);
-      return { id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description };
+      return { id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description, actions: [] };
     }
     const emprise = grille.emprises.get(cible.id);
     const meuble = emprise.meuble;
@@ -120,12 +142,23 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       nom: meuble.nom,
       designation: meuble.designation || meuble.nom,
       description: emprise.place.description || meuble.description || null,
+      actions: [...(meuble.actions || [])],
     };
   }
 
-  // Les cases d'où l'on peut examiner un objet.
+  // Les cases d'où l'on peut examiner un objet (ou parler à quelqu'un).
   function casesPourCible(cible, distances) {
     const ici = deplacement.case;
+    if (cible.type === 'pnj') {
+      const caseHabitant = habitants.caseDe(cible.id);
+      if (!caseHabitant) return [];
+      const cases = [];
+      for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const cle = `${caseHabitant.x + dx},${caseHabitant.z + dz}`;
+        if (distances.has(cle)) cases.push({ x: caseHabitant.x + dx, z: caseHabitant.z + dz, trajet: distances.get(cle) });
+      }
+      return cases.sort((a, b) => a.trajet - b.trajet);
+    }
     if (cible.type === 'point') {
       const point = pointParId.get(cible.id);
       return distances.has(`${point.x},${point.z}`) ? [{ x: point.x, z: point.z }] : [];
@@ -136,6 +169,10 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   // L'angle pour regarder un objet depuis la case (x, z).
   function angleVersCible(cible, x, z) {
     if (cible.type === 'point') return pointParId.get(cible.id).angle;
+    if (cible.type === 'pnj') {
+      const position = habitants.position(cible.id);
+      return position ? angleVers(position.x - (x + 0.5) * TAILLE_CASE, position.z - (z + 0.5) * TAILLE_CASE) : null;
+    }
     const boite = cible.boite;
     const cx = (x + 0.5) * TAILLE_CASE;
     const cz = (z + 0.5) * TAILLE_CASE;
@@ -151,7 +188,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     const distances = new Map([[`${ici.x},${ici.z}`, 0]]);
     let meilleur = null;
     let meilleurEcart = Infinity;
-    for (const cible of cibles) {
+    for (const cible of toutesLesCibles()) {
       if (!cible.examinable) continue;
       if (casesPourCible(cible, distances).length === 0) continue;
       const angle = angleVersCible(cible, ici.x, ici.z);
@@ -165,7 +202,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   }
 
   function definirObjetProche(cible) {
-    if (cible === objetProche) return;
+    if (cible === objetProche || (cible && objetProche && cible.type === 'pnj' && cible.id === objetProche.id)) return;
     objetProche = cible;
     if (cible) reperes.montrerCible(cible.boite);
     else reperes.cacherCible();
@@ -298,9 +335,25 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     rappels.surPosition?.({ x: ici.x, z: ici.z, angle: Math.round(deplacement.angle) });
   }
 
+  // Pendant que les PNJ bougent, l'objet proche (quelqu'un à qui parler) est
+  // revu de temps en temps.
+  let attenteRevue = 0;
+  function revoirObjetProche(dt) {
+    attenteRevue -= dt;
+    if (attenteRevue > 0 || deplacement.enRoute) return;
+    attenteRevue = 0.3;
+    if (objetProche?.type === 'pnj') {
+      const position = habitants.position(objetProche.id);
+      if (position && ecartEnCases(deplacement.case, position) < 1.6) return;
+    }
+    definirObjetProche(chercherObjetProche());
+  }
+
   // --- L'image suivante -----------------------------------------------------------
   function image(dt) {
     const reduit = animationsReduites();
+    const habitantsBougent = habitants.avancer(dt, reduit);
+    if (habitantsBougent || objetProche?.type === 'pnj') revoirObjetProche(dt);
     const resultat = deplacement.avancer(dt, { tournerInstantanement: reduit });
     if (!deplacement.enRoute && directionClavier) pasAuClavier();
     placerPerso();
@@ -322,7 +375,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
     const cameraBouge = camera.mettreAJour(dt, deplacement.position);
     lumieres.regler({ azimut: camera.azimut });
-    return deplacement.enRoute || persoBouge || cameraBouge || resultat.tourne || directionClavier !== null;
+    return deplacement.enRoute || persoBouge || cameraBouge || resultat.tourne || directionClavier !== null || habitantsBougent;
   }
 
   // --- La caméra ------------------------------------------------------------------
@@ -373,7 +426,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     const distanceSol = sol ? rayon.origin.distanceTo(sol) : Infinity;
     let meilleure = null;
     let distanceMeilleure = distanceSol;
-    for (const cible of cibles) {
+    for (const cible of toutesLesCibles()) {
       // D'abord la boîte (rapide), puis la forme exacte si besoin.
       if (!rayon.intersectBox(cible.boite, point)) continue;
       let distance = rayon.origin.distanceTo(point);
@@ -495,9 +548,14 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     get case() { return deplacement.case; },
     get profil() { return profil; },
 
-    // La liste de « Aller à… » : pièces, meubles et points à examiner.
+    // La liste de « Aller à… » : pièces, personnes présentes, meubles et
+    // points à examiner.
     destinations() {
       const liste = lieu.pieces.map((piece) => ({ type: 'piece', id: piece.id, nom: piece.nom, designation: piece.designation, piece: piece.id }));
+      for (const cible of habitants.cibles()) {
+        const caseHabitant = habitants.caseDe(cible.id);
+        liste.push({ ...infosObjet(cible), piece: grille.piece(caseHabitant.x, caseHabitant.z) });
+      }
       for (const cible of cibles) {
         if (!cible.examinable) continue;
         const infos = infosObjet(cible);
@@ -509,8 +567,50 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
     allerVers(destination) {
       if (destination.type === 'piece') return allerDansPiece(destination.id);
-      const cible = cibleParId.get(destination.id);
+      const cible = destination.type === 'pnj'
+        ? habitants.cibles().find((c) => c.id === destination.id)
+        : cibleParId.get(destination.id);
       return cible ? allerVersCible(cible) : false;
+    },
+
+    // L'heure a changé : les PNJ suivent leur routine.
+    definirHeure(minute) {
+      minuteActuelle = minute;
+      for (const evenement of habitants.suivre(minute, deplacement.case)) rappels.surVisite?.(evenement);
+      moteur.animer(image);
+    },
+
+    // Un nouveau jour : chacun est posé directement à sa place du matin.
+    nouvelleJournee(minute) {
+      minuteActuelle = minute;
+      habitants.placer(minute, deplacement.case);
+      definirObjetProche(chercherObjetProche());
+      moteur.animer(image);
+    },
+
+    // On parle à un PNJ : il s'arrête et se tourne vers nous (et nous vers lui).
+    parler(id) {
+      const cible = habitants.cibles().find((c) => c.id === id);
+      if (!cible) return null;
+      const { x, z } = deplacement.position;
+      habitants.arreter(id, x, z, animationsReduites());
+      const ici = deplacement.case;
+      arriveSurPlace(cible, ici.x, ici.z);
+      const habitant = habitants.trouver(id);
+      return { ...infosObjet(cible), pnj: habitant.pnj, creneau: habitant.creneau };
+    },
+
+    finParler(id) {
+      habitants.reprendre(id, minuteActuelle, deplacement.case);
+      moteur.animer(image);
+    },
+
+    // Les PNJ présents (pour les tests et l'interface).
+    get habitantsPresents() {
+      return habitants.cibles().map((cible) => {
+        const caseHabitant = habitants.caseDe(cible.id);
+        return { id: cible.id, case: caseHabitant, piece: grille.piece(caseHabitant.x, caseHabitant.z) };
+      });
     },
 
     allerVersCase,
@@ -528,6 +628,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
     // L'apparence a changé (écran « Ton personnage »).
     changerJoueur(joueur) {
+      joueurActuel = joueur;
       apparence = apparenceDuJoueur(joueur, donnees.personnages);
       profil = profilDeDeplacement(apparence.aide);
       scene.remove(perso.groupe);
@@ -540,6 +641,9 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
         deplacement.teleporter(proche.x, proche.z);
       }
       placerPerso();
+      // Jouer Ferrus ou non change qui est là (le mentor ne vient pas en personne).
+      habitants.placer(minuteActuelle, deplacement.case);
+      definirObjetProche(chercherObjetProche());
       moteur.redessiner();
     },
 
@@ -586,6 +690,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       pointage.debrancher();
       clavier.debrancher();
       perso.liberer();
+      habitants.liberer();
       construit.liberer();
       reperes.liberer();
     },

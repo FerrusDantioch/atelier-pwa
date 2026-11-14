@@ -26,6 +26,7 @@ export const CHOIX = {
   sonCoupe: [false, true],
   luminosite: ['normale', 'douce', 'vive'],
   qualite: ['standard', 'economie', 'haute'],
+  vitesseTemps: ['normale', 'lente', 'arretee'],
 };
 
 export const CANAUX_SON = ['musique', 'effets', 'voix'];
@@ -46,6 +47,7 @@ export function reglagesParDefaut(appareil = {}) {
     sonCoupe: false,
     luminosite: 'normale',
     qualite: 'standard',
+    vitesseTemps: 'normale',
     volumes: { musique: 40, effets: 70, voix: 60 },
     premierLancementFait: false,
   };
