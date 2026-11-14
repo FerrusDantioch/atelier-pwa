@@ -25,10 +25,10 @@ l'avancement dans `docs/JOURNAL.md`. Lire les deux avant de travailler.
 - **Jamais l'identité civile de Ferrus** dans le code, les données, la
   documentation ou les commits. Les mentions légales (jalon 6) utiliseront
   des champs à compléter par lui.
-- **PNJ n°1 (Halaé)** : sa fiche doit être validée par elle avant toute
-  publication. Ce dépôt est public : rien la concernant (nom, apparence,
-  rôle, répliques) n'y est poussé avant la validation. Voir `docs/PLAN.md`
-  § 5.
+- **PNJ n°1 (Halaé)** : sa fiche a été validée par elle le 14/11/2026.
+  Toute modification ou tout ajout la concernant (apparence, rôle, journée,
+  répliques, quêtes) doit de nouveau être validé par elle, via Ferrus,
+  avant d'être poussé : ce dépôt est public. Voir `docs/PLAN.md` § 5.
 - **Rien d'inventé sur Ferrus** : les répliques du mentor sur les vraies
   applications reprennent le portfolio et sont marquées à valider ; tout ce
   qui est personnel reste un emplacement « À ÉCRIRE PAR FERRUS ».
@@ -126,5 +126,6 @@ install && npx playwright install chromium`). Ils couvrent : démarrage,
 accessibilité de base, réglages, sauvegarde/export/import/copies, copie
 d'urgence, hors ligne, mise à jour proposée, absence de requête externe,
 contrastes, et (jalon 1) la scène 3D, le toucher, le clavier, « Aller à… »,
-« Examiner », la caméra, le choix du personnage, le petit écran.
+« Examiner », la caméra, le choix du personnage, le petit écran, et
+(jalon 2) l'horloge, le sommeil, les habitants et les dialogues.
 Petit serveur local : `node outils/serveur.mjs`.

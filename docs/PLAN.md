@@ -136,8 +136,10 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 
 - **PNJ n°1 : Halaé** (nom fictif choisi par Ferrus). Elle vit au domicile
   et c'est la première cliente ; créatrice de vidéos ; fauteuil roulant
-  rouge. Apparence détaillée à décrire par elle ; répliques proposées par
-  Claude, **à valider par elle avant toute publication** (dépôt public).
+  rouge. Apparence détaillée à décrire par elle (neutre en attendant).
+  Fiche (présentation, journée, répliques) **validée par elle et par Ferrus
+  le 14 novembre 2026** ; toute modification ou tout ajout la concernant
+  lui est de nouveau soumis avant publication (dépôt public).
 - **Ferrus, le mentor** : présent dans les lieux et en visio sur
   l'ordinateur ; présente l'activité de Ferrus Dantioch, sert de tutoriel,
   commente les vraies applications. Ses répliques sur les applications
@@ -182,6 +184,8 @@ Décidé avec Ferrus (14 novembre 2026) :
 - **Apparence de Ferrus** (décrite par lui) : cheveux très courts, sombres
   voire noirs, lunettes rondes, chemise noire à rayures blanches verticales,
   pantalon bleu, pas de barbe ; teint non précisé, donc « neutre ».
+- **Jalon 2** : fiche d'Halaé et répliques du mentor validées « pour
+  l'instant » ; d'éventuelles corrections seront vues plus tard.
 
 Recommandations appliquées en attendant une réponse contraire :
 
@@ -196,8 +200,8 @@ Recommandations appliquées en attendant une réponse contraire :
 Questions ouvertes (à trancher avant le jalon indiqué) :
 
 1. *(Réglée : apparence de Ferrus, voir plus haut.)*
-2. **Halaé** : validation de sa fiche par elle (répliques, présentation,
-   apparence) avant de publier le jalon 2.
+2. *(Réglée : fiche d'Halaé validée le 14/11 ; apparence détaillée à
+   décrire par elle quand elle le souhaite.)*
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
    portfolio ? lesquelles en affiche au domicile ? quels statuts ?
 4. **Mentions légales** (avant J6) : statut et champs à compléter.

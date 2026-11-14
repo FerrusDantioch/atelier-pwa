@@ -4,7 +4,7 @@
       "id": "halae",
       "nom": "Halaé",
       "presentation": "Créatrice de vidéos. Elle vit ici, et c'est ta toute première cliente.",
-      "aValider": "Nom, rôle (vit au domicile et première cliente), fauteuil roulant rouge et vidéos : validés le 14/11/2026. Apparence détaillée à décrire par Halaé (neutre en attendant). Répliques proposées, à valider par Halaé avant la fusion du jalon 2 dans main.",
+      "aValider": "Fiche validée par Halaé et Ferrus le 14/11/2026 : nom, rôle (vit au domicile et première cliente), fauteuil roulant rouge, vidéos, présentation, journée et répliques. Apparence neutre en attendant qu'Halaé la décrive. Toute modification ou tout ajout la concernant doit de nouveau être validé par elle avant d'être publié.",
       "apparenceProvisoire": true,
       "apparence": {
         "teint": "neutre",
@@ -117,7 +117,7 @@
       "id": "ferrus",
       "modele": "ferrus",
       "presentation": "Ferrus Dantioch, qui a imaginé ce jeu, passe de temps en temps voir comment avance l'atelier.",
-      "aValider": "Répliques du mentor proposées par Claude, à valider par Ferrus. Quand on joue Ferrus, le mentor n'apparaît qu'en visio (jalon 3).",
+      "aValider": "Répliques du mentor proposées par Claude, validées par Ferrus le 14/11/2026. Quand on joue Ferrus, le mentor n'apparaît qu'en visio (jalon 3).",
       "absentSiJoueur": "ferrus",
       "routine": [
         { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" }

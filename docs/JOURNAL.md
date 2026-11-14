@@ -1,6 +1,10 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 2 — Les habitants et le temps qui passe (version 0.3.0) — à valider
+## ✅ Jalon 2 — Les habitants et le temps qui passe (version 0.3.0, 14 novembre 2026)
+
+Validé par Ferrus et Halaé le 14 novembre 2026 (fiche d'Halaé et répliques
+du mentor comprises), puis fusionné dans `main`. D'éventuelles corrections
+seront vues plus tard.
 
 ### Ce qui est fait
 
@@ -56,12 +60,11 @@
 - Pas encore de commandes ni d'argent à gagner : l'ordinateur arrive au
   jalon 3.
 
-### En attente
+### Plus tard
 
-- **La validation de sa fiche par Halaé** (répliques, présentation,
-  apparence) : rien la concernant n'est publié avant. Ce jalon reste donc
-  sur l'appareil de travail, pas encore sur GitHub.
-- La description de l'apparence d'Halaé.
+- La description de l'apparence d'Halaé, quand elle le souhaite (neutre en
+  attendant). Toute modification de ce qui la concerne lui sera de nouveau
+  soumise avant publication.
 
 ## ✅ Jalon 1 — Le domicile en 3D (version 0.2.0, 14 novembre 2026)
 
