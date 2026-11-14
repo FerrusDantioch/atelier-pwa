@@ -67,6 +67,9 @@ function construireTete(apparence, couleurs) {
       case 'rasee':
         calotte(0.153, 0.48);
         break;
+      case 'tres-courte':
+        calotte(0.158, 0.5);
+        break;
       case 'courte':
         calotte(0.162);
         tete.boite([0.2, 0.05, 0.06], [0, 0.135, 0.1], cheveux, [35, 0, 0]);

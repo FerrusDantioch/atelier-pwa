@@ -112,9 +112,9 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
 
 ## Les personnages : `data/personnages.json`
 
-- `ferrus` : le personnage de Ferrus (nom, présentation, apparence).
-  `apparenceProvisoire: true` affiche « apparence provisoire » sur l'écran
-  de choix. **À compléter par Ferrus** (repère `TODO_FERRUS`).
+- `ferrus` : le personnage de Ferrus (nom, présentation, apparence décrite
+  par lui). `apparenceProvisoire: true` afficherait « apparence encore
+  provisoire » sur l'écran de choix.
 - `prenomsProposes` : les prénoms proposés au hasard (épicènes).
 - `defaut` : l'apparence de départ d'un nouveau personnage.
 - `options` : pour chaque élément (teint, coiffure, haut, motif du haut…),

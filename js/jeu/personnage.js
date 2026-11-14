@@ -35,7 +35,7 @@ export const CHAMPS_COULEUR = ['teint', 'cheveux', 'haut', 'couleurMotif', 'bas'
 // de données peut en proposer moins, jamais d'autres.
 export const FORMES_CONNUES = {
   lunettes: ['aucune', 'rondes', 'carrees'],
-  coiffure: ['aucune', 'rasee', 'courte', 'mi-longue', 'longue', 'chignon', 'boucles'],
+  coiffure: ['aucune', 'rasee', 'tres-courte', 'courte', 'mi-longue', 'longue', 'chignon', 'boucles'],
   barbe: ['aucune', 'courte', 'longue'],
   silhouette: ['fine', 'moyenne', 'large'],
   taille: ['petite', 'moyenne', 'grande'],

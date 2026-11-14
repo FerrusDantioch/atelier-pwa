@@ -178,8 +178,9 @@ Décidé avec Ferrus (14 novembre 2026) :
 - **Test et publication** : tablette **Android** avec le navigateur
   **Brave** ; chaque jalon validé est **fusionné dans `main`**, publiée par
   GitHub Pages.
-- **Apparence de Ferrus** (décrite par lui) : cheveux sombres voire noirs,
-  lunettes, chemise noire à rayures blanches verticales, pantalon bleu.
+- **Apparence de Ferrus** (décrite par lui) : cheveux très courts, sombres
+  voire noirs, lunettes rondes, chemise noire à rayures blanches verticales,
+  pantalon bleu, pas de barbe ; teint non précisé, donc « neutre ».
 
 Recommandations appliquées en attendant une réponse contraire :
 
@@ -193,9 +194,7 @@ Recommandations appliquées en attendant une réponse contraire :
 
 Questions ouvertes (à trancher avant le jalon indiqué) :
 
-1. **Apparence de Ferrus** : il reste à confirmer le teint (neutre en
-   attendant), la longueur des cheveux, la forme des lunettes et la barbe
-   (`TODO_FERRUS`).
+1. *(Réglée : apparence de Ferrus, voir plus haut.)*
 2. **PNJ n°1** (avant J2) : nom fictif choisi par Ferrus (gardé hors du
    dépôt) ; fiche complète (apparence, rôle, répliques) à faire valider par
    elle avant toute publication.

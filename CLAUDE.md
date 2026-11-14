@@ -88,9 +88,10 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   un lieu où une pièce ou un objet à examiner n'est pas atteignable à pied
   ET en fauteuil roulant (passages ≥ 1 m = 2 cases). Tout nouveau lieu ou
   meuble doit passer ce contrôle.
-- **Le personnage « Ferrus »** a une apparence provisoire (`TODO_FERRUS` dans
-  `data/personnages.json`) : ne rien inventer, attendre sa description.
-  Son apparence n'est jamais copiée dans les parties.
+- **Le personnage « Ferrus »** a l'apparence décrite par lui (voir
+  `docs/PLAN.md` § 7) ; teint non précisé, donc « neutre ». Ne rien changer
+  ni ajouter sans sa demande. Son apparence n'est jamais copiée dans les
+  parties.
 - **Tests navigateur** : pour attendre une condition qui importe des modules
   du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
   `page.waitForFunction` (qui n'attend pas les fonctions async).

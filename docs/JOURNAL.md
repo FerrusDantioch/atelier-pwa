@@ -7,9 +7,8 @@ Validé par Ferrus le 14 novembre 2026, puis fusionné dans `main`.
 ### Ce qui est fait
 
 - **Choix du personnage** au début d'une partie : jouer **Ferrus Dantioch**
-  (cheveux noirs, lunettes, chemise noire à rayures blanches, pantalon bleu,
-  d'après sa description ; quelques détails restent à confirmer) ou **son
-  personnage** :
+  (cheveux très courts et noirs, lunettes rondes, chemise noire à rayures
+  blanches, pantalon bleu, d'après sa description) ou **son personnage** :
   prénom, teint (dont un teint « neutre »), coiffure, couleur des cheveux,
   barbe, lunettes, silhouette, taille, haut (uni ou à rayures), bas
   (pantalon, jupe, short),
@@ -95,9 +94,8 @@ Validé par Ferrus le 14 novembre 2026, puis fusionné dans `main`.
 
 - Le temps ne passe pas encore (jour 1, 8 h 00) : il arrive au jalon 2 avec
   les personnages et leurs routines (le lit servira alors à dormir).
-- Ferrus garde un **teint neutre** (lilas) en attendant sa réponse ; la
-  longueur des cheveux, la forme des lunettes et l'absence de barbe sont
-  aussi à confirmer.
+- Ferrus garde un **teint neutre** (lilas), qu'il n'a pas précisé ; il peut
+  en demander un autre à tout moment.
 - La porte d'entrée ne mène encore nulle part (les bureaux arrivent au
   jalon 5).
 - Sur téléphone en portrait avec le texte « Énorme », les barres prennent
@@ -107,9 +105,6 @@ Validé par Ferrus le 14 novembre 2026, puis fusionné dans `main`.
 
 ### En attente de Ferrus
 
-- Les derniers détails de son apparence : teint, longueur des cheveux,
-  forme des lunettes, barbe (repère `TODO_FERRUS` dans
-  `data/personnages.json`).
 - La fiche de la PNJ n°1, validée par elle (avant le jalon 2) : rien la
   concernant n'est poussé dans ce dépôt public avant.
 
