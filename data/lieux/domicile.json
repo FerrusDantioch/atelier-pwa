@@ -14,6 +14,7 @@
     {
       "id": "salle-d-eau", "nom": "Salle d'eau", "designation": "la salle d'eau",
       "zones": [[8, 0, 5, 7]],
+      "paroisHautes": true,
       "sol": { "motif": "damier", "couleurs": ["carrelage", "carrelage-2"] }
     },
     {

@@ -195,6 +195,9 @@ export const SCHEMA_LIEU = {
           nom: texte,
           designation: texte,
           zones: { type: 'liste', min: 1, element: { type: 'liste', element: coordonnee, min: 4, max: 4 } },
+          // Des parois sur toute la hauteur (translucides au-dessus du genou),
+          // pour une pièce qu'on veut bien séparer (la salle d'eau).
+          paroisHautes: { type: 'booleen', facultatif: true },
           sol: {
             type: 'objet',
             champs: {

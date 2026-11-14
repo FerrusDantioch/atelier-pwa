@@ -81,7 +81,7 @@ function construireTete(apparence, couleurs) {
   if (!foulard) {
     switch (apparence.coiffure) {
       case 'rasee':
-        calotte(0.153, 0.48);
+        calotte(0.157, 0.48); // assez large pour que le front ne perce pas
         break;
       case 'tres-courte':
         calotte(0.158, 0.5);

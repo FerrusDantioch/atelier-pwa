@@ -196,3 +196,9 @@ test('les places des personnages sont atteignables avec LEUR façon de se dépla
   pnj.pnj.find((p) => p.id === 'theo').routine[0].point = 'recoin';
   assert.deepEqual(verifierCoherence({ ...donnees, pnj, lieux: { domicile: lieu } }), []);
 });
+
+test('la salle d\'eau est fermée par des parois hautes (les autres pièces restent ouvertes)', () => {
+  const pieces = donnees.lieux.domicile.pieces;
+  assert.equal(pieces.find((p) => p.id === 'salle-d-eau').paroisHautes, true);
+  assert.deepEqual(pieces.filter((p) => p.paroisHautes).map((p) => p.id), ['salle-d-eau']);
+});

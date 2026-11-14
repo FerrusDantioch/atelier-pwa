@@ -75,7 +75,7 @@ fait 10 m × 8 m. La case `x = 0, z = 0` est en haut à gauche du plan
 | `taille` | largeur et profondeur, en cases |
 | `hauteurMurs` | hauteur des murs entiers, en mètres |
 | `depart` | case d'arrivée (`x`, `z`) et direction du regard (`angle` : 0 sud, 90 est, 180 nord, 270 ouest) |
-| `pieces` | chaque pièce : `id`, `nom`, `designation` (« la cuisine »), `zones` (rectangles `[x, z, largeur, profondeur]`), `sol` (`motif` : `uni`, `lames` ou `damier`, et une ou deux couleurs de la palette) |
+| `pieces` | chaque pièce : `id`, `nom`, `designation` (« la cuisine »), `zones` (rectangles `[x, z, largeur, profondeur]`), `sol` (`motif` : `uni`, `lames` ou `damier`, et une ou deux couleurs de la palette), et `paroisHautes` (facultatif) : des cloisons jusqu'au plafond, translucides au-dessus du genou, pour une pièce à bien séparer (la salle d'eau) |
 | `murs` | segments sur les lignes de la grille : `{ "de": [x, z], "a": [x, z] }`, horizontaux ou verticaux |
 | `ouvertures` | sur un mur : `porte` (passage libre), `porte-entree` (porte fermée), `fenetre` |
 | `meubles` | `id` unique, `meuble` (du catalogue), case `x`, `z` (coin nord-ouest de l'emprise), `rotation` (0, 90, 180, 270), et une `description` facultative propre à ce lieu |

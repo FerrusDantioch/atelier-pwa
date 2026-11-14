@@ -6,7 +6,10 @@
 //   - les deux murs extérieurs du fond (ceux qui tournent le dos à la
 //     caméra) sont entiers, avec leurs fenêtres et la porte d'entrée ;
 //   - tous les autres (murs de devant, cloisons intérieures) sont coupés à
-//     hauteur de genou : ils montrent le plan sans rien cacher.
+//     hauteur de genou : ils montrent le plan sans rien cacher ;
+//   - les cloisons d'une pièce à « paroisHautes » (la salle d'eau) montent
+//     jusqu'au plafond : opaques jusqu'au genou, translucides au-dessus (on
+//     voit bien la séparation, sans rien cacher derrière).
 // Quand la caméra tourne, les murs coupés changent : ils sont reconstruits.
 //
 // Tout le décor fixe (socle, sol, meubles) forme UNE seule géométrie, et les
@@ -16,7 +19,7 @@
 import {
   Box3, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Mesh, Vector3,
 } from '../../lib/three/three.module.js';
-import { creerConstructeur, matiereDecor } from '../modeles/formes.js';
+import { creerConstructeur, matiereDecor, matiereParoi } from '../modeles/formes.js';
 import { creerAtelierDeMeubles } from '../modeles/meubles.js';
 import { TAILLE_CASE } from './grille.js';
 
@@ -25,6 +28,7 @@ const EPAISSEUR = 0.12;
 const MARGE_SOCLE = 0.6;
 const BAS_FENETRE = 0.9;
 const HAUT_OUVERTURE = 2.1;
+const CHAPEAU_PAROI = 0.06; // le bord opaque en haut d'une paroi translucide
 
 // La direction de la caméra (vue de dessus) pour une rotation donnée : 0 =
 // caméra au sud-est, puis par quarts de tour.
@@ -55,13 +59,19 @@ function preparerTroncons(lieu, grille) {
     }
   }
 
-  // Pour chaque bord : extérieur ? de quel côté ? quelle ouverture ?
+  // Pour chaque bord : extérieur ? de quel côté ? quelle ouverture ? paroi
+  // haute (il borde une pièce à « paroisHautes ») ?
   const sol = (x, z) => grille.piece(x, z) !== null;
+  const piecesHautes = new Set(lieu.pieces.filter((piece) => piece.paroisHautes).map((piece) => piece.id));
+  const haute = (x, z) => piecesHautes.has(grille.piece(x, z));
   for (const [cle, bord] of bords) {
     const [avant, apres] = bord.sens === 'h'
       ? [sol(bord.debut, bord.ligne - 1), sol(bord.debut, bord.ligne)]
       : [sol(bord.ligne - 1, bord.debut), sol(bord.ligne, bord.debut)];
     bord.exterieur = avant !== apres;
+    bord.haute = !bord.exterieur && (bord.sens === 'h'
+      ? haute(bord.debut, bord.ligne - 1) || haute(bord.debut, bord.ligne)
+      : haute(bord.ligne - 1, bord.debut) || haute(bord.ligne, bord.debut));
     // La normale pointe vers le dehors (le côté sans sol).
     if (bord.exterieur) {
       const signe = avant ? 1 : -1;
@@ -77,7 +87,8 @@ function preparerTroncons(lieu, grille) {
     const dernier = troncons[troncons.length - 1];
     const memeNormale = (a, b) => (!a && !b) || (a && b && a.x === b.x && a.z === b.z);
     if (dernier && dernier.sens === bord.sens && dernier.ligne === bord.ligne && dernier.fin === bord.debut
-      && dernier.ouverture === bord.ouverture && dernier.exterieur === bord.exterieur && memeNormale(dernier.normale, bord.normale)) {
+      && dernier.ouverture === bord.ouverture && dernier.exterieur === bord.exterieur && dernier.haute === bord.haute
+      && memeNormale(dernier.normale, bord.normale)) {
       dernier.fin += 1;
     } else {
       troncons.push({ ...bord, fin: bord.debut + 1 });
@@ -230,12 +241,21 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
       const fin = troncon.fin * TAILLE_CASE + troncon.prolongeFin;
       const ouverture = troncon.ouverture === null ? null : lieu.ouvertures[troncon.ouverture];
 
+      const d = troncon.debut * TAILLE_CASE;
+      const f = troncon.fin * TAILLE_CASE;
+      if (troncon.haute) {
+        // Paroi haute : le bord opaque du haut, et le cadre d'une porte.
+        morceau(troncon, debut, fin, hauteurMurs - CHAPEAU_PAROI, hauteurMurs);
+        if (ouverture) {
+          element(troncon, d, d + 0.06, 0, HAUT_OUVERTURE, c('cadre'));
+          element(troncon, f - 0.06, f, 0, HAUT_OUVERTURE, c('cadre'));
+          element(troncon, d, f, HAUT_OUVERTURE - 0.06, HAUT_OUVERTURE, c('cadre'));
+        }
+      }
       if (!ouverture) {
         morceau(troncon, debut, fin, 0, hauteur);
         continue;
       }
-      const d = troncon.debut * TAILLE_CASE;
-      const f = troncon.fin * TAILLE_CASE;
       const cadre = c('cadre');
       if (ouverture.type === 'fenetre') {
         if (!entier) {
@@ -276,6 +296,29 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     return murs.construire();
   }
 
+  // --- Les parois translucides (elles ne dépendent pas de la caméra) ---------
+  const parois = creerConstructeur();
+  for (const troncon of troncons.filter((t) => t.haute)) {
+    const ouverture = troncon.ouverture === null ? null : lieu.ouvertures[troncon.ouverture];
+    const bas = ouverture ? HAUT_OUVERTURE : HAUTEUR_COUPEE;
+    const haut = hauteurMurs - CHAPEAU_PAROI;
+    const debut = troncon.debut * TAILLE_CASE - troncon.prolongeDebut;
+    const fin = troncon.fin * TAILLE_CASE + troncon.prolongeFin;
+    const milieu = (debut + fin) / 2;
+    const taille = troncon.sens === 'h' ? [fin - debut, haut - bas, EPAISSEUR * 0.6] : [EPAISSEUR * 0.6, haut - bas, fin - debut];
+    const position = troncon.sens === 'h'
+      ? [milieu, (bas + haut) / 2, troncon.ligne * TAILLE_CASE]
+      : [troncon.ligne * TAILLE_CASE, (bas + haut) / 2, milieu];
+    parois.boite(taille, position, c('mur'));
+  }
+  let meshParois = null;
+  if (!parois.vide) {
+    meshParois = new Mesh(parois.construire(), matiereParoi());
+    meshParois.name = 'parois';
+    meshParois.renderOrder = 1; // après le reste (elle est translucide)
+    groupe.add(meshParois);
+  }
+
   function tournerMurs(rotation) {
     const r = ((rotation % 4) + 4) % 4;
     if (r === rotationMurs) return false;
@@ -303,7 +346,7 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     }
     contours = new Group();
     contours.name = 'contours';
-    for (const mesh of [meshDecor, meshMurs]) {
+    for (const mesh of [meshDecor, meshMurs, meshParois]) {
       if (!mesh) continue;
       contours.add(new LineSegments(new EdgesGeometry(mesh.geometry, 30), matiereContour));
     }
@@ -329,6 +372,7 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     liberer() {
       meshDecor.geometry.dispose();
       meshMurs?.geometry.dispose();
+      meshParois?.geometry.dispose();
       montrerContours(false);
       matiereContour.dispose();
       atelier.liberer();

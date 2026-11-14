@@ -46,6 +46,12 @@ l'essayer sur sa tablette. Sa validation est en attente.
   un petit nez et un reflet clair dans les yeux (visibles sur tous les
   teints). La lumière qui « remonte du sol » est plus chaude : la peau
   n'a plus de reflet violet. Le corps garde son style à facettes.
+- **La salle d'eau a ses parois**, à la demande de Ferrus : ses cloisons
+  montent jusqu'au plafond, opaques jusqu'au genou et translucides
+  au-dessus, avec un cadre de porte. On voit bien la séparation, et on
+  voit encore à travers (des murs pleins cacheraient les pièces voisines
+  dans la vue de trois quarts). Les autres cloisons restent coupées au
+  genou.
 - **Teint clair** pour Ferrus et pour Halaé : leur choix (le teint
   « neutre », lilas, avait été mis faute d'information ; il reste au choix
   des joueurs).

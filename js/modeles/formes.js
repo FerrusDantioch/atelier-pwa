@@ -27,6 +27,18 @@ export function matiereDecor() {
   return matiere;
 }
 
+// La matière des parois translucides (au-dessus du genou) : on voit la
+// séparation entre deux pièces, et on voit à travers.
+let matiereDesParois = null;
+export function matiereParoi() {
+  if (!matiereDesParois) {
+    matiereDesParois = new MeshLambertMaterial({
+      vertexColors: true, flatShading: true, transparent: true, opacity: 0.4, depthWrite: false,
+    });
+  }
+  return matiereDesParois;
+}
+
 // La matière des personnages : les formes ordinaires y restent à facettes
 // (chaque triangle garde sa propre orientation), mais les formes « lisses »
 // (tête, cheveux, couvre-chefs) sont éclairées tout en douceur.
