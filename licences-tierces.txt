@@ -1,0 +1,52 @@
+Atelier PWA — fichiers d'autres auteurs embarqués dans le jeu
+==============================================================
+
+Le code du jeu est © 2026 Ferrus Dantioch, sous licence CC BY-NC-ND 4.0
+(voir le fichier LICENSE). Les fichiers ci-dessous ne sont pas de Ferrus
+Dantioch : ils gardent leur propre licence, dont le texte complet est
+fourni à côté d'eux.
+
+Aucun de ces fichiers n'est chargé depuis internet pendant le jeu : ils sont
+copiés dans le dépôt. Leurs empreintes SHA-256 (en bas de ce fichier)
+permettent de vérifier qu'ils n'ont pas été modifiés ; les tests le
+vérifient à chaque lancement (tests/tiers.test.js).
+
+Pour les mettre à jour (outil de développement, jamais lancé pendant la
+publication) : node outils/embarquer-tiers.mjs
+
+
+1. Three.js r187 — paquet npm « three » 0.187.0
+   Le moteur 3D du jeu.
+   Licence MIT — texte complet : lib/three/LICENSE
+   Copyright © 2010-2026 three.js authors — https://threejs.org/
+
+2. Atkinson Hyperlegible Next — paquet npm « @fontsource/atkinson-hyperlegible-next » 5.3.0
+   Police principale du jeu, conçue pour être lue facilement, notamment par
+   les personnes malvoyantes.
+   SIL Open Font License 1.1 — texte complet :
+   assets/polices/LICENCE-Atkinson-Hyperlegible-Next.txt
+   Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors
+
+3. OpenDyslexic — paquet npm « @fontsource/opendyslexic » 5.3.0
+   Police proposée en option dans les réglages, pensée pour les personnes
+   dyslexiques.
+   SIL Open Font License 1.1 — texte complet :
+   assets/polices/LICENCE-OpenDyslexic.txt
+   Copyright (c) 2019 Abbie Gonzalez, nom de police réservé « OpenDyslexic »
+
+
+Empreintes SHA-256
+------------------
+# --- début des empreintes (écrites par outils/embarquer-tiers.mjs) ---
+104f56145899722094556490d787aae0617cc2fc3382f31df02d724ea1aee341  lib/three/three.module.js
+613e370f76638fdef83926642bf256dc9615684922de1ce1f63a8583e5d78578  lib/three/three.core.js
+8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc  lib/three/LICENSE
+5cb240a4d99ab7e6fc3a4d4e6d11d89789fdffe9c86a8384000d662c53283f6f  assets/polices/atkinson-hyperlegible-next-latin-400-normal.woff2
+0dbe07ed7679407db9d90f747d5ca3bd1b2bb7ccbcbe41c8246cfc6d2c7bc3bc  assets/polices/atkinson-hyperlegible-next-latin-700-normal.woff2
+0f9e442184b58992113a9b26c0b85c380410a60e5f8f3ddc03c54fe80f81bbe8  assets/polices/atkinson-hyperlegible-next-latin-ext-400-normal.woff2
+acd5d0771650ceddafa2beb172dc7ada45581f7641db03a70f4a13677ce799d1  assets/polices/atkinson-hyperlegible-next-latin-ext-700-normal.woff2
+474a034e99845062f661855caaa505880d0e9009deddc2727a92795eab374955  assets/polices/LICENCE-Atkinson-Hyperlegible-Next.txt
+f007004af3cda5d8076e57c943f8cc8d00a0da25988b1ae1048683d60e7cac1a  assets/polices/opendyslexic-latin-400-normal.woff2
+dd9fa9c7991113b0dddefe9506a30ad26b48e302b7a8fb91719a4726e8fde85b  assets/polices/opendyslexic-latin-700-normal.woff2
+797cb441b593b3326a69fcf83d84264301d89e8871a75b38bae1d101e922e10c  assets/polices/LICENCE-OpenDyslexic.txt
+# --- fin des empreintes ---
