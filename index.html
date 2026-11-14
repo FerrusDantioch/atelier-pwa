@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr" data-theme="omni">
+<head>
+  <meta charset="utf-8">
+  <!-- Pas de « user-scalable=no » : le zoom du navigateur reste possible sur
+       l'interface (accessibilité). La scène 3D gère elle-même ses gestes. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Règle de sécurité (CSP) : la page ne peut charger que ses propres
+       fichiers et ne contacte aucun autre site. Pas de script ni de style
+       écrit directement dans ce fichier : tout est dans js/ et css/. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Un jeu de simulation calme : crée des applications accessibles pour tes voisins, gagne ta vie et aménage ton atelier.">
+  <meta name="author" content="Ferrus Dantioch">
+  <meta name="theme-color" content="#171126">
+  <meta name="color-scheme" content="dark light">
+  <title>Atelier PWA</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icones/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icones/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Atelier">
+
+  <!-- 1. Réglages généraux, puis réglages d'affichage appliqués AVANT le
+          premier dessin (pas d'éclair du mauvais thème). -->
+  <script src="js/config.js"></script>
+  <script src="js/avant-affichage.js"></script>
+  <!-- 2. L'écran de secours, au cas où le démarrage échoue. -->
+  <script src="js/secours.js" defer></script>
+
+  <link rel="stylesheet" href="css/polices.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/interface.css">
+
+  <!-- 3. Le jeu lui-même. -->
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <!-- La scène 3D (à partir du jalon 1). Elle est cachée aux lecteurs d'écran :
+       tout ce qu'elle montre a un équivalent dans l'interface (liste
+       « Aller à… », descriptions, journal). -->
+  <div id="scene" class="scene" aria-hidden="true"></div>
+
+  <!-- Toute l'interface est fabriquée par js/interface/, avec les textes de
+       data/textes.json. -->
+  <div id="interface" class="interface"></div>
+
+  <!-- Zone des messages discrets (« Partie sauvegardée »…). -->
+  <div id="notifications" class="notifications"></div>
+
+  <!-- Ce que les lecteurs d'écran doivent annoncer. -->
+  <div id="annonces" class="visuellement-cache" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Seuls textes écrits ici : ils doivent s'afficher même si les données
+       du jeu ne se chargent pas. -->
+  <div id="chargement" class="chargement" role="status">
+    <p>Chargement…</p>
+  </div>
+
+  <div id="erreur-demarrage" class="erreur-demarrage" role="alert" hidden>
+    <div class="erreur-demarrage-carte">
+      <h1>Le jeu n'a pas pu démarrer</h1>
+      <p>Ta partie n'est pas perdue : elle reste enregistrée sur cet appareil.</p>
+      <p>Recharge la page. Si le problème revient, voici le détail à transmettre à Ferrus&nbsp;:</p>
+      <pre id="erreur-detail" class="erreur-detail"></pre>
+      <p><a class="bouton bouton-principal" href="./">Recharger</a></p>
+    </div>
+  </div>
+
+  <noscript>
+    <p class="sans-javascript">Ce jeu a besoin de JavaScript pour fonctionner.</p>
+  </noscript>
+</body>
+</html>

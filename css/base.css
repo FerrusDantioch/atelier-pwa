@@ -1,0 +1,189 @@
+/* =============================================================================
+   base.css — textes, boutons, focus, tailles : les règles communes à tout le jeu
+   -----------------------------------------------------------------------------
+   Réglages lus sur la balise <html> (voir js/avant-affichage.js) :
+     data-texte       1 normal | 2 grand | 3 très grand | 4 énorme
+     data-police      lisible | dyslexie | systeme
+     data-espacement  normal | aere
+     data-animations  normales | reduites
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* --- Taille du texte : tout est exprimé en « rem », qui suit ce réglage --- */
+:root {
+  --echelle-texte: 1;
+  --police-texte: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Cible tactile minimale : 48 px (le minimum demandé est 44 px). */
+  --cible: 48px;
+  --rayon: 12px;
+  --espace: 1rem;
+  --duree: 160ms;
+}
+
+[data-texte="2"] { --echelle-texte: 1.2; }
+[data-texte="3"] { --echelle-texte: 1.45; }
+[data-texte="4"] { --echelle-texte: 1.75; }
+
+[data-police="dyslexie"] {
+  --police-texte: 'OpenDyslexic', 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+}
+
+[data-police="systeme"] {
+  --police-texte: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+}
+
+html {
+  /* 112,5 % = 18 px de base, multipliés par le réglage de taille du texte. */
+  font-size: calc(112.5% * var(--echelle-texte));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--fond);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police-texte);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+/* Espacement « aéré » : les valeurs recommandées pour la lecture (WCAG 1.4.12). */
+[data-espacement="aere"] body {
+  line-height: 1.8;
+  letter-spacing: 0.12em;
+  word-spacing: 0.16em;
+}
+
+[data-espacement="aere"] p {
+  margin-block: 0 1.6em;
+}
+
+h1, h2, h3 {
+  line-height: 1.25;
+  margin: 0 0 0.5em;
+}
+
+p {
+  margin: 0 0 0.8em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+/* --- Focus : toujours bien visible au clavier --- */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* --- Boutons --- */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: max(var(--cible), 2.6rem);
+  min-width: var(--cible);
+  padding: 0.45em 1.1em;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+  color: var(--texte);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--duree), border-color var(--duree);
+}
+
+.bouton:hover {
+  border-color: var(--accent);
+}
+
+.bouton-principal {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--sur-accent);
+}
+
+.bouton-discret {
+  background: transparent;
+}
+
+.bouton[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Bouton fait d'une icône seule : il garde un nom pour les lecteurs d'écran
+   (aria-label) et une info-bulle (title). */
+.bouton-icone {
+  padding: 0.4em;
+}
+
+.icone {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- Texte réservé aux lecteurs d'écran --- */
+.visuellement-cache {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* --- Animations réduites : plus aucun mouvement décoratif --- */
+[data-animations="reduites"] *,
+[data-animations="reduites"] *::before,
+[data-animations="reduites"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

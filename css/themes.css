@@ -1,0 +1,151 @@
+/* =============================================================================
+   themes.css — les couleurs de l'interface (SEUL fichier qui contient des couleurs)
+   -----------------------------------------------------------------------------
+   Ailleurs, on utilise uniquement ces variables (var(--texte)…).
+
+   Les réglages sont posés sur la balise <html> par js/avant-affichage.js :
+     data-theme       omni (violet nuit, par défaut) | sombre | clair
+                      (« Auto » choisit sombre ou clair selon l'appareil)
+     data-contraste   normal | eleve
+     data-daltonisme  aucun | rouge-vert | bleu-jaune
+
+   Contrastes vérifiés par les tests (tests/navigateur/themes.test.mjs) :
+     texte principal ≥ 7, texte secondaire, liens et couleurs d'état ≥ 4,5,
+     bordures des commandes et contour de focus ≥ 3.
+   Les informations ne passent jamais par la couleur seule : chaque état a
+   aussi une icône et un mot.
+   ========================================================================== */
+
+/* --- Omni : violet nuit, l'identité de l'Omni-système (thème par défaut) --- */
+:root,
+[data-theme="omni"] {
+  --fond: #171126;
+  --surface: #241a3d;
+  --surface-2: #30244f;
+  --surface-active: #4a3880;
+  --bordure: #8f7fd0;
+  --texte: #f4f0ff;
+  --texte-doux: #d2c8f0;
+  --accent: #c9b6ff;
+  --sur-accent: #1a1033;
+  --focus: #ffd166;
+  --succes: #8ee6ae;
+  --attention: #ffd27a;
+  --erreur: #ffa8a8;
+  --info: #a7cfff;
+  --voile: rgba(8, 4, 18, 0.72);
+  --ombre: rgba(0, 0, 0, 0.45);
+  --epaisseur-bordure: 2px;
+  color-scheme: dark;
+}
+
+/* --- Sombre : gris neutres --- */
+[data-theme="sombre"] {
+  --fond: #121316;
+  --surface: #1c1e23;
+  --surface-2: #272a31;
+  --surface-active: #3a4252;
+  --bordure: #858d9c;
+  --texte: #f2f3f5;
+  --texte-doux: #c8ccd4;
+  --accent: #9cc8ff;
+  --sur-accent: #0b1626;
+  --focus: #ffd166;
+  --succes: #85e0a3;
+  --attention: #ffd27a;
+  --erreur: #ffa3a3;
+  --info: #9cc8ff;
+  --voile: rgba(0, 0, 0, 0.7);
+  --ombre: rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* --- Clair --- */
+[data-theme="clair"] {
+  --fond: #f4f2f9;
+  --surface: #ffffff;
+  --surface-2: #ece8f6;
+  --surface-active: #d9cff5;
+  --bordure: #6e6787;
+  --texte: #1b1630;
+  --texte-doux: #4a4462;
+  --accent: #5232b0;
+  --sur-accent: #ffffff;
+  --focus: #b3400b;
+  --succes: #1d7340;
+  --attention: #8a5300;
+  --erreur: #b42318;
+  --info: #1c5fae;
+  --voile: rgba(27, 22, 48, 0.55);
+  --ombre: rgba(27, 22, 48, 0.25);
+  color-scheme: light;
+}
+
+/* --- Contraste élevé (sur fond noir, ou blanc avec le thème clair) --- */
+[data-contraste="eleve"] {
+  --fond: #000000;
+  --surface: #000000;
+  --surface-2: #121212;
+  --surface-active: #2e2e2e;
+  --bordure: #ffffff;
+  --texte: #ffffff;
+  --texte-doux: #ffffff;
+  --accent: #ffe066;
+  --sur-accent: #000000;
+  --focus: #4de1ff;
+  --succes: #7dffa8;
+  --attention: #ffe066;
+  --erreur: #ff9a9a;
+  --info: #8fd1ff;
+  --voile: rgba(0, 0, 0, 0.85);
+  --epaisseur-bordure: 3px;
+}
+
+[data-contraste="eleve"][data-theme="clair"] {
+  --fond: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f0f0f0;
+  --surface-active: #d6d6d6;
+  --bordure: #000000;
+  --texte: #000000;
+  --texte-doux: #000000;
+  --accent: #1a1aa6;
+  --sur-accent: #ffffff;
+  --focus: #c40000;
+  --succes: #005a1e;
+  --attention: #6b4100;
+  --erreur: #a30000;
+  --info: #003d99;
+  --voile: rgba(0, 0, 0, 0.6);
+}
+
+/* --- Modes daltoniens : couleurs d'état faciles à distinguer --- */
+/* Rouge-vert (deutéranopie, protanopie) : bleu / orange / jaune. */
+[data-daltonisme="rouge-vert"] {
+  --succes: #8fc3ff;
+  --erreur: #ffb066;
+  --attention: #ffe08a;
+  --info: #d4bfff;
+}
+
+[data-daltonisme="rouge-vert"][data-theme="clair"] {
+  --succes: #1f5aa6;
+  --erreur: #a14a00;
+  --attention: #6e5300;
+  --info: #5a3aa8;
+}
+
+/* Bleu-jaune (tritanopie) : turquoise / rouge / rose. */
+[data-daltonisme="bleu-jaune"] {
+  --succes: #6fe3d4;
+  --erreur: #ff9a9a;
+  --attention: #ff9ad5;
+  --info: #c9c4ff;
+}
+
+[data-daltonisme="bleu-jaune"][data-theme="clair"] {
+  --succes: #00695f;
+  --erreur: #b3261e;
+  --attention: #9c1f6b;
+  --info: #4b3fa8;
+}

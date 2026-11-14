@@ -1,0 +1,26 @@
+{
+  "monnaie": {
+    "singulier": "pièce",
+    "pluriel": "pièces"
+  },
+  "depart": {
+    "argent": 100,
+    "reputation": 0,
+    "lieu": "domicile",
+    "jour": 1,
+    "heure": "08:00"
+  },
+  "reputation": {
+    "paliers": [
+      { "niveau": 1, "nom": "Premiers pas", "points": 0 },
+      { "niveau": 2, "nom": "Bouche-à-oreille", "points": 30 },
+      { "niveau": 3, "nom": "Atelier reconnu", "points": 80 },
+      { "niveau": 4, "nom": "Référence du quartier", "points": 160 },
+      { "niveau": 5, "nom": "Référence de la ville", "points": 280 }
+    ]
+  },
+  "sauvegarde": {
+    "intervalleSecondes": 30,
+    "copiesDeSecours": 5
+  }
+}

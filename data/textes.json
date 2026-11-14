@@ -1,0 +1,256 @@
+{
+  "commun": {
+    "fermer": "Fermer",
+    "annuler": "Annuler",
+    "daccord": "D'accord",
+    "nouvelOnglet": "(s'ouvre dans un nouvel onglet)"
+  },
+  "notifications": {
+    "masquer": "Masquer ce message"
+  },
+  "monnaie": {
+    "montant": {
+      "un": "{n} {singulier}",
+      "plusieurs": "{n} {pluriel}"
+    }
+  },
+  "format": {
+    "heure": "{h} h {m}",
+    "dateHeure": "{date} à {heure}"
+  },
+  "accueil": {
+    "accroche": "Crée des applications qui facilitent la vie de tes voisins, à ton rythme.",
+    "menu": "Menu principal",
+    "continuer": "Continuer",
+    "nouvellePartie": "Nouvelle partie",
+    "importer": "Importer une partie",
+    "reglages": "Réglages",
+    "installer": "Installer le jeu",
+    "aPropos": "À propos",
+    "version": "Version {version}"
+  },
+  "bienvenue": {
+    "titre": "Bienvenue !",
+    "intro": "Ici, pas de chronomètre et pas de partie perdue : tu joues à ton rythme, et tu peux faire une pause à tout moment.",
+    "confort": "Avant de commencer, tu peux régler le confort : taille du texte, contraste, police, animations, sons…",
+    "son": "Le son",
+    "plusTard": "Tout se change plus tard dans Réglages, depuis l'accueil ou le menu Pause.",
+    "commencer": "Garder les réglages par défaut",
+    "regler": "Régler le confort maintenant"
+  },
+  "nouvellePartie": {
+    "titre": "Commencer une nouvelle partie ?",
+    "remplace": "Ta partie actuelle sera remplacée.",
+    "copieGardee": "Une copie de secours est gardée : tu pourras y revenir depuis Sauvegarde.",
+    "oui": "Nouvelle partie",
+    "commencee": "Nouvelle partie commencée. Bienvenue !"
+  },
+  "hud": {
+    "argent": "Argent",
+    "reputation": "Réputation",
+    "moment": "Jour et heure",
+    "objectif": "Objectif :",
+    "aucunObjectif": "aucun pour l'instant",
+    "journalBientot": "Le journal des quêtes arrivera avec les premières quêtes.",
+    "pause": "Pause",
+    "jour": "Jour {jour}",
+    "niveau": "Niveau {niveau} · {nom}"
+  },
+  "provisoire": {
+    "titre": "Bientôt : ton domicile en 3D",
+    "texte": "Cette première étape pose les fondations : les réglages de confort, la sauvegarde et le fonctionnement hors ligne. La scène 3D arrive à l'étape suivante.",
+    "testsExplication": "Pour vérifier la sauvegarde, ces deux boutons de test modifient ta partie. Ils disparaîtront à l'étape suivante.",
+    "gagner": "Gagner 10 pièces (test)",
+    "jourSuivant": "Passer au jour suivant (test)"
+  },
+  "pause": {
+    "titre": "Pause",
+    "explication": "Le jeu est en pause : rien ne se passe tant que ce menu est ouvert.",
+    "reprendre": "Reprendre",
+    "reglages": "Réglages",
+    "sauvegarde": "Sauvegarde",
+    "aPropos": "À propos",
+    "accueil": "Retour à l'accueil (la partie est sauvegardée)"
+  },
+  "reglages": {
+    "titre": "Réglages",
+    "intro": "Chaque changement s'applique tout de suite et reste enregistré sur cet appareil.",
+    "sections": {
+      "affichage": "Affichage",
+      "mouvement": "Mouvements",
+      "son": "Son",
+      "couleurs": "Couleurs",
+      "retablir": "Réglages par défaut"
+    },
+    "texte": {
+      "titre": "Taille du texte",
+      "valeurs": { "1": "Normale", "2": "Grande", "3": "Très grande", "4": "Énorme" }
+    },
+    "theme": {
+      "titre": "Thème",
+      "aide": "« Auto » suit le mode clair ou sombre de l'appareil.",
+      "valeurs": { "omni": "Violet nuit", "sombre": "Sombre", "clair": "Clair", "auto": "Auto" }
+    },
+    "contraste": {
+      "titre": "Contraste élevé",
+      "aide": "Noir et blanc francs, bordures plus épaisses.",
+      "valeurs": { "normal": "Non", "eleve": "Oui" }
+    },
+    "police": {
+      "titre": "Police",
+      "aide": "« Très lisible » (Atkinson Hyperlegible) est conçue pour être lue facilement. OpenDyslexic est pensée pour les personnes dyslexiques.",
+      "valeurs": { "lisible": "Très lisible", "dyslexie": "OpenDyslexic", "systeme": "Police de l'appareil" }
+    },
+    "espacement": {
+      "titre": "Espacement du texte",
+      "aide": "« Aéré » écarte les lignes, les lettres et les mots.",
+      "valeurs": { "normal": "Normal", "aere": "Aéré" }
+    },
+    "animations": {
+      "titre": "Réduire les animations",
+      "aide": "Moins de mouvements à l'écran. « Auto » suit le réglage de l'appareil.",
+      "valeurs": { "auto": "Auto", "reduites": "Oui", "normales": "Non" }
+    },
+    "modeCalme": {
+      "titre": "Mode calme",
+      "aide": "Pas d'événements imprévus et moins de mouvements dans le décor. Les nouveautés arrivent sans bruit.",
+      "valeurs": { "false": "Désactivé", "true": "Activé" }
+    },
+    "sonCoupe": {
+      "titre": "Son",
+      "aide": "Le jeu se joue entièrement sans le son : tout ce qui est dit est aussi écrit.",
+      "valeurs": { "false": "Son activé", "true": "Son coupé" }
+    },
+    "volumes": {
+      "titre": "Volumes",
+      "aide": "Trois volumes séparés. « Écouter » fait entendre un court exemple.",
+      "musique": "Musique",
+      "effets": "Effets",
+      "voix": "Voix des personnages",
+      "ecouter": "Écouter",
+      "ecouterCanal": "Écouter un exemple : {canal}",
+      "valeur": "{n} %",
+      "noteCoupe": "Le son est coupé : ces volumes serviront quand tu le réactiveras."
+    },
+    "essai": {
+      "coupe": "Le son est coupé. Réactive-le pour écouter.",
+      "muet": "Ce volume est à 0 %. Monte-le pour écouter.",
+      "indisponible": "Le son n'est pas disponible sur cet appareil."
+    },
+    "daltonisme": {
+      "titre": "Mode daltonien",
+      "aide": "Change les couleurs des indicateurs (rouge-vert : deutéranopie, protanopie ; bleu-jaune : tritanopie). Les informations ne passent jamais par la couleur seule.",
+      "valeurs": { "aucun": "Aucun", "rouge-vert": "Rouge-vert", "bleu-jaune": "Bleu-jaune" }
+    },
+    "retablir": {
+      "aide": "Remet tous les réglages comme au premier lancement. Ta partie n'est pas touchée.",
+      "bouton": "Rétablir les réglages par défaut",
+      "titre": "Rétablir les réglages ?",
+      "message": "Tous les réglages reprennent leur valeur de départ. Ta partie n'est pas touchée.",
+      "oui": "Rétablir",
+      "fait": "Les réglages par défaut sont rétablis."
+    }
+  },
+  "sauvegarde": {
+    "titre": "Sauvegarde",
+    "partieEnCours": "Ta partie",
+    "aucunePartie": "Aucune partie en cours. Tu peux en importer une depuis un fichier.",
+    "maintenant": "Sauvegarder maintenant",
+    "maintenantDetail": "La sauvegarde est automatique, mais tu peux aussi la faire toi-même.",
+    "exporter": "Exporter ma partie",
+    "exporterDetail": "Crée un fichier avec ta partie, à garder ou à ouvrir sur un autre appareil.",
+    "importer": "Importer une partie",
+    "importerDetail": "Reprend une partie depuis un fichier exporté.",
+    "automatique": "Ta partie est sauvegardée toute seule sur cet appareil : après chaque événement important, régulièrement pendant le jeu, et quand tu le quittes.",
+    "faite": "Partie sauvegardée.",
+    "echec": "La sauvegarde n'a pas pu se faire. Pense à exporter ta partie dans un fichier.",
+    "exportee": "Fichier créé : {fichier}",
+    "modeMemoire": "Ce navigateur ne permet pas d'enregistrer la partie (navigation privée ?). Elle sera perdue en fermant le jeu : pense à l'exporter dans un fichier.",
+    "reparee": "Ta sauvegarde était abîmée : la copie de secours du {date} a été reprise.",
+    "perdue": "Ta sauvegarde était abîmée et aucune copie de secours n'était lisible. Elle a été mise de côté ; tu peux commencer une nouvelle partie.",
+    "resume": {
+      "moment": "Moment",
+      "argent": "Argent",
+      "reputation": "Réputation",
+      "enregistree": "Enregistrée le",
+      "version": "Version du jeu"
+    },
+    "import": {
+      "impossible": "Import impossible",
+      "rienChange": "Rien n'a été changé : ta partie actuelle est intacte.",
+      "titre": "Importer cette partie ?",
+      "trouvee": "Voici la partie trouvée dans le fichier :",
+      "copieGardee": "Ta partie actuelle sera gardée en copie de secours.",
+      "remplacer": "Remplacer ma partie",
+      "charger": "Charger cette partie",
+      "reussi": "Partie chargée."
+    },
+    "copies": {
+      "titre": "Copies de secours",
+      "detail": "Revenir à une copie gardée automatiquement.",
+      "aucune": "Aucune copie de secours pour l'instant. Le jeu en crée une à chaque nouveau jour et avant chaque import.",
+      "explication": "Le jeu garde tout seul les copies les plus récentes.",
+      "reprendre": "Reprendre cette copie",
+      "reprendreTitre": "Reprendre cette copie ?",
+      "reprendreMessage": "La partie revient à son état du {date}.",
+      "reprise": "Copie de secours reprise."
+    },
+    "raisons": {
+      "nouveau-jour": "Début d'une nouvelle journée",
+      "avant-import": "Avant un import",
+      "avant-nouvelle-partie": "Avant une nouvelle partie",
+      "avant-restauration": "Avant la reprise d'une copie",
+      "manuelle": "Copie manuelle"
+    },
+    "erreurs": {
+      "vide": "Le fichier est vide.",
+      "tropGros": "Ce fichier est trop gros pour être une partie du jeu.",
+      "pasJson": "Ce fichier n'est pas une partie du jeu (il n'est pas au format attendu).",
+      "pasUnePartie": "Ce fichier ne contient pas une partie de ce jeu.",
+      "tropRecente": "Cette partie vient d'une version plus récente du jeu. Mets le jeu à jour, puis réessaie.",
+      "abimee": "Cette partie est abîmée et ne peut pas être lue.",
+      "copieIntrouvable": "Cette copie de secours n'existe plus."
+    }
+  },
+  "pwa": {
+    "disponible": "Une nouvelle version du jeu est prête.",
+    "disponibleVersion": "La version {version} du jeu est prête.",
+    "mettreAJour": "Mettre à jour",
+    "echec": "La mise à jour n'a pas pu se faire. Elle sera proposée à nouveau."
+  },
+  "installation": {
+    "titre": "Installer le jeu",
+    "intro": "Installé, le jeu s'ouvre comme une application et fonctionne sans connexion internet.",
+    "android": {
+      "titre": "Tablette ou téléphone Android (Chrome, Brave, Edge)",
+      "etapes": "Ouvre le menu du navigateur (les trois points ⋮), puis touche « Installer l'application » ou « Ajouter à l'écran d'accueil »."
+    },
+    "ipad": {
+      "titre": "iPad ou iPhone (Safari)",
+      "etapes": "Touche le bouton Partager (le carré avec une flèche vers le haut), puis « Sur l'écran d'accueil »."
+    },
+    "ordinateur": {
+      "titre": "Ordinateur (Chrome, Edge, Brave)",
+      "etapes": "Clique sur l'icône d'installation à droite de la barre d'adresse, ou passe par le menu du navigateur."
+    },
+    "astuceTitre": "Si l'installation ne se propose pas",
+    "astuce": "Sur Chrome pour Android, une seule application de ce site peut parfois être installée. Si une autre application de Ferrus Dantioch est déjà installée, ouvre le jeu dans le navigateur Brave pour l'installer à son tour.",
+    "dejaInstalle": "Le jeu est déjà installé sur cet appareil.",
+    "merci": "C'est installé ! Tu retrouveras le jeu parmi tes applications."
+  },
+  "aPropos": {
+    "titre": "À propos",
+    "logoAlt": "Logo de l'Omni-système : un dé à vingt faces violet entouré d'un anneau lumineux",
+    "version": "Version {version}",
+    "realisation": "Jeu réalisé par {auteur}, avec l'aide de l'intelligence artificielle.",
+    "licenceDebut": "© 2026 {auteur} —",
+    "licenceNom": "Creative Commons BY-NC-ND 4.0",
+    "licenceFin": " : partage autorisé en citant l'auteur, sans usage commercial ni modification.",
+    "licenceTexte": "Lire la licence complète.",
+    "confidentialite": "Ta partie et tes réglages restent sur cet appareil. Aucun compte, aucune publicité, aucune donnée envoyée.",
+    "tiers": "Moteur 3D Three.js (licence MIT), polices Atkinson Hyperlegible Next et OpenDyslexic (licence SIL OFL 1.1) :",
+    "tiersLien": "voir les licences.",
+    "contact": "Une idée, une remarque, un souci ? Tes retours sont les bienvenus :",
+    "omni": "Découvrir l'Omni-système"
+  }
+}
