@@ -10,6 +10,23 @@
   position: fixed;
   inset: 0;
   z-index: 0;
+  background: var(--fond-scene);
+}
+
+/* La zone de dessin 3D occupe toute la scène. Les gestes (glisser, pincer)
+   sont gérés par le jeu : le navigateur ne fait ni défiler ni zoomer ici. */
+.scene-toile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.scene-toile.scene-cliquable {
+  cursor: pointer;
 }
 
 .interface {
@@ -139,42 +156,57 @@
 }
 
 /* --- Écran de jeu --- */
+/* La scène 3D est DESSOUS l'interface. En jeu, l'interface laisse passer le
+   doigt partout où il n'y a pas de bouton : on touche la scène. */
+.en-jeu .interface {
+  pointer-events: none;
+}
+
 .ecran-jeu {
-  min-height: 100vh;
-  min-height: 100dvh;
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+}
+
+.ecran-jeu > .barre-haut,
+.ecran-jeu > .barre-bas,
+.ecran-jeu > .commandes-camera,
+.ecran-jeu .bulle {
+  pointer-events: auto;
 }
 
 /* La barre fixe : mêmes informations, toujours aux mêmes places. */
 .barre-haut {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 5;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.4rem 1rem;
   padding:
-    max(0.5rem, env(safe-area-inset-top))
+    max(0.4rem, env(safe-area-inset-top))
     max(0.75rem, env(safe-area-inset-right))
-    0.5rem
+    0.4rem
     max(0.75rem, env(safe-area-inset-left));
   border-bottom: var(--epaisseur-bordure) solid var(--bordure);
-  background: var(--surface);
+  background: var(--barre);
+  box-shadow: 0 4px 16px var(--ombre);
 }
 
 .barre-zone {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1rem;
+  gap: 0.4rem 1rem;
 }
 
 .barre-centre {
   flex: 1 1 14rem;
   justify-content: center;
+  min-width: 0;
 }
 
 /* Même quand la barre passe sur deux lignes (texte très grand), l'heure et
@@ -189,35 +221,446 @@
   gap: 0.4em;
   min-height: var(--cible);
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.libelle-court {
+  display: none;
 }
 
 .objectif {
   max-width: 100%;
+  min-width: 0;
   font-weight: 400;
+}
+
+.objectif-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .objectif strong {
   font-weight: 700;
 }
 
-.zone-centrale {
+/* Barre compacte (écran étroit ou texte très grand) : libellés raccourcis,
+   l'objectif sur sa propre ligne, « Pause » réduit à son icône. */
+.barre-haut.compacte {
+  gap: 0.2rem 0.8rem;
+}
+
+/* Le libellé complet reste lu par les lecteurs d'écran (seul le libellé
+   court, caché aux lecteurs d'écran, est montré). */
+.barre-haut.compacte .libelle-long {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.barre-haut.compacte .libelle-court {
+  display: inline;
+}
+
+.barre-haut.compacte .barre-gauche {
+  order: 1;
+}
+
+.barre-haut.compacte .barre-droite {
+  order: 2;
+}
+
+.barre-haut.compacte .barre-centre {
+  order: 3;
+  flex-basis: 100%;
+  justify-content: flex-start;
+}
+
+.barre-haut.compacte .objectif {
+  min-height: var(--cible);
+  padding-block: 0.2em;
+}
+
+.barre-haut.compacte .libelle-pause {
+  display: none;
+}
+
+.barre-haut.compacte .bouton-pause {
+  padding: 0.4em;
+}
+
+/* Entre les deux barres : la scène (la bulle « Examiner » s'y affiche). */
+.zone-monde {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  align-items: flex-end;
+  justify-content: flex-start;
+  /* À droite, la place des boutons de la caméra. */
+  padding: 0.75rem calc(52px * 2 + 8px + 1.5rem) 0.75rem max(0.75rem, env(safe-area-inset-left));
+  min-height: 0;
 }
 
-.panneau-provisoire {
-  width: min(38rem, 100%);
-  padding: 1.4rem;
-  border: var(--epaisseur-bordure) dashed var(--bordure);
+/* Sur un écran étroit, la bulle prend toute la largeur : les boutons de la
+   caméra s'effacent le temps de la lire. */
+@media (max-width: 700px) {
+  .zone-monde {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+  .bulle-ouverte .commandes-camera {
+    visibility: hidden;
+  }
+}
+
+.bulle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: min(34rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 0.8rem 0.6rem 0.8rem 1.1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
   border-radius: var(--rayon);
   background: var(--surface);
+  box-shadow: 0 8px 24px var(--ombre);
 }
 
-.panneau-provisoire h2 {
-  font-size: 1.35rem;
+.bulle-contenu {
+  flex: 1;
+}
+
+.bulle-titre {
+  font-size: 1.15rem;
+  margin-bottom: 0.25em;
+}
+
+.bulle-texte {
+  margin: 0;
+}
+
+.barre-bas {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding:
+    0.5rem
+    max(0.75rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom))
+    max(0.75rem, env(safe-area-inset-left));
+  border-top: var(--epaisseur-bordure) solid var(--bordure);
+  background: var(--barre);
+  box-shadow: 0 -4px 16px var(--ombre);
+}
+
+.barre-bas .barre-zone {
+  gap: 0.5rem;
+}
+
+.raccourci {
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: 400;
+  padding: 0.05em 0.4em;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+}
+
+.lieu-actuel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* Les boutons de la caméra : icônes de taille fixe (ils ne grossissent pas
+   avec le texte), en colonne à droite, au-dessus de la barre du bas. */
+.commandes-camera {
+  position: fixed;
+  z-index: 4;
+  right: max(0.6rem, env(safe-area-inset-right));
+  bottom: calc(var(--hauteur-barre-bas, 4.5rem) + 0.6rem);
+  display: grid;
+  grid-template-columns: repeat(2, 52px);
+  gap: 8px;
+  font-size: 18px;
+}
+
+.bouton-camera {
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 0;
+  font-size: 18px;
+  background: var(--barre);
+  box-shadow: 0 4px 12px var(--ombre);
+}
+
+.commandes-camera .bouton-camera:last-child {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+/* Fenêtre « Aller à… » : une section par pièce. */
+.groupe-destinations h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  font-size: 1.1rem;
+  margin: 0.4rem 0 0.5rem;
+}
+
+.etiquette {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.1em 0.6em;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+}
+
+.liste-destinations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* Fenêtre « Commandes ». */
+.liste-commandes {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr;
+  gap: 0.4rem 1rem;
+  margin: 0 0 1.2rem;
+}
+
+.liste-commandes dt {
+  font-weight: 700;
+}
+
+.liste-commandes dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .liste-commandes {
+    grid-template-columns: 1fr;
+  }
+  .liste-commandes dd {
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* --- Écran « Qui veux-tu incarner ? » --- */
+.ecran-perso {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(36rem, 58vw);
+  pointer-events: none;
+}
+
+.ecran-perso > * {
+  pointer-events: auto;
+}
+
+/* La zone où l'on voit le personnage (la 3D est dessous). */
+.perso-apercu {
+  min-height: 0;
+  pointer-events: none;
+}
+
+.ecran-perso > .perso-apercu {
+  pointer-events: none;
+}
+
+.ecran-perso.sans-apercu {
+  grid-template-columns: 1fr;
+  background: var(--fond);
+}
+
+.ecran-perso.sans-apercu .perso-apercu {
+  display: none;
+}
+
+.perso-panneau {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: var(--epaisseur-bordure) solid var(--bordure);
+  background: var(--surface);
+  box-shadow: -8px 0 32px var(--ombre);
+}
+
+.perso-defilement {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding:
+    max(1rem, env(safe-area-inset-top))
+    max(1.2rem, env(safe-area-inset-right))
+    1rem
+    1.2rem;
+}
+
+.perso-defilement h1 {
+  font-size: 1.6rem;
+}
+
+.perso-defilement h1:focus {
+  outline: none;
+}
+
+.perso-defilement h2 {
+  font-size: 1.2rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--bordure);
+  margin: 0 0 1rem;
+}
+
+.perso-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding:
+    0.8rem
+    max(1.2rem, env(safe-area-inset-right))
+    max(0.8rem, env(safe-area-inset-bottom))
+    1.2rem;
+  border-top: 1px solid var(--bordure);
+}
+
+.perso-tourner {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+}
+
+/* Les deux grandes cartes : Ferrus ou ton personnage. */
+.cartes-modele {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.7rem;
+}
+
+.carte-modele {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+}
+
+.carte-modele-contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+.carte-modele-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.carte-modele-texte {
+  font-size: 0.95rem;
+}
+
+.carte-modele-note {
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+  font-style: italic;
+}
+
+.option-entree:checked + .carte-modele-contenu {
+  background: var(--surface-active);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.option-entree:checked + .carte-modele-contenu .option-coche {
+  display: inline-block;
+}
+
+.option-entree:focus-visible + .carte-modele-contenu {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Pastille de couleur (toujours accompagnée du nom de la couleur). */
+.pastille {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+  border: 2px solid var(--texte);
+  border-radius: 50%;
+}
+
+.champ-texte {
+  flex: 1 1 10rem;
+  min-width: 0;
+  min-height: var(--cible);
+  padding: 0.4em 0.7em;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+  color: var(--texte);
+}
+
+.rangee-champ {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.erreur-champ {
+  margin: 0.4rem 0 0;
+  color: var(--erreur);
+  font-weight: 700;
+}
+
+.erreur-champ:empty {
+  display: none;
+}
+
+/* Écran étroit ou en hauteur : l'aperçu en haut, les choix en dessous. */
+@media (max-width: 760px), (orientation: portrait) and (max-width: 1000px) {
+  .ecran-perso {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(9rem, 34vh) minmax(0, 1fr);
+  }
+  .perso-panneau {
+    border-left: 0;
+    border-top: var(--epaisseur-bordure) solid var(--bordure);
+    box-shadow: 0 -8px 32px var(--ombre);
+  }
+  .perso-tourner {
+    top: calc(34vh - 60px);
+    bottom: auto;
+  }
 }
 
 .rangee-boutons {
@@ -538,6 +981,13 @@ input[type="range"] {
   gap: 0.6rem;
   width: min(32rem, calc(100vw - 1.5rem));
   pointer-events: none;
+}
+
+/* En jeu, les messages s'affichent en haut, sous la barre fixe : le bas de
+   l'écran reste à la bulle « Examiner » et aux boutons. */
+.en-jeu .notifications {
+  top: calc(var(--hauteur-barre-haut, 4rem) + 0.75rem);
+  bottom: auto;
 }
 
 .notification {

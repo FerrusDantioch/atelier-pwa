@@ -26,6 +26,7 @@ export function resumeEnListe(partie, jeu) {
   const resume = resumerPartie(partie);
   const niveau = niveauDeReputation(resume.reputation, jeu.reputation.paliers);
   const lignes = [
+    ...(resume.nomJoueur ? [[t('sauvegarde.resume.personnage'), resume.nomJoueur]] : []),
     [t('sauvegarde.resume.moment'), `${t('hud.jour', { jour: resume.jour })}, ${formaterHeure(resume.minute)}`],
     [t('sauvegarde.resume.argent'), tPluriel('monnaie.montant', resume.argent, {
       singulier: jeu.monnaie.singulier, pluriel: jeu.monnaie.pluriel,

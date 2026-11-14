@@ -41,7 +41,7 @@ export function afficherAccueil(parent, options) {
     boutons.push(boutonMenu({
       icone: 'jouer',
       texte: t('accueil.continuer'),
-      detail: `${t('hud.jour', { jour: resume.jour })}, ${formaterHeure(resume.minute)} · ${
+      detail: `${resume.nomJoueur ? `${resume.nomJoueur} · ` : ''}${t('hud.jour', { jour: resume.jour })}, ${formaterHeure(resume.minute)} · ${
         tPluriel('monnaie.montant', resume.argent, { singulier: jeu.monnaie.singulier, pluriel: jeu.monnaie.pluriel })}`,
       principal: true,
       surClic: options.surContinuer,

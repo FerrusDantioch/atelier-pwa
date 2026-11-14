@@ -24,6 +24,8 @@ export const CHOIX = {
   daltonisme: ['aucun', 'rouge-vert', 'bleu-jaune'],
   modeCalme: [false, true],
   sonCoupe: [false, true],
+  luminosite: ['normale', 'douce', 'vive'],
+  qualite: ['standard', 'economie', 'haute'],
 };
 
 export const CANAUX_SON = ['musique', 'effets', 'voix'];
@@ -42,6 +44,8 @@ export function reglagesParDefaut(appareil = {}) {
     daltonisme: 'aucun',
     modeCalme: false,
     sonCoupe: false,
+    luminosite: 'normale',
+    qualite: 'standard',
     volumes: { musique: 40, effets: 70, voix: 60 },
     premierLancementFait: false,
   };

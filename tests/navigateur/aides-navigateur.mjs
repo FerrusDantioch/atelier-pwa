@@ -59,13 +59,79 @@ export async function fermerBienvenueSiPresente(page) {
   if (await bouton.isVisible().catch(() => false)) await bouton.click();
 }
 
-export async function nouvellePartie(page) {
+// Nouvelle partie : confirmation éventuelle, choix du personnage, puis jeu.
+//   modele : 'perso' (personnage proposé) ou 'ferrus'
+//   aide   : aide à la mobilité du personnage ('aucune', 'fauteuil', 'canne')
+export async function nouvellePartie(page, { modele = 'perso', aide = null } = {}) {
   await page.getByRole('button', { name: /^Nouvelle partie/ }).click();
-  const confirmation = page.getByRole('dialog', { name: 'Commencer une nouvelle partie ?' });
+  const confirmation = page.getByRole('dialog', { name: /Commencer une nouvelle partie/ });
+  const titre = page.getByRole('heading', { name: /Qui veux-tu incarner/ });
+  await Promise.race([confirmation.waitFor(), titre.waitFor()]);
   if (await confirmation.isVisible().catch(() => false)) {
     await confirmation.getByRole('button', { name: 'Nouvelle partie' }).click();
   }
+  await titre.waitFor();
+  if (modele === 'ferrus') await page.getByRole('radio', { name: /Ferrus Dantioch/ }).check();
+  if (aide) await page.getByRole('group', { name: 'Aide', exact: true }).getByRole('radio', { name: aide }).check();
+  await page.getByRole('button', { name: /C'est parti/ }).click();
   await page.locator('.barre-haut').waitFor();
+  await attendreMonde(page);
+}
+
+// Attend que la scène 3D soit prête (le monde est créé et dessiné).
+export async function attendreMonde(page) {
+  await page.waitForFunction(async () => {
+    const ecran = await import('/js/interface/ecran-jeu.js');
+    return Boolean(ecran.mondeAffiche());
+  });
+}
+
+// Ajoute des pièces à la partie en cours, comme le fera le jeu (pour préparer
+// un test : il n'y a pas encore de quoi gagner de l'argent au jalon 1).
+export async function gagnerPieces(page, nombre) {
+  await page.evaluate(async (n) => {
+    const etat = await import('/js/noyau/etat.js');
+    etat.modifierPartie((partie) => { partie.argent += n; });
+  }, nombre);
+}
+
+// Passe au jour suivant comme le fera le jeu : copie de secours, puis jour + 1.
+export async function jourSuivant(page) {
+  await page.evaluate(async () => {
+    const etat = await import('/js/noyau/etat.js');
+    const sauvegarde = await import('/js/noyau/sauvegarde.js');
+    await sauvegarde.creerCopieDeSecours(etat.partieEnCours(), 'nouveau-jour');
+    etat.modifierPartie((partie) => { partie.temps.jour += 1; partie.temps.minute = 480; }, { important: true });
+  });
+}
+
+// La partie en cours (copie), lue dans le jeu.
+export async function lirePartieEnCours(page) {
+  return page.evaluate(async () => {
+    const etat = await import('/js/noyau/etat.js');
+    return JSON.parse(JSON.stringify(etat.partieEnCours()));
+  });
+}
+
+// Où se trouve, à l'écran, le centre d'une case du lieu (en pixels de page).
+export async function positionDeCase(page, x, z) {
+  return page.evaluate(async ([cx, cz]) => {
+    const ecran = await import('/js/interface/ecran-jeu.js');
+    return ecran.mondeAffiche().positionEcranDeCase(cx, cz);
+  }, [x, z]);
+}
+
+// Attend que le personnage soit arrivé (plus de déplacement en cours).
+export async function attendreArrivee(page, { x, z } = {}) {
+  await page.waitForFunction(async ([cx, cz]) => {
+    const ecran = await import('/js/interface/ecran-jeu.js');
+    const monde = ecran.mondeAffiche();
+    const etat = await import('/js/noyau/etat.js');
+    const position = etat.partieEnCours()?.joueur?.position;
+    if (!monde || !position) return false;
+    if (cx === undefined) return true;
+    return position.x === cx && position.z === cz && monde.case.x === cx && monde.case.z === cz;
+  }, [x, z], { timeout: 15000 });
 }
 
 // Le texte de la barre fixe, sur une seule ligne.

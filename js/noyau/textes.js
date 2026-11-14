@@ -63,6 +63,13 @@ export function existe(cle) {
   return typeof chercher(cle) === 'string';
 }
 
+// Les noms des textes d'un groupe, dans l'ordre du fichier (pour les listes
+// dont la longueur se règle dans data/textes.json).
+export function clesDuGroupe(cle) {
+  const groupe = chercher(cle);
+  return groupe && typeof groupe === 'object' ? Object.keys(groupe) : [];
+}
+
 const formatNombre = new Intl.NumberFormat('fr-FR');
 export function formaterNombre(nombre) {
   return formatNombre.format(nombre);

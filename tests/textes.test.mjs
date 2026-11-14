@@ -38,7 +38,7 @@ test('les textes des réglages existent pour chaque choix', () => {
   for (const resultat of ['coupe', 'muet', 'indisponible']) {
     if (!existe(`reglages.essai.${resultat}`)) manquantes.push(`reglages.essai.${resultat}`);
   }
-  for (const section of ['affichage', 'mouvement', 'son', 'couleurs', 'retablir']) {
+  for (const section of ['affichage', 'mouvement', 'scene', 'son', 'couleurs', 'retablir']) {
     if (!existe(`reglages.sections.${section}`)) manquantes.push(`reglages.sections.${section}`);
   }
   assert.deepEqual(manquantes, []);

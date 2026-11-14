@@ -46,6 +46,24 @@ const DESSINS = {
   recharger: [['path', { d: 'M20 12a8 8 0 1 1-2.4-5.7' }], ['path', { d: 'M20 4v4.5h-4.5' }]],
   lienExterne: [['path', { d: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6' }]],
   calme: [['path', { d: 'M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0' }]],
+  tournerGauche: [['path', { d: 'M5.5 9.5a7.5 7.5 0 1 1 1.8 8.2' }], ['path', { d: 'M4.5 4.5v5h5' }]],
+  tournerDroite: [['path', { d: 'M18.5 9.5a7.5 7.5 0 1 0-1.8 8.2' }], ['path', { d: 'M19.5 4.5v5h-5' }]],
+  zoomPlus: [['circle', { cx: 10.5, cy: 10.5, r: 6.5 }], ['path', { d: 'M15.5 15.5L20.5 20.5M10.5 7.8v5.4M7.8 10.5h5.4' }]],
+  zoomMoins: [['circle', { cx: 10.5, cy: 10.5, r: 6.5 }], ['path', { d: 'M15.5 15.5L20.5 20.5M7.8 10.5h5.4' }]],
+  recentrer: [['circle', { cx: 12, cy: 12, r: 4.5 }], ['circle', { cx: 12, cy: 12, r: 1.2, fill: 'currentColor' }], ['path', { d: 'M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4' }]],
+  allerA: [['path', { d: 'M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z' }], ['circle', { cx: 12, cy: 10, r: 2.4 }]],
+  examiner: [['path', { d: 'M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z' }], ['circle', { cx: 12, cy: 12, r: 3 }]],
+  personnage: [['circle', { cx: 12, cy: 7.5, r: 3.5 }], ['path', { d: 'M5 20.5c0-4 3-6.5 7-6.5s7 2.5 7 6.5' }]],
+  clavier: [['rect', { x: 2.5, y: 6, width: 19, height: 12, rx: 2 }], ['path', { d: 'M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9' }]],
+  retour: [['path', { d: 'M10 6l-6 6 6 6M4 12h16' }]],
+  hasard: [
+    ['rect', { x: 4, y: 4, width: 16, height: 16, rx: 3 }],
+    ['circle', { cx: 9, cy: 9, r: 1.3, fill: 'currentColor' }],
+    ['circle', { cx: 15, cy: 15, r: 1.3, fill: 'currentColor' }],
+    ['circle', { cx: 15, cy: 9, r: 1.3, fill: 'currentColor' }],
+    ['circle', { cx: 9, cy: 15, r: 1.3, fill: 'currentColor' }],
+  ],
+  lieu: [['path', { d: 'M4 11l8-7 8 7M6 9.5V20h12V9.5' }], ['path', { d: 'M10 20v-5h4v5' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

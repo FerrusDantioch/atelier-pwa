@@ -124,6 +124,10 @@ function contenuReglages({ surRetablis }) {
       groupeDeChoix('animations'),
       groupeDeChoix('modeCalme'),
     ]),
+    section('scene', [
+      groupeDeChoix('luminosite'),
+      groupeDeChoix('qualite'),
+    ]),
     section('son', [
       groupeDeChoix('sonCoupe', { surChangement: (coupe) => { noteSonCoupe.hidden = !coupe; } }),
       el('div', { class: 'reglage' },
