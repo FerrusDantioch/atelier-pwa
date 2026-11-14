@@ -1,0 +1,12 @@
+{
+  "name": "atelier-pwa-tests-navigateur",
+  "private": true,
+  "description": "Tests du jeu dans un vrai navigateur (outil de développement, jamais publié avec le jeu).",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"*.test.mjs\""
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
