@@ -24,7 +24,7 @@ const SECTIONS = [
   ['visage', ['teint', 'lunettes']],
   ['cheveux', ['coiffure', 'cheveux', 'barbe']],
   ['silhouette', ['silhouette', 'taille']],
-  ['tenue', ['haut', 'styleBas', 'bas', 'couvreChef', 'couleurCouvreChef']],
+  ['tenue', ['haut', 'motifHaut', 'couleurMotif', 'styleBas', 'bas', 'couvreChef', 'couleurCouvreChef']],
   ['aide', ['aide', 'couleurAide']],
 ];
 
@@ -202,6 +202,7 @@ export function afficherChoixPerso(parent, { mode, personnages, palette, joueur,
   function actualiser() {
     groupes.get('cheveux').hidden = apparence.coiffure === 'aucune' && apparence.barbe === 'aucune';
     groupes.get('couleurCouvreChef').hidden = apparence.couvreChef === 'aucun';
+    groupes.get('couleurMotif').hidden = apparence.motifHaut === 'uni';
     groupes.get('couleurAide').hidden = apparence.aide === 'aucune';
     editeur.hidden = modele !== 'perso';
     studio?.montrer(apparenceAffichee());

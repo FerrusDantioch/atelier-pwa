@@ -175,8 +175,11 @@ Décidé avec Ferrus (14 novembre 2026) :
 
 - **Deux Ferrus** : si le joueur choisit Ferrus, le mentor n'apparaît qu'en
   visio, comme « le vrai Ferrus, depuis le monde réel ».
-- **Test et publication** : tablette avec le navigateur **Brave** ; chaque
-  jalon validé est **fusionné dans `main`**, publiée par GitHub Pages.
+- **Test et publication** : tablette **Android** avec le navigateur
+  **Brave** ; chaque jalon validé est **fusionné dans `main`**, publiée par
+  GitHub Pages.
+- **Apparence de Ferrus** (décrite par lui) : cheveux sombres voire noirs,
+  lunettes, chemise noire à rayures blanches verticales, pantalon bleu.
 
 Recommandations appliquées en attendant une réponse contraire :
 
@@ -190,14 +193,15 @@ Recommandations appliquées en attendant une réponse contraire :
 
 Questions ouvertes (à trancher avant le jalon indiqué) :
 
-1. **Apparence de Ferrus** : comment le représenter quand on le joue (teint,
-   cheveux, barbe, lunettes, tenue, aide éventuelle) ? En attendant :
-   apparence neutre, marquée provisoire (`TODO_FERRUS`).
-2. **PNJ n°1** (avant J2) : fiche à valider (nom fictif, présentation).
+1. **Apparence de Ferrus** : il reste à confirmer le teint (neutre en
+   attendant), la longueur des cheveux, la forme des lunettes et la barbe
+   (`TODO_FERRUS`).
+2. **PNJ n°1** (avant J2) : nom fictif choisi par Ferrus (gardé hors du
+   dépôt) ; fiche complète (apparence, rôle, répliques) à faire valider par
+   elle avant toute publication.
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
    portfolio ? lesquelles en affiche au domicile ? quels statuts ?
 4. **Mentions légales** (avant J6) : statut et champs à compléter.
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.
-6. **Tablette** : Android ou iPad ? (Brave n'utilise pas le même moteur sur
-   les deux.)
+6. *(Réglée : tablette Android, Brave.)*

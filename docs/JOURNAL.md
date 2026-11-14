@@ -1,13 +1,18 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 1 — Le domicile en 3D (version 0.2.0, 14 novembre 2026) — à valider
+## ✅ Jalon 1 — Le domicile en 3D (version 0.2.0, 14 novembre 2026)
+
+Validé par Ferrus le 14 novembre 2026, puis fusionné dans `main`.
 
 ### Ce qui est fait
 
 - **Choix du personnage** au début d'une partie : jouer **Ferrus Dantioch**
-  (apparence provisoire, en attendant sa description) ou **son personnage** :
+  (cheveux noirs, lunettes, chemise noire à rayures blanches, pantalon bleu,
+  d'après sa description ; quelques détails restent à confirmer) ou **son
+  personnage** :
   prénom, teint (dont un teint « neutre »), coiffure, couleur des cheveux,
-  barbe, lunettes, silhouette, taille, haut, bas (pantalon, jupe, short),
+  barbe, lunettes, silhouette, taille, haut (uni ou à rayures), bas
+  (pantalon, jupe, short),
   couvre-chef (bonnet, casquette, foulard) et une **aide à la mobilité
   facultative** (fauteuil roulant, canne) avec sa couleur. Aperçu 3D mis à
   jour à chaque choix, bouton « Tout au hasard » (qui ne touche jamais à
@@ -90,22 +95,23 @@
 
 - Le temps ne passe pas encore (jour 1, 8 h 00) : il arrive au jalon 2 avec
   les personnages et leurs routines (le lit servira alors à dormir).
-- Ferrus a une apparence **provisoire et neutre** (teint lilas, sans
-  cheveux) en attendant sa description.
+- Ferrus garde un **teint neutre** (lilas) en attendant sa réponse ; la
+  longueur des cheveux, la forme des lunettes et l'absence de barbe sont
+  aussi à confirmer.
 - La porte d'entrée ne mène encore nulle part (les bureaux arrivent au
   jalon 5).
 - Sur téléphone en portrait avec le texte « Énorme », les barres prennent
   encore environ 40 % de la hauteur de l'écran.
-- Testé dans Chromium (le moteur de Brave sur Android). Sur iPad, Brave
-  utilise le moteur de Safari, qui n'a pas pu être essayé ici.
+- Testé dans Chromium, le moteur de Brave sur Android (la tablette de
+  Ferrus).
 
 ### En attente de Ferrus
 
-- La validation de ce jalon, puis la fusion dans `main` (publiée par GitHub
-  Pages).
-- La description de son apparence pour le personnage « Ferrus » (repère
-  `TODO_FERRUS` dans `data/personnages.json`).
-- La fiche de la PNJ n°1 (avant le jalon 2).
+- Les derniers détails de son apparence : teint, longueur des cheveux,
+  forme des lunettes, barbe (repère `TODO_FERRUS` dans
+  `data/personnages.json`).
+- La fiche de la PNJ n°1, validée par elle (avant le jalon 2) : rien la
+  concernant n'est poussé dans ce dépôt public avant.
 
 ## ✅ Jalon 0 — Squelette PWA (version 0.1.0, 14 novembre 2026)
 

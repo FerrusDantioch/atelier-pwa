@@ -24,12 +24,12 @@ export const CHAMPS_APPARENCE = [
   'teint', 'lunettes',
   'coiffure', 'cheveux', 'barbe',
   'silhouette', 'taille',
-  'haut', 'styleBas', 'bas', 'couvreChef', 'couleurCouvreChef',
+  'haut', 'motifHaut', 'couleurMotif', 'styleBas', 'bas', 'couvreChef', 'couleurCouvreChef',
   'aide', 'couleurAide',
 ];
 
 // Les champs dont les options sont des couleurs (data/palette.json).
-export const CHAMPS_COULEUR = ['teint', 'cheveux', 'haut', 'bas', 'couleurCouvreChef', 'couleurAide'];
+export const CHAMPS_COULEUR = ['teint', 'cheveux', 'haut', 'couleurMotif', 'bas', 'couleurCouvreChef', 'couleurAide'];
 
 // Les formes que le code sait dessiner (js/modeles/personnage.js). Le fichier
 // de données peut en proposer moins, jamais d'autres.
@@ -39,6 +39,7 @@ export const FORMES_CONNUES = {
   barbe: ['aucune', 'courte', 'longue'],
   silhouette: ['fine', 'moyenne', 'large'],
   taille: ['petite', 'moyenne', 'grande'],
+  motifHaut: ['uni', 'rayures'],
   styleBas: ['pantalon', 'jupe', 'short'],
   couvreChef: ['aucun', 'bonnet', 'casquette', 'foulard'],
   aide: ['aucune', 'fauteuil', 'canne'],

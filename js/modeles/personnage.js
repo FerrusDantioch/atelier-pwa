@@ -156,6 +156,7 @@ export function construirePersonnage(apparence, personnages, palette) {
     peau: couleurDe('teint', apparence, personnages, palette),
     cheveux: couleurDe('cheveux', apparence, personnages, palette),
     haut: couleurDe('haut', apparence, personnages, palette),
+    motif: couleurDe('couleurMotif', apparence, personnages, palette),
     bas: couleurDe('bas', apparence, personnages, palette),
     couvreChef: couleurDe('couleurCouvreChef', apparence, personnages, palette),
     aide: couleurDe('couleurAide', apparence, personnages, palette),
@@ -185,6 +186,18 @@ export function construirePersonnage(apparence, personnages, palette) {
   buste.boite([0.32 * largeur, 0.15, 0.19 * epaisseur], [0, hanches, 0], couleurs.bas);
   buste.boite([0.36 * largeur, 0.48, 0.21 * epaisseur], [0, hanches + 0.3, 0], couleurs.haut);
   buste.cylindre({ rayon: 0.055, hauteur: 0.1, cotes: 8 }, [0, hanches + 0.57, 0], couleurs.peau);
+  const rayures = apparence.motifHaut === 'rayures';
+  if (rayures) {
+    // Rayures verticales devant, derrière et sur les côtés du buste.
+    const devant = 0.105 * epaisseur + 0.003;
+    const cote = 0.18 * largeur + 0.003;
+    for (const x of [-0.135, -0.045, 0.045, 0.135]) {
+      for (const z of [devant, -devant]) buste.boite([0.022, 0.47, 0.006], [x * largeur, hanches + 0.3, z], couleurs.motif);
+    }
+    for (const z of [-0.045, 0.045]) {
+      for (const x of [cote, -cote]) buste.boite([0.006, 0.47, 0.022], [x, hanches + 0.3, z * epaisseur], couleurs.motif);
+    }
+  }
   if (apparence.styleBas === 'jupe') {
     if (assis) buste.boite([0.38 * largeur, 0.13, 0.46], [0, hanches - 0.02, 0.18], couleurs.bas);
     else buste.cylindre({ rayon: 0.25 * largeur, rayonHaut: 0.17 * largeur, hauteur: 0.36, cotes: 10 }, [0, hanches - 0.16, 0], couleurs.bas);
@@ -232,6 +245,14 @@ export function construirePersonnage(apparence, personnages, palette) {
     forme.boite([0.1, 0.34, 0.11], [0, -0.17, 0], couleurs.haut);
     forme.boite([0.09, 0.24, 0.1], [0, -0.46, 0], couleurs.haut);
     forme.boite([0.085, 0.09, 0.09], [0, -0.625, 0], couleurs.peau);
+    if (rayures) {
+      for (const z of [0.058, -0.058]) {
+        forme.boite([0.018, 0.33, 0.004], [0, -0.17, z], couleurs.motif);
+        forme.boite([0.016, 0.23, 0.004], [0, -0.46, z * 0.92], couleurs.motif);
+      }
+      forme.boite([0.004, 0.33, 0.018], [0.052 * cote, -0.17, 0], couleurs.motif);
+      forme.boite([0.004, 0.23, 0.016], [0.047 * cote, -0.46, 0], couleurs.motif);
+    }
     unBras.add(mesh(forme));
     corps.add(unBras);
     bras.push(unBras);

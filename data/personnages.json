@@ -4,18 +4,20 @@
     "nomComplet": "Ferrus Dantioch",
     "presentation": "Ferrus Dantioch a imaginé ce jeu et crée de vraies applications web pour faciliter la vie des autres.",
     "apparenceProvisoire": true,
-    "aValider": "TODO_FERRUS : apparence et présentation à valider par Ferrus. En attendant, apparence neutre (teint « neutre », sans cheveux).",
+    "aValider": "TODO_FERRUS : décrite par Ferrus le 14/11/2026 (cheveux sombres voire noirs, lunettes, chemise noire à rayures blanches verticales, pantalon bleu). Reste à confirmer : teint (neutre en attendant), longueur des cheveux (courte en attendant), forme des lunettes (carrées en attendant), barbe (aucune en attendant).",
     "apparence": {
       "teint": "neutre",
       "silhouette": "moyenne",
       "taille": "moyenne",
-      "coiffure": "aucune",
+      "coiffure": "courte",
       "cheveux": "noir",
       "barbe": "aucune",
-      "lunettes": "aucune",
-      "haut": "violet",
+      "lunettes": "carrees",
+      "haut": "noir",
+      "motifHaut": "rayures",
+      "couleurMotif": "blanc",
       "styleBas": "pantalon",
-      "bas": "gris",
+      "bas": "jean",
       "couvreChef": "aucun",
       "couleurCouvreChef": "violet",
       "aide": "aucune",
@@ -35,6 +37,8 @@
     "barbe": "aucune",
     "lunettes": "aucune",
     "haut": "turquoise",
+    "motifHaut": "uni",
+    "couleurMotif": "blanc",
     "styleBas": "pantalon",
     "bas": "jean",
     "couvreChef": "aucun",
@@ -104,6 +108,18 @@
       { "id": "vert", "nom": "Vert", "couleur": "vert" },
       { "id": "blanc", "nom": "Blanc", "couleur": "blanc" },
       { "id": "noir", "nom": "Noir", "couleur": "noir" }
+    ],
+    "motifHaut": [
+      { "id": "uni", "nom": "Uni" },
+      { "id": "rayures", "nom": "Rayures" }
+    ],
+    "couleurMotif": [
+      { "id": "blanc", "nom": "Blanc", "couleur": "blanc" },
+      { "id": "noir", "nom": "Noir", "couleur": "noir" },
+      { "id": "gris", "nom": "Gris clair", "couleur": "gris-clair" },
+      { "id": "moutarde", "nom": "Moutarde", "couleur": "moutarde" },
+      { "id": "bleu", "nom": "Bleu ciel", "couleur": "bleu-clair" },
+      { "id": "rouge", "nom": "Rouge", "couleur": "rouge" }
     ],
     "styleBas": [
       { "id": "pantalon", "nom": "Pantalon" },

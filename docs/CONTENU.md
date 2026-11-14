@@ -117,8 +117,8 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
   de choix. **À compléter par Ferrus** (repère `TODO_FERRUS`).
 - `prenomsProposes` : les prénoms proposés au hasard (épicènes).
 - `defaut` : l'apparence de départ d'un nouveau personnage.
-- `options` : pour chaque élément (teint, coiffure, haut…), la liste des
-  choix `{ "id", "nom", "couleur" }`. On peut retirer des choix, en ajouter
+- `options` : pour chaque élément (teint, coiffure, haut, motif du haut…),
+  la liste des choix `{ "id", "nom", "couleur" }`. On peut retirer des choix, en ajouter
   de couleur, ou renommer ; les formes (coiffures, couvre-chefs, aides…)
   doivent être connues du jeu : le test le vérifie.
 

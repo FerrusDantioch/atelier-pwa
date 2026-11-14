@@ -21,7 +21,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | Jalon | Contenu | État |
 |---|---|---|
 | J0 | Squelette : installation, hors ligne, réglages, sauvegarde | ✅ livré (version 0.1.0) |
-| J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | 🧪 livré, à valider (version 0.2.0) |
+| J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | ✅ livré (version 0.2.0) |
 | J2 | Personnages, routines, dialogues | à venir |
 | J3 | L'ordinateur : commandes et création d'applications | à venir |
 | J4 | Quêtes et journal (premier livrable jouable) | à venir |
