@@ -115,6 +115,15 @@
       "apercu": "Le disque se vide peu à peu"
     },
     {
+      "id": "sous-titres",
+      "nom": "Sous-titres",
+      "description": "Le texte de ce qui est dit s'affiche en même temps que la vidéo.",
+      "apporte": ["sous-titrer"],
+      "charge": 1,
+      "icone": "sousTitres",
+      "apercu": "Sous-titres affichés sous l'image"
+    },
+    {
       "id": "historique",
       "nom": "Historique",
       "description": "Garde la trace de ce qui a été fait, jour après jour.",

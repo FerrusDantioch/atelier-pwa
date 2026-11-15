@@ -1,0 +1,192 @@
+{
+  "aValider": "Quêtes du premier livrable, proposées par Claude : une par principe. « Le planning de publication » et « Des sous-titres pour tout le monde » concernent Halaé : textes validés par elle (via Ferrus) le 15/11/2026, ne rien y changer sans son accord. « Bienvenue à l'atelier » (le mentor) est à valider par Ferrus ; Théo est un personnage fictif. ⚠️ Ne jamais changer l'identifiant d'une quête ou d'une étape publiée : les étapes faites sont retenues par ces identifiants dans les parties.",
+  "principes": {
+    "lisibilite": {
+      "nom": "Lisibilité",
+      "explication": "Un texte assez grand, bien contrasté, dans une police nette : tout le monde lit plus vite et se fatigue moins."
+    },
+    "simplicite": {
+      "nom": "Simplicité",
+      "explication": "Une application qui fait une seule chose, et la fait bien, se comprend du premier coup."
+    },
+    "soutien": {
+      "nom": "Soutien au quotidien",
+      "explication": "Ce qui aide certaines personnes rend souvent service à tout le monde : les sous-titres, pensés pour les personnes sourdes, servent aussi à qui regarde sans le son."
+    },
+    "routine": {
+      "nom": "Aide à la routine",
+      "explication": "Savoir à l'avance ce qui va se passer rassure : une bonne application prévient, calmement, au lieu de surprendre."
+    },
+    "charge": {
+      "nom": "Charge cognitive",
+      "explication": "Chaque bouton, chaque chiffre, chaque notification demande un petit effort. Moins il y en a, plus il reste d'énergie pour l'essentiel."
+    }
+  },
+  "quetes": [
+    {
+      "id": "bienvenue",
+      "titre": "Bienvenue à l'atelier",
+      "principe": "lisibilite",
+      "donneur": "ferrus",
+      "resume": "Ferrus te confie son atelier. Allume l'ordinateur, écoute ses explications, puis livre ta première application.",
+      "etapes": [
+        {
+          "id": "appel",
+          "type": "drapeau",
+          "drapeau": "visio-accueil",
+          "destination": "bureau",
+          "texte": "allume ton ordinateur, au bureau",
+          "detail": "Ferrus t'appelle en visio pour t'expliquer le métier."
+        },
+        {
+          "id": "texte-agrandi",
+          "type": "drapeau",
+          "drapeau": "atelier-texte-agrandi",
+          "facultative": true,
+          "texte": "dans l'atelier, essaie un texte plus grand",
+          "detail": "Regarde l'aperçu changer : un texte plus grand se lit mieux, et pas seulement quand on voit mal."
+        },
+        {
+          "id": "essai",
+          "type": "commande",
+          "commande": "essai-courses",
+          "texte": "livre la liste de courses de Ferrus"
+        }
+      ],
+      "fin": "Ta première application est livrée : une liste claire, lisible, sans rien de trop. C'est tout l'esprit de l'atelier.",
+      "recompense": { "argent": 20, "reputation": 5 }
+    },
+    {
+      "id": "planning-publication",
+      "titre": "Le planning de publication",
+      "principe": "simplicite",
+      "donneur": "halae",
+      "resume": "Halaé publie une vidéo par semaine. Entre le tournage, le montage et les commentaires, elle s'y perd un peu : aide-la à s'organiser, simplement.",
+      "debloquee": { "quetes": ["bienvenue"] },
+      "etapes": [
+        {
+          "id": "demande",
+          "type": "demande",
+          "commande": "halae-planning",
+          "texte": "parle à Halaé",
+          "detail": "Demande-lui si elle a besoin d'une application."
+        },
+        {
+          "id": "livraison",
+          "type": "commande",
+          "commande": "halae-planning",
+          "texte": "livre son planning de vidéos"
+        }
+      ],
+      "fin": "Halaé a son planning : chaque étape de sa semaine, un rappel pour chacune, et rien de plus.",
+      "recompense": { "argent": 20, "reputation": 5 }
+    },
+    {
+      "id": "matin-sans-surprise",
+      "titre": "Un matin sans surprise",
+      "principe": "routine",
+      "donneur": "theo",
+      "resume": "Théo apprend souvent au dernier moment que ses cours changent d'horaire ou de salle. Aide-le à commencer ses journées sans mauvaise surprise.",
+      "debloquee": { "quetes": ["planning-publication"] },
+      "etapes": [
+        {
+          "id": "demande",
+          "type": "demande",
+          "commande": "theo-changements",
+          "texte": "parle à Théo, vers 16 h",
+          "detail": "Il passe chaque jour de 16 h à 17 h. Demande-lui s'il a besoin d'une application."
+        },
+        {
+          "id": "livraison",
+          "type": "commande",
+          "commande": "theo-changements",
+          "texte": "livre « Prévenu à l'avance » à Théo"
+        },
+        {
+          "id": "nouvelles",
+          "type": "parler",
+          "pnj": "theo",
+          "texte": "demande à Théo si l'appli l'aide",
+          "question": "Alors, cette application ?",
+          "replique": "Je l'ai installée tout de suite. Elle m'annonce déjà que demain, le cours de maths change de salle. Je le sais la veille, calmement : merci."
+        }
+      ],
+      "fin": "Théo sait la veille ce qui change le lendemain. Ses matins sont plus calmes.",
+      "recompense": { "argent": 20, "reputation": 5 }
+    },
+    {
+      "id": "sous-titres",
+      "titre": "Des sous-titres pour tout le monde",
+      "principe": "soutien",
+      "donneur": "halae",
+      "resume": "Karim, qui est sourd, aimerait suivre les vidéos d'Halaé, mais elles n'ont pas de sous-titres. Aide Halaé à en ajouter : ils serviront à bien d'autres personnes.",
+      "debloquee": { "quetes": ["planning-publication"], "commandes": ["karim-atelier"] },
+      "etapes": [
+        {
+          "id": "demande",
+          "type": "demande",
+          "commande": "halae-sous-titres",
+          "texte": "parle à Halaé"
+        },
+        {
+          "id": "livraison",
+          "type": "commande",
+          "commande": "halae-sous-titres",
+          "texte": "livre sa commande « Mes sous-titres »"
+        },
+        {
+          "id": "television",
+          "type": "aller",
+          "cible": "television",
+          "facultative": true,
+          "texte": "regarde sa nouvelle vidéo, à la télévision",
+          "message": "La nouvelle vidéo d'Halaé défile, avec des sous-titres bien lisibles."
+        },
+        {
+          "id": "theo",
+          "type": "parler",
+          "pnj": "theo",
+          "facultative": true,
+          "texte": "parle à Théo",
+          "question": "Tu as vu la nouvelle vidéo d'Halaé ?",
+          "replique": "Oui, dans le bus, sans le son. Grâce aux sous-titres, j'ai tout compris !"
+        }
+      ],
+      "fin": "Les vidéos d'Halaé ont leurs sous-titres : Karim peut les suivre, et toutes les personnes qui regardent sans le son aussi.",
+      "recompense": { "argent": 20, "reputation": 5 }
+    },
+    {
+      "id": "reviser-sans-se-noyer",
+      "titre": "Réviser sans se noyer",
+      "principe": "charge",
+      "donneur": "theo",
+      "resume": "Les examens de Théo approchent. Son application de révision l'assomme de badges, de graphiques et de notifications : aide-le à réviser une chose à la fois.",
+      "debloquee": { "quetes": ["matin-sans-surprise"] },
+      "etapes": [
+        {
+          "id": "demande",
+          "type": "demande",
+          "commande": "theo-revisions",
+          "texte": "parle à Théo, vers 16 h",
+          "detail": "Demande-lui s'il a besoin d'une autre application."
+        },
+        {
+          "id": "livraison",
+          "type": "commande",
+          "commande": "theo-revisions",
+          "texte": "livre « Une chose à la fois » à Théo"
+        },
+        {
+          "id": "nouvelles",
+          "type": "parler",
+          "pnj": "theo",
+          "texte": "demande à Théo où en sont ses révisions",
+          "question": "Alors, ces révisions ?",
+          "replique": "Une matière par jour, cochée quand c'est fini, et une pause quand le disque du temps est vide. Pour la première fois, je ne me sens pas noyé."
+        }
+      ],
+      "fin": "Théo révise une chose à la fois, sans badges ni graphiques. Il lui reste de l'énergie pour l'essentiel.",
+      "recompense": { "argent": 30, "reputation": 8 }
+    }
+  ]
+}

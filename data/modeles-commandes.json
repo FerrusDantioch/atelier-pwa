@@ -1,0 +1,258 @@
+{
+  "aValider": "Briques des commandes du jour, proposées par Claude : clientes et clients fictifs, applications fictives. Chaque matin, le jeu assemble une personne, un sujet, une contrainte et une récompense (voir js/jeu/generateur.js).",
+  "parJour": 2,
+  "debloquee": { "niveau": 3 },
+  "recompense": { "argent": [40, 70], "reputation": [6, 12], "bonus": 10 },
+  "clients": [
+    {
+      "id": "lucie",
+      "nom": "Lucie",
+      "presentation": "Infirmière de nuit : ses journées commencent quand celles des autres finissent.",
+      "apparence": {
+        "teint": "clair", "silhouette": "moyenne", "taille": "moyenne", "coiffure": "mi-longue", "cheveux": "roux",
+        "barbe": "aucune", "lunettes": "aucune", "haut": "bleu", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "pantalon", "bas": "jean", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "nour",
+      "nom": "Nour",
+      "presentation": "Étudiante en architecture, toujours entre deux maquettes.",
+      "apparence": {
+        "teint": "mat", "silhouette": "fine", "taille": "moyenne", "coiffure": "longue", "cheveux": "noir",
+        "barbe": "aucune", "lunettes": "aucune", "haut": "moutarde", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "jupe", "bas": "noir", "couvreChef": "foulard", "couleurCouvreChef": "vert",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "bastien",
+      "nom": "Bastien",
+      "presentation": "Chauffeur de bus, il connaît chaque rue de la ville.",
+      "apparence": {
+        "teint": "tres-clair", "silhouette": "large", "taille": "grande", "coiffure": "rasee", "cheveux": "blond",
+        "barbe": "courte", "lunettes": "aucune", "haut": "blanc", "motifHaut": "rayures", "couleurMotif": "bleu",
+        "styleBas": "pantalon", "bas": "marine", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "mei",
+      "nom": "Mei",
+      "presentation": "Fleuriste, les mains souvent occupées par un bouquet.",
+      "apparence": {
+        "teint": "clair", "silhouette": "moyenne", "taille": "petite", "coiffure": "courte", "cheveux": "noir",
+        "barbe": "aucune", "lunettes": "rondes", "haut": "vert", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "pantalon", "bas": "beige", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "yanis",
+      "nom": "Yanis",
+      "presentation": "Lycéen, dyslexique : les longs textes serrés le fatiguent vite.",
+      "apparence": {
+        "teint": "brun", "silhouette": "fine", "taille": "grande", "coiffure": "boucles", "cheveux": "brun",
+        "barbe": "aucune", "lunettes": "aucune", "haut": "rouge", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "pantalon", "bas": "jean", "couvreChef": "casquette", "couleurCouvreChef": "rouge",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "ines",
+      "nom": "Inès",
+      "presentation": "Professeure de piano, elle donne ses cours chez elle.",
+      "apparence": {
+        "teint": "mat", "silhouette": "moyenne", "taille": "moyenne", "coiffure": "mi-longue", "cheveux": "chatain",
+        "barbe": "aucune", "lunettes": "carrees", "haut": "violet", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "pantalon", "bas": "noir", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "fauteuil", "couleurAide": "bleu"
+      }
+    },
+    {
+      "id": "antoine",
+      "nom": "Antoine",
+      "presentation": "Jeune papa, il jongle entre le travail et les biberons.",
+      "apparence": {
+        "teint": "fonce", "silhouette": "moyenne", "taille": "grande", "coiffure": "tres-courte", "cheveux": "noir",
+        "barbe": "courte", "lunettes": "aucune", "haut": "turquoise", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "pantalon", "bas": "gris", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "aucune", "couleurAide": "noir"
+      }
+    },
+    {
+      "id": "aicha",
+      "nom": "Aïcha",
+      "presentation": "Retraitée, bénévole à la bibliothèque du quartier.",
+      "apparence": {
+        "teint": "tres-fonce", "silhouette": "moyenne", "taille": "petite", "coiffure": "courte", "cheveux": "gris",
+        "barbe": "aucune", "lunettes": "rondes", "haut": "orange", "motifHaut": "uni", "couleurMotif": "blanc",
+        "styleBas": "jupe", "bas": "bordeaux", "couvreChef": "aucun", "couleurCouvreChef": "noir",
+        "aide": "canne", "couleurAide": "argent"
+      }
+    }
+  ],
+  "sujets": [
+    {
+      "id": "rendez-vous",
+      "titre": "Mes rendez-vous",
+      "resume": "Tous les rendez-vous au même endroit, avec un rappel.",
+      "demande": "J'ai des rendez-vous notés un peu partout, et j'en oublie. Il me faudrait un seul endroit pour les voir, avec un rappel avant chacun.",
+      "besoins": [
+        { "apporte": "planifier", "texte": "Voir mes rendez-vous de la semaine" },
+        { "apporte": "rappel-ecran", "texte": "Un rappel à l'écran avant chacun" }
+      ],
+      "bonus": [
+        { "apporte": "vue-ensemble", "texte": "Voir toute ma semaine d'un coup d'œil" }
+      ],
+      "apercu": { "agenda": ["Mardi · 9 h · Dentiste", "Jeudi · 15 h · Banque", "Samedi · 11 h · Marché"] }
+    },
+    {
+      "id": "courses",
+      "titre": "Les courses de la semaine",
+      "resume": "Une seule liste de courses pour toute la maison.",
+      "demande": "À la maison, chaque personne note les courses sur un bout de papier différent. Il nous faudrait une seule liste, qu'on coche au magasin.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher ce qui est déjà dans le panier" }
+      ],
+      "bonus": [
+        { "apporte": "partager", "texte": "Envoyer la liste à quelqu'un de la maison" }
+      ],
+      "apercu": { "liste": ["Riz", "Tomates", "Savon"] }
+    },
+    {
+      "id": "arrosage",
+      "titre": "L'arrosage des plantes",
+      "resume": "Ne plus oublier d'arroser, ni arroser deux fois.",
+      "demande": "J'ai beaucoup de plantes, et je ne sais jamais lesquelles j'ai déjà arrosées. Une petite application m'aiderait à m'y retrouver.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher les plantes arrosées" },
+        { "apporte": "rappel-ecran", "texte": "Un rappel les jours d'arrosage" }
+      ],
+      "bonus": [
+        { "apporte": "verifier", "texte": "Retrouver quand chaque plante a été arrosée" }
+      ],
+      "apercu": { "liste": ["Basilic", "Ficus", "Orchidée"] }
+    },
+    {
+      "id": "cuisine",
+      "titre": "Le minuteur de cuisine",
+      "resume": "Savoir quand c'est cuit, sans y penser.",
+      "demande": "Je cuisine souvent plusieurs plats à la fois, et j'oublie toujours quelque chose sur le feu. Il me faudrait un minuteur tout simple.",
+      "besoins": [
+        { "apporte": "chronometrer", "texte": "Savoir quand c'est cuit" },
+        { "apporte": "un-geste", "texte": "Le lancer d'un seul geste, les mains pleines" }
+      ],
+      "bonus": [
+        { "apporte": "temps-visuel", "texte": "Voir de loin le temps qui reste" }
+      ],
+      "apercu": { "minuteur": ["8 min 00 s"] }
+    },
+    {
+      "id": "idees",
+      "titre": "Mes idées",
+      "resume": "Noter une idée avant qu'elle s'envole.",
+      "demande": "J'ai des idées n'importe quand : dans le bus, sous la douche, au milieu de la nuit. Il me faudrait un carnet qui s'ouvre tout de suite.",
+      "besoins": [
+        { "apporte": "noter", "texte": "Noter une idée en quelques secondes" }
+      ],
+      "bonus": [
+        { "apporte": "verifier", "texte": "Retrouver les idées des jours passés" }
+      ],
+      "apercu": { "carnet": ["Idée de cadeau", "Livre à emprunter"] }
+    },
+    {
+      "id": "chat",
+      "titre": "Les soins du chat",
+      "resume": "Les soins du chat, sans oubli ni doublon.",
+      "demande": "Mon chat a un traitement à prendre, et nous sommes plusieurs à nous en occuper. On ne sait jamais s'il a déjà eu son médicament.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher les soins donnés" },
+        { "apporte": "rappel-ecran", "texte": "Un rappel pour le médicament du soir" }
+      ],
+      "bonus": [
+        { "apporte": "partager", "texte": "Prévenir les autres quand c'est fait" }
+      ],
+      "apercu": { "liste": ["Croquettes", "Eau fraîche", "Médicament du soir"] }
+    },
+    {
+      "id": "horaires",
+      "titre": "Mes horaires de travail",
+      "resume": "Des horaires qui changent, annoncés à l'avance.",
+      "demande": "Mes horaires changent d'une semaine à l'autre. J'aimerais les voir d'un coup d'œil, et savoir à l'avance quand ils changent.",
+      "besoins": [
+        { "apporte": "planifier", "texte": "Voir mes horaires de la semaine" },
+        { "apporte": "prevoir", "texte": "Savoir à l'avance quand un horaire change" }
+      ],
+      "bonus": [
+        { "apporte": "vue-ensemble", "texte": "Voir tout le mois d'un coup d'œil" }
+      ],
+      "apercu": { "agenda": ["Lundi · 6 h - 14 h", "Mardi · 14 h - 22 h", "Mercredi · repos"] }
+    },
+    {
+      "id": "club",
+      "titre": "Les infos du club",
+      "resume": "Les infos pratiques du club, toujours à portée de main.",
+      "demande": "Je m'occupe d'un club de randonnée. Les nouvelles personnes me demandent toujours les mêmes choses : l'heure, le lieu, ce qu'il faut apporter.",
+      "besoins": [
+        { "apporte": "informer", "texte": "Retrouver l'heure, le lieu et ce qu'il faut apporter" }
+      ],
+      "bonus": [
+        { "apporte": "partager", "texte": "Envoyer les infos aux nouvelles personnes" }
+      ],
+      "apercu": { "fiche": ["Dimanche · 9 h", "Parking de la gare", "Apporter une gourde"] }
+    },
+    {
+      "id": "consignes",
+      "titre": "Les consignes du jour",
+      "resume": "Des consignes qu'on peut lire… ou écouter.",
+      "demande": "On me donne chaque jour des consignes écrites, souvent longues. J'aimerais pouvoir les écouter plutôt que de tout lire.",
+      "besoins": [
+        { "apporte": "informer", "texte": "Retrouver les consignes du jour" },
+        { "apporte": "ecouter", "texte": "Écouter le texte au lieu de le lire" }
+      ],
+      "bonus": [],
+      "apercu": { "fiche": ["Consignes du jour", "À rendre vendredi", "Salle 4"] }
+    },
+    {
+      "id": "sport",
+      "titre": "Mes séances de sport",
+      "resume": "Chronométrer ses séries sans regarder l'écran.",
+      "demande": "Pendant mes séances, je chronomètre mes séries. Je n'ai pas toujours l'écran sous les yeux, et la salle est bruyante.",
+      "besoins": [
+        { "apporte": "chronometrer", "texte": "Chronométrer mes séries" },
+        { "apporte": "rappel-vibration", "texte": "Sentir la fin de chaque série" }
+      ],
+      "bonus": [
+        { "apporte": "temps-visuel", "texte": "Voir de loin le temps qui reste" }
+      ],
+      "apercu": { "minuteur": ["0 min 45 s"] }
+    }
+  ],
+  "contraintes": [
+    { "id": "sans-compte", "aEviter": { "apporte": "compte", "texte": "Pas de compte à créer : je veux m'en servir tout de suite" } },
+    { "id": "sans-sonnerie", "aEviter": { "apporte": "rappel-son", "texte": "Pas de sonnerie : je suis souvent dans des endroits calmes" } },
+    { "id": "sans-graphiques", "aEviter": { "apporte": "statistiques", "texte": "Pas de graphiques : ils m'embrouillent" } },
+    { "id": "grand-texte", "confort": { "reglage": "texte", "valeurs": ["grand", "tres-grand"], "texte": "Je lis mieux les grands caractères" } },
+    { "id": "plein-soleil", "confort": { "reglage": "contraste", "valeurs": ["eleve"], "texte": "Je m'en sers souvent dehors, en plein soleil" } },
+    { "id": "sans-animations", "confort": { "reglage": "animations", "valeurs": ["reduites"], "texte": "Les animations me donnent mal à la tête" } },
+    { "id": "aere", "confort": { "reglage": "espacement", "valeurs": ["aere"], "texte": "Des lignes bien espacées m'aident à m'y retrouver" } },
+    { "id": "police-nette", "confort": { "reglage": "police", "valeurs": ["lisible"], "texte": "Je confonds vite certaines lettres" } },
+    { "id": "leger", "chargeMax": 2 }
+  ],
+  "reactions": {
+    "parfait": [
+      "C'est exactement ce qu'il me fallait. Merci !",
+      "Parfait : je m'en sers dès aujourd'hui !"
+    ],
+    "bien": [
+      "Ça m'aide déjà beaucoup. Merci !",
+      "C'est bien : il reste quelques détails, mais je m'en sers dès maintenant."
+    ],
+    "aRetravailler": [
+      "Ce n'est pas encore tout à fait ça. Je reviendrai la chercher quand elle sera prête.",
+      "Je préfère attendre une version qui me convient : rien ne presse."
+    ]
+  }
+}

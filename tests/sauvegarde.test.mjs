@@ -119,3 +119,25 @@ test('le joueur et la vue sont vérifiés', () => {
   partie.vue = { rotation: 7, zoom: null };
   assert.match(verifierPartie(partie).join(), /vue invalide/);
 });
+
+test('une partie du jalon 3 (format 2) est mise à niveau : commandes du jour, quêtes', () => {
+  const ancienne = creer();
+  delete ancienne.commandes.aleatoires;
+  ancienne.versionFormat = 2;
+  ancienne.commandes.livrees.push({ id: 'essai-courses', note: 'parfait', jour: 1, argent: 20, reputation: 5 });
+  const lecture = lireFichierPartie(JSON.stringify(ancienne));
+  assert.equal(lecture.ok, true, lecture.details);
+  assert.equal(lecture.partie.versionFormat, VERSION_FORMAT);
+  assert.deepEqual(lecture.partie.commandes.aleatoires, {});
+  assert.equal(lecture.partie.commandes.livrees.length, 1, 'rien n\'est perdu');
+  assert.deepEqual(lecture.partie.quetes, { actives: {}, finies: [], suivie: null });
+});
+
+test('les quêtes en cours sont vérifiées', () => {
+  const partie = creer();
+  partie.quetes.actives.bienvenue = { debut: { jour: 1, minute: 480 } };
+  partie.quetes.suivie = 'bienvenue';
+  assert.deepEqual(verifierPartie(partie), []);
+  partie.quetes.actives.bienvenue = { debut: 'hier' };
+  assert.match(verifierPartie(partie).join(), /quetes invalides/);
+});

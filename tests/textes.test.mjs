@@ -77,3 +77,18 @@ test('le tutoiement est respecté (pas de « vous » dans les textes)', () => {
   const tous = JSON.stringify(textes);
   assert.doesNotMatch(tous, /\b[Vv]ous\b|\b[Vv]otre\b|\b[Vv]os\b/);
 });
+
+test('un « de » devant un nom ou un objet inséré suit la grammaire', async () => {
+  const { remplir } = await import('../js/noyau/textes.js');
+  assert.equal(remplir('Commande de {client}', { client: 'Antoine' }), 'Commande d\'Antoine');
+  assert.equal(remplir('Commande de {client}', { client: 'Halaé' }), 'Commande d\'Halaé');
+  assert.equal(remplir('Commande de {client}', { client: 'Théo' }), 'Commande de Théo');
+  assert.equal(remplir('De la part de {nom}', { nom: 'Inès' }), 'De la part d\'Inès');
+  assert.equal(remplir('{nom} de {lieu}', { nom: 'Ève', lieu: 'Lyon' }), 'Ève de Lyon', 'seulement juste avant la valeur');
+  assert.equal(remplir('Impossible de t\'approcher de {objet}.', { objet: 'le lit' }), 'Impossible de t\'approcher du lit.');
+  assert.equal(remplir('Impossible de t\'approcher de {objet}.', { objet: 'les toilettes' }), 'Impossible de t\'approcher des toilettes.');
+  assert.equal(remplir('Impossible de t\'approcher de {objet}.', { objet: 'la douche' }), 'Impossible de t\'approcher de la douche.');
+  assert.equal(remplir('Impossible de t\'approcher de {objet}.', { objet: 'l\'armoire' }), 'Impossible de t\'approcher de l\'armoire.');
+  assert.equal(remplir('une charge de {n} au plus', { n: 2 }), 'une charge de 2 au plus');
+  assert.equal(remplir('Le monde {x}', { x: 'entier' }), 'Le monde entier', '« monde » n\'est pas « de »');
+});

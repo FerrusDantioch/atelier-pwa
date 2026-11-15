@@ -8,9 +8,11 @@
 //   livrée    rangée dans partie.commandes.livrees avec sa note et ses gains.
 // Une commande se débloque selon « debloquee » : un drapeau (l'appel de
 // bienvenue du mentor), d'autres commandes livrées, un niveau de réputation.
-// Une commande « enPersonne » (Halaé, qui vit au domicile) est d'abord
-// demandée de vive voix : il faut parler à la personne pour qu'elle arrive
-// sur l'ordinateur.
+// Une commande « enPersonne » (Halaé, Théo) est d'abord demandée de vive
+// voix : il faut parler à la personne pour qu'elle arrive sur l'ordinateur.
+// Les « commandes du jour » (generateur.js) suivent les mêmes règles ; leur
+// identifiant commence par « jour- », et une fois acceptées, elles sont
+// recopiées dans la partie (partie.commandes.aleatoires).
 //
 // JavaScript pur (sans page ni 3D) : testé par tests/creation.test.mjs.
 // =============================================================================
@@ -24,6 +26,12 @@ export const DRAPEAU_VISIO_ACCUEIL = 'visio-accueil';
 
 // Le meuble où l'on travaille (data/lieux/domicile.json).
 export const ID_BUREAU = 'bureau';
+
+// Le début de l'identifiant des commandes du jour (« jour-3-1 »).
+export const PREFIXE_DU_JOUR = 'jour-';
+export function estCommandeDuJour(id) {
+  return typeof id === 'string' && id.startsWith(PREFIXE_DU_JOUR);
+}
 
 // Le drapeau posé quand la personne a présenté sa commande de vive voix.
 export function drapeauDeProposition(commande) {
@@ -82,10 +90,15 @@ export function nouvellesOffres(avant, apres, commandes) {
 }
 
 // Accepte une offre : un projet vide l'attend (rien ne se passe si la
-// commande est déjà en cours). La partie est modifiée sur place.
+// commande est déjà en cours). Une commande du jour est recopiée dans la
+// partie : elle ne disparaîtra plus le lendemain. La partie est modifiée
+// sur place.
 export function accepterCommande(partie, commande, creation) {
   if (!partie.commandes.enCours[commande.id]) {
     partie.commandes.enCours[commande.id] = projetVide(creation, partie.temps);
+  }
+  if (estCommandeDuJour(commande.id) && !partie.commandes.aleatoires[commande.id]) {
+    partie.commandes.aleatoires[commande.id] = JSON.parse(JSON.stringify(commande));
   }
   return partie.commandes.enCours[commande.id];
 }
@@ -116,17 +129,19 @@ export function livrerProjet(partie, commande, evaluation, paliers) {
 }
 
 /**
- * L'objectif affiché en haut de l'écran (en attendant le journal des quêtes).
- * Renvoie { cle, commande?, destination? } :
+ * L'objectif tiré des commandes, quand aucune quête n'est suivie (voir
+ * quetes.js › objectifDeQuete). Renvoie { cle, commande?, destination? } :
  *   allumer       le premier appel du mentor attend sur l'ordinateur ;
  *   retravailler  un projet est à reprendre ;
  *   terminer      un projet est en cours ;
  *   parler        quelqu'un veut présenter sa commande de vive voix ;
  *   choisir       des commandes attendent d'être acceptées ;
  *   attendre      il faut plus de réputation pour les suivantes ;
+ *   demain        tout est livré, d'autres commandes arrivent demain matin ;
  *   fini          toutes les commandes sont livrées.
+ * « demain » : vrai si les commandes du jour ont commencé (generateur.js).
  */
-export function objectifDuMoment(partie, commandes, paliers) {
+export function objectifDuMoment(partie, commandes, paliers, { demain = false } = {}) {
   if (!partie.drapeaux[DRAPEAU_VISIO_ACCUEIL]) return { cle: 'allumer', destination: ID_BUREAU };
   const etat = etatDesCommandes(partie, commandes, paliers);
   const aReprendre = etat.enCours.find((element) => element.projet.resultat === 'aRetravailler');
@@ -135,6 +150,6 @@ export function objectifDuMoment(partie, commandes, paliers) {
   const aProposer = commandesAProposer(partie, commandes, paliers);
   if (aProposer.length > 0) return { cle: 'parler', commande: aProposer[0], destination: aProposer[0].client };
   if (etat.offres.length > 0) return { cle: 'choisir', destination: ID_BUREAU };
-  if (etat.livrees.length === commandes.length) return { cle: 'fini' };
+  if (etat.livrees.length === commandes.length) return { cle: demain ? 'demain' : 'fini' };
   return { cle: 'attendre' };
 }

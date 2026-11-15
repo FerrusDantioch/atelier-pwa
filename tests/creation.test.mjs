@@ -182,7 +182,9 @@ test('les commandes : appel du mentor, essai, puis les suivantes', () => {
   assert.equal(evaluationHalae.note, 'parfait');
   assert.equal(livrerProjet(partie, halae, evaluationHalae, paliers).livree, true);
   const nouvelles = nouvellesOffres(avantHalae, idsDesOffres(partie, commandes, paliers), commandes).map((c) => c.id);
-  assert.deepEqual(nouvelles, ['theo-changements', 'madeleine-medicaments', 'samia-fournees', 'karim-atelier']);
+  assert.deepEqual(nouvelles, ['madeleine-medicaments', 'samia-fournees', 'karim-atelier']);
+  // Théo présente la sienne de vive voix, quand il passe à 16 h.
+  assert.deepEqual(commandesAProposer(partie, commandes, paliers).map((c) => c.id), ['theo-changements']);
   assert.ok(!nouvelles.includes('hugo-notes'), 'Hugo attend le niveau 2 de réputation');
   assert.deepEqual(verifierPartie(partie), []);
 

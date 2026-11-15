@@ -27,11 +27,21 @@ function chercher(cle) {
   ), textes);
 }
 
-// Remplace {nom} par la valeur correspondante.
+// Remplace {nom} par la valeur correspondante. Un « de » juste avant suit
+// la grammaire : « de Antoine » → « d'Antoine », « de Halaé » → « d'Halaé »,
+// « de le lit » → « du lit », « de les toilettes » → « des toilettes ».
+const ELISION = /^[aeiouyhàâäéèêëîïôöùûüÿæœ]/i;
 export function remplir(modele, valeurs = {}) {
-  return modele.replace(/\{(\w+)\}/g, (morceau, nom) => (
-    Object.prototype.hasOwnProperty.call(valeurs, nom) ? String(valeurs[nom]) : morceau
-  ));
+  return modele.replace(/(\b[Dd]e )?\{(\w+)\}/g, (morceau, de, nom) => {
+    if (!Object.prototype.hasOwnProperty.call(valeurs, nom)) return morceau;
+    const valeur = String(valeurs[nom]);
+    if (!de) return valeur;
+    const d = de[0]; // « d » ou « D » (en début de phrase)
+    if (valeur.startsWith('les ')) return `${d}es ${valeur.slice(4)}`;
+    if (valeur.startsWith('le ')) return `${d}u ${valeur.slice(3)}`;
+    if (ELISION.test(valeur)) return `${d}'${valeur}`;
+    return `${de}${valeur}`;
+  });
 }
 
 // Typographie française : une espace fine insécable avant ! ? : ; % » et

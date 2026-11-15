@@ -13,13 +13,21 @@
 //     ET en fauteuil roulant (passages d'au moins 1 m) ;
 //   - chaque commande (jalon 3) cite des clients, des apports et des
 //     réglages qui existent, peut être réussie « parfaitement », et finit
-//     par se débloquer même si l'on n'obtient que des « Bien ».
+//     par se débloquer même si l'on n'obtient que des « Bien » ;
+//   - chaque quête (jalon 4) cite des personnes, des commandes et des
+//     endroits qui existent, chaque étape peut vraiment se faire, et toutes
+//     les quêtes finissent par commencer et se terminer (même avec des
+//     « Bien ») ;
+//   - chaque sujet des commandes du jour peut être réussi « parfaitement »
+//     avec au moins une contrainte, et ces commandes finissent par arriver.
 //
 // Ce module n'utilise ni la 3D ni la page (testé avec node --test).
 // =============================================================================
 
 import { etatDesCommandes } from '../jeu/commandes.js';
 import { meilleurProjet, recompensePour } from '../jeu/creation.js';
+import { associationsPossibles, commandesDuJourOuvertes } from '../jeu/generateur.js';
+import { DRAPEAUX_D_ETAPES, mettreAJourQuetes } from '../jeu/quetes.js';
 import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personnage.js';
 import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
 import { heureEnMinutes } from './format-sauvegarde.js';
@@ -259,7 +267,169 @@ export function verifierCoherence(donnees) {
   for (const lieu of Object.values(donnees.lieux || {})) verifierLieu(lieu, donnees, signaler);
   verifierPnj(donnees, signaler);
   verifierCommandes(donnees, signaler);
+  verifierModelesCommandes(donnees, signaler);
+  verifierQuetes(donnees, signaler);
   return problemes;
+}
+
+// Ce que les pièces du mini-jeu savent apporter, et les réglages de confort.
+function piecesDuMiniJeu(creation) {
+  return {
+    modeles: new Set(creation.modeles.map((modele) => modele.id)),
+    apports: new Set([...creation.modeles, ...creation.fonctions].flatMap((element) => element.apporte)),
+    reglages: new Map(creation.confort.map((reglage) => [reglage.id, new Set(reglage.valeurs.map((v) => v.id))])),
+  };
+}
+
+// Les apparences des personnes : chaque valeur existe dans data/personnages.json.
+function verifierApparence(apparence, personnages, chemin, ou, signaler) {
+  if (!apparence || !personnages) return;
+  for (const champ of CHAMPS_APPARENCE) {
+    if (!personnages.options[champ].some((option) => option.id === apparence[champ])) {
+      signaler(chemin, `${ou} › apparence › ${champ} : « ${apparence[champ]} » n'existe pas dans data/personnages.json`);
+    }
+  }
+}
+
+// Les briques des commandes du jour (jalon 4).
+function verifierModelesCommandes(donnees, signaler) {
+  const chemin = 'data/modeles-commandes.json';
+  const modeles = donnees.modelesCommandes;
+  const creation = donnees.creation;
+  if (!modeles || !creation) return;
+  const pieces = piecesDuMiniJeu(creation);
+  const idsPnj = new Set((donnees.pnj?.pnj || []).map((pnj) => pnj.id));
+  for (const client of modeles.clients) {
+    if (idsPnj.has(client.id)) signaler(chemin, `clients › ${client.id} : cet identifiant est déjà celui d'un personnage de data/pnj.json`);
+    verifierApparence(client.apparence, donnees.personnages, chemin, `clients › ${client.id}`, signaler);
+  }
+  for (const sujet of modeles.sujets) {
+    for (const groupe of ['besoins', 'bonus']) {
+      for (const attente of sujet[groupe]) {
+        if (!pieces.apports.has(attente.apporte)) {
+          signaler(chemin, `sujets › ${sujet.id} › ${groupe} : aucun modèle ni aucune fonction n'apporte « ${attente.apporte} » (data/creation.json)`);
+        }
+      }
+    }
+    for (const id of Object.keys(sujet.apercu || {})) {
+      if (!pieces.modeles.has(id)) signaler(chemin, `sujets › ${sujet.id} › apercu : le modèle « ${id} » n'existe pas dans data/creation.json`);
+    }
+  }
+  for (const contrainte of modeles.contraintes) {
+    const ou = `contraintes › ${contrainte.id}`;
+    if (contrainte.aEviter && !pieces.apports.has(contrainte.aEviter.apporte)) {
+      signaler(chemin, `${ou} › aEviter : aucune fonction n'apporte « ${contrainte.aEviter.apporte} » (data/creation.json)`);
+    }
+    if (contrainte.confort) {
+      const valeurs = pieces.reglages.get(contrainte.confort.reglage);
+      if (!valeurs) signaler(chemin, `${ou} › confort : le réglage « ${contrainte.confort.reglage} » n'existe pas dans data/creation.json`);
+      else for (const valeur of contrainte.confort.valeurs) {
+        if (!valeurs.has(valeur)) signaler(chemin, `${ou} › confort › ${contrainte.confort.reglage} : la valeur « ${valeur} » n'existe pas`);
+      }
+    }
+  }
+  const possibles = associationsPossibles(modeles, creation);
+  for (const sujet of modeles.sujets) {
+    if (!possibles.some((association) => association.sujet === sujet)) {
+      signaler(chemin, `sujets › ${sujet.id} : aucune contrainte ne lui convient, il ne serait jamais réussi « parfaitement »`);
+    }
+  }
+  if (possibles.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} sujets possibles`);
+  if (modeles.clients.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} clientes ou clients`);
+  const commandes = new Set((donnees.commandes?.commandes || []).map((commande) => commande.id));
+  for (const id of modeles.debloquee?.apres || []) {
+    if (!commandes.has(id)) signaler(chemin, `debloquee › apres : la commande « ${id} » n'existe pas dans data/commandes.json`);
+  }
+}
+
+// Les quêtes (jalon 4).
+function verifierQuetes(donnees, signaler) {
+  const chemin = 'data/quetes.json';
+  const fichier = donnees.quetes;
+  if (!fichier) return;
+  const pnjParId = new Map((donnees.pnj?.pnj || []).map((pnj) => [pnj.id, pnj]));
+  const commandes = new Map((donnees.commandes?.commandes || []).map((commande) => [commande.id, commande]));
+  const ids = new Set(fichier.quetes.map((quete) => quete.id));
+  const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
+  // Ce qu'on peut viser dans les lieux : meubles, points et pièces.
+  const endroits = new Set();
+  for (const lieu of Object.values(donnees.lieux || {})) {
+    for (const groupe of ['meubles', 'points', 'pieces']) for (const element of lieu[groupe] || []) endroits.add(element.id);
+  }
+
+  for (const quete of fichier.quetes) {
+    const ou = `quetes › ${quete.id}`;
+    if (!fichier.principes[quete.principe]) signaler(chemin, `${ou} › principe : « ${quete.principe} » n'est pas décrit dans « principes »`);
+    if (!pnjParId.has(quete.donneur)) signaler(chemin, `${ou} › donneur : « ${quete.donneur} » n'existe pas dans data/pnj.json`);
+    const condition = quete.debloquee || {};
+    for (const id of condition.quetes || []) {
+      if (!ids.has(id)) signaler(chemin, `${ou} › debloquee › quetes : la quête « ${id} » n'existe pas`);
+    }
+    for (const id of condition.commandes || []) {
+      if (!commandes.has(id)) signaler(chemin, `${ou} › debloquee › commandes : la commande « ${id} » n'existe pas dans data/commandes.json`);
+    }
+    if (condition.drapeau && !DRAPEAUX_D_ETAPES.includes(condition.drapeau)) {
+      signaler(chemin, `${ou} › debloquee › drapeau : « ${condition.drapeau} » n'est posé nulle part par le jeu`);
+    }
+    if ((condition.niveau || 1) > niveauMax) signaler(chemin, `${ou} › debloquee › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+
+    for (const etape of quete.etapes) {
+      const ici = `${ou} › etapes › ${etape.id}`;
+      if (etape.type === 'demande' || etape.type === 'commande') {
+        const commande = commandes.get(etape.commande);
+        if (!commande) signaler(chemin, `${ici} : la commande « ${etape.commande} » n'existe pas dans data/commandes.json`);
+        else if (etape.type === 'demande' && !commande.enPersonne) {
+          signaler(chemin, `${ici} : la commande « ${etape.commande} » n'est pas « enPersonne » : personne ne la présente de vive voix`);
+        }
+      } else if (etape.type === 'drapeau' && !DRAPEAUX_D_ETAPES.includes(etape.drapeau)) {
+        signaler(chemin, `${ici} : le drapeau « ${etape.drapeau} » n'est posé nulle part par le jeu (possibles : ${DRAPEAUX_D_ETAPES.join(', ')})`);
+      } else if (etape.type === 'reputation' && etape.niveau > niveauMax) {
+        signaler(chemin, `${ici} : il n'y a que ${niveauMax} niveaux de réputation`);
+      } else if (etape.type === 'parler') {
+        const pnj = pnjParId.get(etape.pnj);
+        if (!pnj) signaler(chemin, `${ici} : « ${etape.pnj} » n'existe pas dans data/pnj.json`);
+        else if (pnj.routine.length === 0) signaler(chemin, `${ici} : ${etape.pnj} ne vient dans aucun lieu, on ne pourra jamais lui parler`);
+        else if (pnj.absentSiJoueur && !etape.facultative) {
+          signaler(chemin, `${ici} : ${etape.pnj} n'est pas là quand on joue « ${pnj.absentSiJoueur} » ; l'étape doit être « facultative »`);
+        }
+      } else if (etape.type === 'aller' && !endroits.has(etape.cible)) {
+        signaler(chemin, `${ici} : la cible « ${etape.cible} » n'est ni un meuble, ni un point, ni une pièce d'un lieu`);
+      }
+      if (etape.destination && !endroits.has(etape.destination) && !pnjParId.has(etape.destination)) {
+        signaler(chemin, `${ici} › destination : « ${etape.destination} » n'est ni un endroit d'un lieu, ni une personne`);
+      }
+    }
+  }
+
+  // Une partie qui fait tout, mais n'obtient que des « Bien » : chaque quête
+  // doit commencer puis se terminer, et les commandes du jour arriver.
+  if (!donnees.jeu || !donnees.commandes || !donnees.creation) return;
+  const paliers = donnees.jeu.reputation.paliers;
+  const liste = donnees.commandes.commandes;
+  const partie = {
+    drapeaux: new Proxy({}, { get: () => true }), // tous les gestes faits
+    argent: 0,
+    reputation: donnees.jeu.depart.reputation,
+    temps: { jour: 1, minute: 0 },
+    commandes: { enCours: {}, livrees: [], aleatoires: {} },
+    quetes: { actives: {}, finies: [], suivie: null },
+  };
+  for (let tour = 0; tour <= liste.length + fichier.quetes.length + 1; tour += 1) {
+    mettreAJourQuetes(partie, fichier.quetes, paliers);
+    for (const commande of etatDesCommandes(partie, liste, paliers).offres) {
+      partie.reputation += recompensePour('bien', commande, 0, donnees.creation.bareme).reputation;
+      partie.commandes.livrees.push({ id: commande.id });
+    }
+  }
+  mettreAJourQuetes(partie, fichier.quetes, paliers);
+  for (const quete of fichier.quetes) {
+    if (!partie.quetes.finies.includes(quete.id)) {
+      signaler(chemin, `quetes › ${quete.id} : ne commence ou ne se termine jamais si l'on n'obtient que des « Bien » (vérifier « debloquee »)`);
+    }
+  }
+  if (donnees.modelesCommandes && !commandesDuJourOuvertes(partie, donnees.modelesCommandes, paliers)) {
+    signaler('data/modeles-commandes.json', 'debloquee : les commandes du jour n\'arrivent jamais si l\'on n\'obtient que des « Bien », quêtes comprises');
+  }
 }
 
 // Les commandes : tout ce qu'elles citent existe, chacune peut être

@@ -30,6 +30,19 @@ export function presenceDans(pnj, lieu, minute, joueur) {
   return creneau && creneau.lieu === lieu ? creneau : null;
 }
 
+// Quand la personne revient-elle dans ce lieu ? Renvoie { minute, demain } :
+// sa prochaine arrivée aujourd'hui, sinon la première de demain. null si
+// elle n'y vient jamais (ou pas quand on joue ce personnage-là).
+export function prochainPassage(pnj, lieu, minute, joueur) {
+  if (pnj.absentSiJoueur && joueur?.modele === pnj.absentSiJoueur) return null;
+  const debuts = pnj.routine.filter((c) => c.lieu === lieu).map((c) => heureEnMinutes(c.de));
+  if (debuts.length === 0) return null;
+  const plusTard = debuts.filter((debut) => debut > minute);
+  return plusTard.length > 0
+    ? { minute: Math.min(...plusTard), demain: false }
+    : { minute: Math.min(...debuts), demain: true };
+}
+
 /**
  * Les problèmes d'une routine : heures dans l'ordre, dans la journée, sans
  * chevauchement. Renvoie une liste de messages.

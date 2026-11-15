@@ -1,5 +1,5 @@
 {
-  "aValider": "Commandes proposées par Claude : applications fictives. La commande d'essai vient du mentor : ses répliques ont été validées par Ferrus le 15/11/2026. La commande d'Halaé (« Mon planning de vidéos ») a été validée par elle, via Ferrus, le 15/11/2026 : ne rien y changer sans son accord.",
+  "aValider": "Commandes proposées par Claude : applications fictives. La commande d'essai vient du mentor : ses répliques ont été validées par Ferrus le 15/11/2026. Les commandes d'Halaé (« Mon planning de vidéos », « Mes sous-titres ») ont été validées par elle, via Ferrus, le 15/11/2026 (le résumé de « Mes sous-titres » reprend ses deux besoins) : ne rien y changer sans son accord. Théo est un personnage fictif : il présente ses commandes de vive voix, quand il passe à 16 h.",
   "commandes": [
     {
       "id": "essai-courses",
@@ -55,6 +55,7 @@
     {
       "id": "theo-changements",
       "client": "theo",
+      "enPersonne": true,
       "titre": "Prévenu à l'avance",
       "resume": "Un agenda qui annonce les changements la veille.",
       "demande": "Mes cours changent parfois d'horaire ou de salle, et je l'apprends au dernier moment. Ça me met mal à l'aise. Je voudrais une application qui me prévient à l'avance, calmement.",
@@ -195,6 +196,64 @@
         "parfait": "J'ouvre, je note, c'est fini. Exactement ce que je voulais !",
         "bien": "Pas mal ! Encore un peu trop de choses à mon goût, mais ça ira.",
         "aRetravailler": "Trop compliquée pour moi, ou il manque l'essentiel. Allège-la et renvoie-la-moi."
+      }
+    },
+    {
+      "id": "halae-sous-titres",
+      "client": "halae",
+      "enPersonne": true,
+      "titre": "Mes sous-titres",
+      "resume": "Écrire ce qui est dit, passage par passage, et l'afficher en même temps que la vidéo.",
+      "demande": "Karim m'a écrit : il aimerait suivre mes vidéos, mais il est sourd, et je ne mets jamais de sous-titres. Les écrire à la main me prend des heures… Tu pourrais m'aider ?",
+      "besoins": [
+        { "apporte": "noter", "texte": "Écrire ce qui est dit, passage par passage" },
+        { "apporte": "sous-titrer", "texte": "Afficher le texte en même temps que la vidéo" }
+      ],
+      "bonus": [
+        { "apporte": "partager", "texte": "Envoyer les sous-titres avec la vidéo" }
+      ],
+      "aEviter": [
+        { "apporte": "compte", "texte": "Pas de compte de plus : j'en ai déjà bien assez" }
+      ],
+      "confort": [
+        { "reglage": "contraste", "valeurs": ["eleve"], "texte": "Des sous-titres bien contrastés, lisibles sur toutes les images" }
+      ],
+      "recompense": { "argent": 60, "reputation": 12, "bonus": 10 },
+      "debloquee": { "apres": ["halae-planning", "karim-atelier"] },
+      "reactions": {
+        "parfait": "Karim va pouvoir suivre mes vidéos, et tout le monde avec lui. Merci !",
+        "bien": "C'est déjà bien plus rapide qu'à la main.",
+        "aRetravailler": "Pas encore tout à fait… Ce n'est pas grave, je continue mes vidéos en attendant."
+      }
+    },
+    {
+      "id": "theo-revisions",
+      "client": "theo",
+      "enPersonne": true,
+      "titre": "Une chose à la fois",
+      "resume": "Savoir quoi réviser aujourd'hui, et rien de plus.",
+      "demande": "Mes examens approchent. J'ai essayé une application de révision : des badges, des graphiques, des notifications partout… Je m'y noie. Il me faudrait juste savoir quoi réviser aujourd'hui, une chose à la fois.",
+      "besoins": [
+        { "apporte": "cocher", "texte": "Cocher ce que j'ai révisé aujourd'hui" },
+        { "apporte": "temps-visuel", "texte": "Voir le temps qui reste avant la pause" }
+      ],
+      "bonus": [
+        { "apporte": "rappel-ecran", "texte": "Un rappel discret quand c'est l'heure de la pause" }
+      ],
+      "aEviter": [
+        { "apporte": "statistiques", "texte": "Pas de graphiques ni de badges : je veux réviser, pas me comparer" }
+      ],
+      "chargeMax": 2,
+      "confort": [
+        { "reglage": "espacement", "valeurs": ["aere"], "texte": "Des lignes bien espacées : je m'y retrouve mieux" }
+      ],
+      "apercu": { "liste": ["Aujourd'hui : histoire", "Relire le chapitre 3", "Faire la fiche des dates"] },
+      "recompense": { "argent": 60, "reputation": 12, "bonus": 10 },
+      "debloquee": { "apres": ["theo-changements"] },
+      "reactions": {
+        "parfait": "C'est exactement ça : une chose à la fois. Je commence ce soir.",
+        "bien": "C'est déjà beaucoup plus calme. Je vais m'en servir.",
+        "aRetravailler": "C'est encore un peu trop pour moi. Je préfère attendre une version plus simple : rien ne presse."
       }
     }
   ]

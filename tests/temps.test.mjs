@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chargerDonneesDuDisque, lireJson } from './aides.mjs';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../js/jeu/temps.js';
-import { creneauA, presenceDans, verifierRoutine } from '../js/jeu/routines.js';
+import { creneauA, presenceDans, prochainPassage, verifierRoutine } from '../js/jeu/routines.js';
 import { drapeauDeRencontre, repliqueDAccueil, repliqueDActivite } from '../js/jeu/dialogues.js';
 
 const jeu = lireJson('data/jeu.json');
@@ -73,4 +73,14 @@ test('les répliques : rencontre la première fois, puis salutations ; toujours 
   assert.equal(activite.description, 'monte sa prochaine vidéo');
   assert.equal(repliqueDActivite(halae, null, moment), null);
   assert.equal(drapeauDeRencontre(halae), 'rencontre-halae');
+});
+
+test('quand une personne revient-elle ? (pour le dire quand elle n\'est pas là)', async () => {
+  const { pnj } = await chargerDonneesDuDisque();
+  const theo = pnj.pnj.find((p) => p.id === 'theo');
+  assert.deepEqual(prochainPassage(theo, 'domicile', 10 * 60, null), { minute: 16 * 60, demain: false });
+  assert.deepEqual(prochainPassage(theo, 'domicile', 17 * 60 + 30, null), { minute: 16 * 60, demain: true });
+  assert.equal(prochainPassage(theo, 'bureaux', 10 * 60, null), null, 'il ne va pas ailleurs');
+  const mentor = pnj.pnj.find((p) => p.id === 'ferrus');
+  assert.equal(prochainPassage(mentor, 'domicile', 8 * 60, { modele: 'ferrus' }), null, 'pas quand on joue Ferrus');
 });

@@ -14,8 +14,11 @@
 // et ajouter une étape dans MIGRATIONS : les anciennes parties restent lisibles.
 // =============================================================================
 
+import { SCHEMA_COMMANDE } from './schemas.js';
+import { verifier } from './verification.js';
+
 export const FORMAT = 'atelier-pwa-partie';
-export const VERSION_FORMAT = 2;
+export const VERSION_FORMAT = 3;
 
 // Taille maximale d'un fichier importé (une partie fait quelques kilo-octets).
 export const TAILLE_MAXIMALE_IMPORT = 5 * 1024 * 1024;
@@ -42,7 +45,8 @@ export function nouvellePartie({ graine, depart, versionJeu, joueur = null, main
     argent: depart.argent,
     reputation: depart.reputation,
     quetes: { actives: {}, finies: [], suivie: null },
-    commandes: { enCours: {}, livrees: [] },
+    // aleatoires : les commandes du jour acceptées, recopiées (jalon 4).
+    commandes: { enCours: {}, livrees: [], aleatoires: {} },
     possessions: [],
     lieux: { actuel: depart.lieu, debloques: [depart.lieu], amenagements: {} },
     drapeaux: {},
@@ -93,6 +97,18 @@ function livraisonValide(livraison) {
     && estEntier(livraison.jour, 1) && estEntier(livraison.argent) && estEntier(livraison.reputation);
 }
 
+// Une commande du jour acceptée, recopiée dans la partie : elle doit avoir
+// la forme d'une commande, et son identifiant celui d'une commande du jour.
+function commandeDuJourValide(id, commande) {
+  return estObjet(commande) && commande.id === id && id.startsWith('jour-')
+    && verifier(commande, SCHEMA_COMMANDE).length === 0;
+}
+
+// Une quête en cours : depuis quand.
+function queteActiveValide(quete) {
+  return estObjet(quete) && estObjet(quete.debut) && estEntier(quete.debut.jour, 1) && estEntier(quete.debut.minute);
+}
+
 // Renvoie la liste des problèmes (vide si la partie est bien formée).
 export function verifierPartie(partie) {
   const problemes = [];
@@ -110,11 +126,14 @@ export function verifierPartie(partie) {
   exiger(estEntier(partie.argent), 'argent invalide');
   exiger(estEntier(partie.reputation), 'reputation invalide');
   exiger(estObjet(partie.quetes) && estObjet(partie.quetes.actives)
+    && Object.values(partie.quetes.actives).every(queteActiveValide)
     && estListeDeTextes(partie.quetes.finies)
     && (partie.quetes.suivie === null || typeof partie.quetes.suivie === 'string'), 'quetes invalides');
   exiger(estObjet(partie.commandes) && estObjet(partie.commandes.enCours)
     && Object.values(partie.commandes.enCours).every(projetValide)
-    && Array.isArray(partie.commandes.livrees) && partie.commandes.livrees.every(livraisonValide), 'commandes invalides');
+    && Array.isArray(partie.commandes.livrees) && partie.commandes.livrees.every(livraisonValide)
+    && estObjet(partie.commandes.aleatoires)
+    && Object.entries(partie.commandes.aleatoires).every(([id, commande]) => commandeDuJourValide(id, commande)), 'commandes invalides');
   exiger(estListeDeTextes(partie.possessions), 'possessions invalides');
   exiger(estObjet(partie.lieux) && typeof partie.lieux.actuel === 'string'
     && estListeDeTextes(partie.lieux.debloques) && estObjet(partie.lieux.amenagements), 'lieux invalides');
@@ -130,6 +149,13 @@ const MIGRATIONS = {
   // Format 1 (jalon 0) → 2 (jalon 1) : la caméra est gardée dans la partie.
   // Le joueur restait à null au jalon 0 : il sera choisi en reprenant la partie.
   1: (partie) => ({ ...partie, vue: { rotation: 0, zoom: null } }),
+  // Format 2 → 3 (jalon 4) : les commandes du jour acceptées sont gardées.
+  // Les quêtes commencent toutes seules en reprenant la partie : ce qui est
+  // déjà fait (commandes livrées…) compte.
+  2: (partie) => ({
+    ...partie,
+    commandes: estObjet(partie.commandes) ? { ...partie.commandes, aleatoires: {} } : partie.commandes,
+  }),
 };
 
 export class ErreurSauvegarde extends Error {

@@ -462,14 +462,23 @@ function verifierCreationEnPlus(creation) {
 
 // --- data/commandes.json : les commandes des clients (jalon 3) ---------------
 const SCHEMA_ATTENTE = { type: 'objet', champs: { apporte: texte, texte } };
-export const SCHEMA_COMMANDES = {
+const SCHEMA_CONFORT_ATTENDU = {
   type: 'objet',
+  champs: { reglage: texte, valeurs: { type: 'liste', min: 1, element: texte }, texte },
+};
+const SCHEMA_DEBLOQUEE = {
+  type: 'objet',
+  facultatif: true,
   champs: {
-    aValider: { ...texte, facultatif: true },
-    commandes: {
-      type: 'liste',
-      min: 1,
-      element: {
+    drapeau: { ...texte, facultatif: true },
+    apres: { type: 'liste', facultatif: true, element: texte },
+    niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+  },
+};
+
+// Une commande. Aussi utilisé pour vérifier les commandes du jour gardées
+// dans une partie (format-sauvegarde.js).
+export const SCHEMA_COMMANDE = {
         type: 'objet',
         champs: {
           id: texte,
@@ -485,31 +494,22 @@ export const SCHEMA_COMMANDES = {
           aEviter: { type: 'liste', element: SCHEMA_ATTENTE },
           avis: { type: 'objet', facultatif: true, valeurs: texte },
           chargeMax: { type: 'nombre', entier: true, min: 0, max: 20, facultatif: true },
-          confort: {
-            type: 'liste',
-            element: {
-              type: 'objet',
-              champs: { reglage: texte, valeurs: { type: 'liste', min: 1, element: texte }, texte },
-            },
-          },
+          confort: { type: 'liste', element: SCHEMA_CONFORT_ATTENDU },
           apercu: { type: 'objet', facultatif: true, valeurs: listeDeTextes },
           recompense: {
             type: 'objet',
             champs: { argent: entierPositif, reputation: entierPositif, bonus: entierPositif },
           },
-          debloquee: {
-            type: 'objet',
-            facultatif: true,
-            champs: {
-              drapeau: { ...texte, facultatif: true },
-              apres: { type: 'liste', facultatif: true, element: texte },
-              niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
-            },
-          },
+          debloquee: SCHEMA_DEBLOQUEE,
           reactions: { type: 'objet', champs: { parfait: texte, bien: texte, aRetravailler: texte } },
         },
-      },
-    },
+};
+
+export const SCHEMA_COMMANDES = {
+  type: 'objet',
+  champs: {
+    aValider: { ...texte, facultatif: true },
+    commandes: { type: 'liste', min: 1, element: SCHEMA_COMMANDE },
   },
 };
 
@@ -519,6 +519,168 @@ function verifierCommandesEnPlus(fichier) {
   for (const commande of fichier?.commandes || []) {
     if (vus.has(commande.id)) erreurs.push(`commandes › ${commande.id} : identifiant en double`);
     vus.add(commande.id);
+  }
+  return erreurs;
+}
+
+// --- data/quetes.json : les quêtes (jalon 4) -----------------------------------
+// Les types d'étapes (voir js/jeu/quetes.js) et les champs que chacun exige :
+// verifierQuetesEnPlus() vérifie qu'il ne manque rien.
+export const CHAMPS_DES_ETAPES = {
+  demande: ['commande'],
+  commande: ['commande'],
+  drapeau: ['drapeau'],
+  reputation: ['niveau'],
+  parler: ['pnj', 'question', 'replique'],
+  aller: ['cible'],
+};
+
+const SCHEMA_ETAPE = {
+  type: 'objet',
+  champs: {
+    id: texte,
+    type: { type: 'choix', valeurs: Object.keys(CHAMPS_DES_ETAPES) },
+    texte,
+    detail: { ...texte, facultatif: true },
+    facultative: { type: 'booleen', facultatif: true },
+    commande: { ...texte, facultatif: true },
+    drapeau: { ...texte, facultatif: true },
+    destination: { ...texte, facultatif: true },
+    niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+    pnj: { ...texte, facultatif: true },
+    question: { ...texte, facultatif: true },
+    replique: { ...texte, facultatif: true },
+    cible: { ...texte, facultatif: true },
+    message: { ...texte, facultatif: true },
+  },
+};
+
+export const SCHEMA_QUETES = {
+  type: 'objet',
+  champs: {
+    aValider: { ...texte, facultatif: true },
+    principes: { type: 'objet', valeurs: { type: 'objet', champs: { nom: texte, explication: texte } } },
+    quetes: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          titre: texte,
+          principe: texte,
+          donneur: texte,
+          resume: texte,
+          debloquee: {
+            type: 'objet',
+            facultatif: true,
+            champs: {
+              drapeau: { ...texte, facultatif: true },
+              quetes: { type: 'liste', facultatif: true, element: texte },
+              commandes: { type: 'liste', facultatif: true, element: texte },
+              niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+            },
+          },
+          etapes: { type: 'liste', min: 1, element: SCHEMA_ETAPE },
+          fin: texte,
+          recompense: { type: 'objet', champs: { argent: entierPositif, reputation: entierPositif } },
+        },
+      },
+    },
+  },
+};
+
+function verifierQuetesEnPlus(fichier) {
+  const erreurs = [];
+  const vues = new Set();
+  for (const quete of fichier?.quetes || []) {
+    const ou = `quetes › ${quete.id}`;
+    if (vues.has(quete.id)) erreurs.push(`${ou} : identifiant en double`);
+    vues.add(quete.id);
+    const etapesVues = new Set();
+    (quete.etapes || []).forEach((etape, n) => {
+      const ici = `${ou} › etapes › n°${n + 1} (${etape.id})`;
+      if (etapesVues.has(etape.id)) erreurs.push(`${ici} : identifiant d'étape en double`);
+      etapesVues.add(etape.id);
+      for (const champ of CHAMPS_DES_ETAPES[etape.type] || []) {
+        if (!(champ in etape)) erreurs.push(`${ici} : une étape « ${etape.type} » a besoin du champ « ${champ} »`);
+      }
+    });
+    if ((quete.etapes || []).every((etape) => etape.facultative)) {
+      erreurs.push(`${ou} : il faut au moins une étape obligatoire (non « facultative »)`);
+    }
+  }
+  return erreurs;
+}
+
+// --- data/modeles-commandes.json : les briques des commandes du jour (J4) ------
+const deuxEntiers = { type: 'liste', min: 2, max: 2, element: entierPositif };
+export const SCHEMA_MODELES_COMMANDES = {
+  type: 'objet',
+  champs: {
+    aValider: { ...texte, facultatif: true },
+    parJour: { type: 'nombre', entier: true, min: 1, max: 5 },
+    debloquee: SCHEMA_DEBLOQUEE,
+    recompense: { type: 'objet', champs: { argent: deuxEntiers, reputation: deuxEntiers, bonus: entierPositif } },
+    clients: {
+      type: 'liste',
+      min: 1,
+      element: { type: 'objet', champs: { id: texte, nom: texte, presentation: texte, apparence: SCHEMA_APPARENCE } },
+    },
+    sujets: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          titre: texte,
+          resume: texte,
+          demande: texte,
+          besoins: { type: 'liste', min: 1, element: SCHEMA_ATTENTE },
+          bonus: { type: 'liste', element: SCHEMA_ATTENTE },
+          apercu: { type: 'objet', facultatif: true, valeurs: listeDeTextes },
+        },
+      },
+    },
+    contraintes: {
+      type: 'liste',
+      min: 1,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          aEviter: { ...SCHEMA_ATTENTE, facultatif: true },
+          confort: { ...SCHEMA_CONFORT_ATTENDU, facultatif: true },
+          chargeMax: { type: 'nombre', entier: true, min: 0, max: 20, facultatif: true },
+        },
+      },
+    },
+    reactions: { type: 'objet', champs: { parfait: listeDeTextes, bien: listeDeTextes, aRetravailler: listeDeTextes } },
+  },
+};
+
+function verifierModelesCommandesEnPlus(fichier) {
+  const erreurs = [];
+  for (const groupe of ['clients', 'sujets', 'contraintes']) {
+    const vus = new Set();
+    for (const element of fichier?.[groupe] || []) {
+      if (vus.has(element.id)) erreurs.push(`${groupe} › ${element.id} : identifiant en double`);
+      vus.add(element.id);
+    }
+  }
+  for (const contrainte of fichier?.contraintes || []) {
+    const sortes = ['aEviter', 'confort', 'chargeMax'].filter((champ) => champ in contrainte);
+    if (sortes.length !== 1) {
+      erreurs.push(`contraintes › ${contrainte.id} : il faut exactement un champ parmi « aEviter », « confort » et « chargeMax »`);
+    }
+  }
+  for (const nom of ['argent', 'reputation']) {
+    const [min, max] = fichier?.recompense?.[nom] || [0, 0];
+    if (min > max) erreurs.push(`recompense › ${nom} : le minimum (${min}) dépasse le maximum (${max})`);
+  }
+  if (fichier?.recompense?.argent && Math.ceil(fichier.recompense.argent[0] / 5) > Math.floor(fichier.recompense.argent[1] / 5)) {
+    erreurs.push('recompense › argent : il faut au moins un multiple de 5 entre le minimum et le maximum');
   }
   return erreurs;
 }
@@ -534,5 +696,12 @@ export const FICHIERS_DONNEES = [
   { nom: 'pnj', chemin: 'data/pnj.json', schema: SCHEMA_PNJ, enPlus: verifierPnjEnPlus },
   { nom: 'creation', chemin: 'data/creation.json', schema: SCHEMA_CREATION, enPlus: verifierCreationEnPlus },
   { nom: 'commandes', chemin: 'data/commandes.json', schema: SCHEMA_COMMANDES, enPlus: verifierCommandesEnPlus },
+  { nom: 'quetes', chemin: 'data/quetes.json', schema: SCHEMA_QUETES, enPlus: verifierQuetesEnPlus },
+  {
+    nom: 'modelesCommandes',
+    chemin: 'data/modeles-commandes.json',
+    schema: SCHEMA_MODELES_COMMANDES,
+    enPlus: verifierModelesCommandesEnPlus,
+  },
   { nom: 'indexLieux', chemin: 'data/lieux/index.json', schema: SCHEMA_INDEX_LIEUX },
 ];
