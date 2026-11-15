@@ -24,7 +24,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | ✅ livré (version 0.2.0) |
 | J2 | Personnages, routines, dialogues | ✅ livré (version 0.3.0) |
 | J3 | L'ordinateur : commandes et création d'applications | ✅ livré (version 0.4.1) |
-| J4 | Quêtes et journal (premier livrable jouable) | 🚧 en cours |
+| J4 | Quêtes et journal (premier livrable jouable) | 🧪 à valider (version 0.5.0) |
 | J5 | Progression, bureaux, nouveaux lieux | à venir |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
 
@@ -40,11 +40,17 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
   habitants suivent chacun leur journée, toujours la même.
 - **Le temps** : une minute de jeu par seconde (réglable, ou arrêté) ; il
   s'arrête dès qu'une fenêtre est ouverte. Le soir, « Dormir » près du lit.
+- **Les quêtes** : cinq petites histoires, une par principe
+  d'accessibilité (lisibilité, simplicité, routine, soutien au quotidien,
+  charge cognitive). L'étape en cours de la quête suivie s'affiche en haut
+  de l'écran : la toucher t'emmène là où elle se joue. Le **journal**
+  (bouton en bas, touche J) les raconte toutes ; rien n'expire.
 - **L'ordinateur** (au bureau, « Utiliser l'ordinateur ») : la visio avec
-  Ferrus, les commandes des voisins (applications fictives), l'atelier de
-  création et tes comptes. Toucher l'objectif, en haut, t'y emmène.
-  Halaé, ta toute première cliente, vit avec toi : c'est en lui parlant
-  qu'elle te présente sa commande.
+  Ferrus, les commandes (applications fictives), l'atelier de création et
+  tes comptes. Halaé, ta toute première cliente, vit avec toi, et Théo
+  passe chaque jour à 16 h : c'est en leur parlant qu'ils te présentent
+  leurs commandes. Une fois l'atelier reconnu (niveau 3), de nouvelles
+  commandes arrivent chaque matin.
 - **Créer une application** : choisis un modèle, ajoute les fonctions utiles
   (pas trop : chaque fonction pèse dans la « charge »), règle le confort,
   teste comme la personne, puis livre. Parfait, Bien ou À retravailler :
@@ -59,6 +65,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | + / − | rapprocher / éloigner la vue |
 | C | recentrer la vue |
 | Entrée ou Espace | examiner l'objet proche |
+| J | ouvrir le journal des quêtes |
 | Échap | pause, ou fermer une fenêtre |
 
 ## Confort et accessibilité

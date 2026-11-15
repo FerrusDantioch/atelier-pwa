@@ -41,11 +41,12 @@ js/       config.js · avant-affichage.js · secours.js · main.js
   interface/  dom, icones, fenetres, notifications, accueil, reglages-ecran,
               sauvegarde-ecran, a-propos, installation, ecran-jeu
               (+ choix-perso J1, dialogue-ecran J2, ordinateur et
-              atelier-app J3, journal J4, aller-a J1, fiche-app J6)
+              atelier-app J3, journal et progression J4, aller-a J1,
+              fiche-app J6)
 data/     jeu.json · textes.json (J0)
           personnages.json · palette.json · meubles.json (J1)
           pnj.json · dialogues.json (J2)
-          commandes.json · creation.json (J3) · quetes.json · modeles-quetes.json (J4)
+          commandes.json · creation.json (J3) · quetes.json · modeles-commandes.json (J4)
           prix et déblocages des meubles (J5) · apps.json · mentions.json (J6)
           lieux/index.json + un fichier par lieu (J1+)
 lib/three/    three.module.js · three.core.js · LICENSE
@@ -71,11 +72,14 @@ Chaque fichier de `data/` est décrit par un schéma dans
 - **pnj.json** : identité, apparence, profil de confort, routine
   (`{ de, a, lieu, point, activite }`), besoins, répliques courtes.
   `"lieu": "ailleurs"` = un lieu non dessiné : le PNJ est simplement absent.
-- **quetes.json** : quêtes écrites à l'avance, en étapes typées (parler,
-  aller, commande, acheter, placer, réputation, voir-app, drapeau) ; une
-  étape « facultative » ne bloque jamais.
-- **modeles-quetes.json** : briques des quêtes aléatoires (client, besoin,
-  contrainte, récompense), tirées avec la graine de la partie + le jour.
+- **quetes.json** : quêtes écrites à l'avance, en étapes typées (demande,
+  commande, drapeau, réputation, parler, aller au jalon 4 ; acheter et
+  placer au jalon 5, voir-app au jalon 6) ; une étape « facultative » ne
+  bloque jamais. Chaque quête illustre un principe d'accessibilité.
+- **modeles-commandes.json** : briques des commandes du jour (personne,
+  sujet, contrainte, récompense), tirées avec la graine de la partie et le
+  jour, à partir du niveau 3 de réputation ; celles qu'on n'accepte pas se
+  renouvellent chaque matin.
 - **commandes.json** / **creation.json** : cahier des charges (attendus,
   bonus, à éviter, confort) et pièces du mini-jeu (modèles d'appli,
   fonctionnalités avec ce qu'elles « apportent » et leur « charge », barème).
@@ -97,7 +101,8 @@ La **sauvegarde** (IndexedDB, base `atelier-pwa`, et fichier exporté de même
 forme) : `format`, `versionFormat`, `versionJeu`, dates, `graine`, `joueur`,
 `temps { jour, minute }`, `argent`, `reputation`, `quetes`, `commandes`,
 `possessions`, `lieux { actuel, debloques, amenagements }`, `drapeaux`,
-`vue { rotation, zoom }` (format 2, jalon 1). Le joueur :
+`vue { rotation, zoom }` (format 2, jalon 1), `commandes.aleatoires` (les
+commandes du jour acceptées, recopiées : format 3, jalon 4). Le joueur :
 `{ modele: 'ferrus' | 'perso', nom, apparence, position { x, z, angle } }`
 (l'apparence de Ferrus n'est jamais copiée : elle vient des données).
 Toute évolution de forme passe par `versionFormat` + une étape de migration.
@@ -153,11 +158,14 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
   livrable ; Madeleine, retraitée malvoyante (lisibilité) ; Samia, boulangère
   (simplicité) ; Karim, menuisier sourd (rien de seulement sonore) ; Hugo,
   client pressé (moins, c'est mieux).
-- **Premier livrable (J4)**, une quête par thème : « Bienvenue à l'atelier »
-  (lisibilité), « Le planning de publication » (simplicité), « Des
-  sous-titres pour tout le monde » (soutien au quotidien), « Un matin sans
-  surprise » (aide à la routine), « Réviser sans se noyer » (charge
-  cognitive).
+- **Premier livrable (J4)**, une quête par principe : « Bienvenue à
+  l'atelier » (lisibilité, le mentor), « Le planning de publication »
+  (simplicité, Halaé), « Un matin sans surprise » (aide à la routine,
+  Théo), « Des sous-titres pour tout le monde » (soutien au quotidien,
+  Halaé, pour Karim), « Réviser sans se noyer » (charge cognitive, Théo).
+  Les deux quêtes d'Halaé, et sa commande « Mes sous-titres », ont été
+  validées par elle (via Ferrus) le 15/11. Théo présente ses commandes de
+  vive voix, quand il passe à 16 h.
 
 ## 6. Jalons
 
@@ -191,6 +199,8 @@ Décidé avec Ferrus (14 novembre 2026) :
   l'instant » ; d'éventuelles corrections seront vues plus tard.
 - **Jalon 3** : validé par Ferrus le 15/11 (« Tout est bon »), répliques
   du mentor en visio et commande d'essai comprises.
+- **Jalon 4** : les deux quêtes d'Halaé validées par elle (via Ferrus) le
+  15/11, telles que proposées.
 
 Recommandations appliquées en attendant une réponse contraire :
 

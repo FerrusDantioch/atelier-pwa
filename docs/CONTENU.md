@@ -192,6 +192,65 @@ commande. Au démarrage, le jeu vérifie que chaque commande peut être
 réussie « parfaitement », et que toutes finissent par se débloquer même si
 l'on n'obtient que des « Bien ».
 
+## Les quêtes : `data/quetes.json`
+
+Une quête est une petite histoire en étapes. Elle commence toute seule
+quand ses conditions sont remplies, s'affiche dans le journal (touche J),
+et se termine quand ses étapes obligatoires sont faites : sa récompense est
+alors gagnée, une seule fois. Rien n'expire.
+
+| Champ | Rôle |
+|---|---|
+| `principes` | les principes d'accessibilité (`nom`, `explication`), cités par les quêtes |
+| `id`, `titre`, `principe`, `donneur` | identifiant, titre, principe (une clé de `principes`) et la personne qui la donne (`data/pnj.json`) |
+| `resume`, `fin` | ce qu'il y a à faire, et ce qui est dit quand c'est fini |
+| `debloquee` | facultatif : `quetes` (finies avant), `commandes` (livrées avant), `niveau` (de réputation), `drapeau` |
+| `etapes` | les étapes, dans l'ordre (voir ci-dessous) |
+| `recompense` | `argent` et `reputation` gagnés à la fin |
+
+Chaque étape a un `id`, un `type`, un `texte` court (affiché en haut de
+l'écran : « parle à Halaé »), et peut avoir un `detail` (affiché dans le
+journal) et `"facultative": true` (elle ne bloque jamais, et reste possible
+après la fin de la quête). Selon le type :
+
+| Type | Champs | Faite quand… |
+|---|---|---|
+| `demande` | `commande` | la personne a présenté sa commande de vive voix (commande `enPersonne`) |
+| `commande` | `commande` | la commande est livrée (quelle que soit la note) |
+| `drapeau` | `drapeau`, `destination` (facultatif) | le jeu a posé ce drapeau : `visio-accueil` (appel du mentor), `atelier-texte-agrandi` (un texte plus grand essayé dans l'atelier) |
+| `reputation` | `niveau` | ce niveau de réputation est atteint |
+| `parler` | `pnj`, `question`, `replique` | le joueur a posé la question dans le dialogue ; la personne répond |
+| `aller` | `cible`, `message` (facultatif) | le joueur s'est approché de ce meuble, point ou pièce ; le message dit ce qu'il y voit |
+
+⚠️ Ne jamais changer l'`id` d'une quête ou d'une étape déjà publiée : les
+parties retiennent les étapes faites par ces identifiants
+(`etape-<quête>-<étape>`). Au démarrage, le jeu vérifie que tout ce que
+citent les quêtes existe, que chaque étape peut vraiment se faire (une
+personne qui vient dans un lieu, une commande « en personne »…) et que
+toutes les quêtes finissent par commencer puis se terminer, même si l'on
+n'obtient que des « Bien ». Ce qui concerne Halaé doit être validé par
+elle avant d'être publié.
+
+## Les commandes du jour : `data/modeles-commandes.json`
+
+Une fois l'atelier reconnu (`debloquee` : niveau 3 de réputation), chaque
+matin apporte `parJour` nouvelles commandes, assemblées à partir de briques.
+Le tirage dépend de la partie et du jour : recharger ne change rien. Une
+commande du jour qu'on n'accepte pas laisse sa place le lendemain ; une
+commande acceptée est gardée dans la partie jusqu'à sa livraison.
+
+| Champ | Rôle |
+|---|---|
+| `clients` | les personnes : `id` (différent de ceux de `data/pnj.json`), `nom`, `presentation`, `apparence` (comme dans `data/pnj.json`) |
+| `sujets` | ce dont elles ont besoin : `titre`, `resume`, `demande` (écrite pour aller à n'importe quelle personne : épicène), `besoins`, `bonus`, `apercu` (facultatif) |
+| `contraintes` | une seule chose parmi `aEviter` (`{ "apporte", "texte" }`), `confort` (`{ "reglage", "valeurs", "texte" }`) et `chargeMax` |
+| `recompense` | `argent` et `reputation` : `[minimum, maximum]` ; `bonus` : pièces par petit plus |
+| `reactions` | des listes de réactions possibles pour `parfait`, `bien`, `aRetravailler` |
+
+Seules les associations sujet + contrainte qu'on peut réussir
+« parfaitement » sont tirées ; le jeu refuse au démarrage un sujet qui ne
+s'accorde avec aucune contrainte.
+
 ## Les couleurs de la 3D : `data/palette.json`
 
 Toutes les couleurs des meubles, des sols, des murs et des personnages,

@@ -1,5 +1,117 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.0) — à valider
+
+Sur la branche de travail, pas encore dans `main`. Les deux quêtes d'Halaé,
+et sa nouvelle commande « Mes sous-titres », ont été validées par elle (via
+Ferrus) le 15 novembre 2026, telles que proposées.
+
+### Ce qui est fait
+
+- **Cinq quêtes**, une par principe d'accessibilité (`data/quetes.json`) :
+  - « Bienvenue à l'atelier » (lisibilité, le mentor) : allumer
+    l'ordinateur, livrer la liste de courses ; en facultatif, essayer un
+    texte plus grand dans l'atelier ;
+  - « Le planning de publication » (simplicité, Halaé) : lui parler,
+    livrer son planning ;
+  - « Un matin sans surprise » (aide à la routine, Théo) : lui parler à
+    16 h (il présente maintenant sa commande de vive voix), la livrer, puis
+    lui demander des nouvelles ;
+  - « Des sous-titres pour tout le monde » (soutien au quotidien, Halaé,
+    pour Karim) : après la commande de Karim, sa commande « Mes
+    sous-titres » ; en facultatif, regarder sa nouvelle vidéo à la
+    télévision, et en parler à Théo ;
+  - « Réviser sans se noyer » (charge cognitive, Théo) : sa seconde
+    commande, « Une chose à la fois », puis ses nouvelles.
+
+  Une quête commence toute seule ; elle se termine quand ses étapes
+  obligatoires sont faites, et rapporte des pièces et de la réputation.
+  Une étape facultative ne bloque jamais et reste possible ensuite. Rien
+  n'expire.
+- **Le journal** (bouton « Journal » en bas, touche J, ou Pause › Journal
+  des quêtes) : les quêtes en cours, leur principe expliqué, leurs étapes
+  (« Faite », « Maintenant », « Ensuite », « Facultative », toujours écrit
+  en toutes lettres) et leur récompense. « Suivre » choisit la quête dont
+  l'étape s'affiche en haut ; « Y aller » emmène là où se joue une étape.
+  Les quêtes terminées gardent leur fin.
+- **L'objectif en haut** : l'étape en cours de la quête suivie, précisée
+  selon la commande (« lis la commande de Théo, au bureau », « termine… »,
+  « reprends… »). Si la personne n'est pas là, le jeu dit quand elle
+  revient : « Théo n'est pas là pour l'instant : retour prévu à 16 h. »
+- **Les commandes du jour** (`data/modeles-commandes.json`) : à partir du
+  niveau 3 (« Atelier reconnu »), deux commandes chaque matin, assemblées
+  à partir de 8 personnes, 10 sujets et 9 contraintes, toujours
+  réussissables « parfaitement ». Celles qu'on n'accepte pas sont
+  remplacées le lendemain ; une commande acceptée reste jusqu'à sa
+  livraison.
+- Une nouvelle fonction dans l'atelier : « Sous-titres ».
+- **Un seul message** quand plusieurs choses arrivent ensemble (les
+  lecteurs d'écran le lisent en entier) ; la fenêtre de livraison dit aussi
+  la fin d'une quête et le début de la suivante.
+- **Rejoindre quelqu'un qui marche** : le personnage va là où la personne
+  va s'arrêter et l'y attend. Avant, il allait là où elle était, et
+  annonçait « Devant Théo » alors que Théo était déjà plus loin.
+- Sur un petit écran avec un très grand texte, le bouton « Journal » ne
+  garde que son icône (son nom reste lu par les lecteurs d'écran).
+- Le français des noms insérés : « Commande d'Antoine », « lis la commande
+  d'Halaé », « Impossible de t'approcher du lit » (au lieu de « de le
+  lit », une faute qui datait du jalon 1).
+- Sauvegarde au format 3 (les commandes du jour acceptées) : une partie de
+  la 0.4 est mise à niveau, et ce qui est déjà fait compte (les premières
+  quêtes se terminent toutes seules, avec leur récompense).
+
+### Vérifications faites
+
+- 116 tests sans navigateur, dont 22 nouveaux : les quêtes (déblocage,
+  étapes, facultatives, récompense donnée une seule fois, quête suivie,
+  objectif, partie d'une ancienne version, textes validés par Halaé
+  inchangés, données fautives refusées), les commandes du jour
+  (reproductibles, 300 jours tous réussissables, renouvelées, gardées une
+  fois acceptées, fichier trafiqué refusé), la mise à niveau du format 2,
+  l'heure de retour d'une personne et le « de » devant un nom (« d'Antoine »).
+- 50 tests dans Chromium, dont 5 nouveaux : le journal (bouton, touche J,
+  Pause, « Y aller »), Théo à 16 h (absent, puis sa commande, puis ses
+  nouvelles et la fin de la quête), suivre une autre quête et la
+  télévision, les commandes du jour (niveau 3, puis le lendemain), le
+  téléphone avec le texte « Énorme ».
+
+### Comment tester sur tablette
+
+1. Nouvelle partie : un message annonce la quête « Bienvenue à
+   l'atelier ». Touche « Journal » en bas (ou J) et lis-la.
+2. Suis l'objectif en haut : l'appel de Ferrus, puis sa liste de courses.
+   Dans l'atelier, essaie un texte plus grand (étape facultative). À la
+   livraison, la quête se termine et « Le planning de publication »
+   commence.
+3. Parle à Halaé, livre son planning. L'objectif devient « parle à Théo,
+   vers 16 h » : touche-le avant 16 h pour voir le message, puis attends
+   16 h (ou règle « Vitesse du temps »).
+4. Parle à Théo : sa commande ; une fois livrée, « Alors, cette
+   application ? ».
+5. Livre la commande de Karim : la quête des sous-titres commence. Dans le
+   journal, « Suivre » change l'objectif du haut.
+6. Plus tard (niveau 3), regarde « Commandes du jour » sur l'ordinateur ;
+   dors une nuit : celles que tu n'as pas acceptées ont changé.
+7. En reprenant une partie de la 0.4.1 : les quêtes déjà faites se
+   terminent toutes seules, avec leur récompense.
+
+### Limites connues
+
+- Madeleine, Samia, Karim, Hugo et les personnes des commandes du jour ne
+  viennent pas encore au domicile.
+- L'argent ne sert pas encore : les achats arrivent au jalon 5.
+- L'objectif du haut suit la quête choisie : un projet en cours pour une
+  autre commande se retrouve sur l'ordinateur.
+- Lors de sa visite, le mentor dit toujours « Bientôt, ton ordinateur
+  recevra les premières commandes ».
+
+### En attente
+
+- La validation du jalon 4 par Ferrus.
+- Son avis sur les textes de la quête du mentor (« Bienvenue à
+  l'atelier ») ; ceux de Théo (personnage fictif) sont à relire s'il le
+  souhaite.
+
 ## ✅ Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1, 15 novembre 2026)
 
 Validé par Ferrus le 15 novembre 2026 (« Tout est bon »), répliques du

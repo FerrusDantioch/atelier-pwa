@@ -106,8 +106,25 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   `economie.js`. `coherence.js` refuse une commande impossible à réussir
   « parfaitement » ou qui ne se débloque jamais avec des « Bien ». Chaque
   commande affiche « application fictive ». Une commande « enPersonne »
-  (celle d'Halaé) est d'abord présentée de vive voix dans le dialogue
+  (Halaé, Théo) est d'abord présentée de vive voix dans le dialogue
   (drapeau `proposee-<id>`), puis arrive sur l'ordinateur.
+- **Les quêtes** (jalon 4) : règles pures dans `js/jeu/quetes.js`
+  (déblocage, étapes, fin et récompense, quête suivie, objectif du haut),
+  appliquées par `js/interface/progression.js`, le seul endroit qui les
+  fait avancer et les annonce (en **un seul message** : les lecteurs
+  d'écran ne lisent que le dernier de deux messages d'affilée). Une étape
+  faite est retenue par le drapeau `etape-<quête>-<étape>` : **ne jamais
+  changer l'identifiant d'une quête ou d'une étape publiée**. Une étape
+  « drapeau » n'attend qu'un drapeau de `DRAPEAUX_D_ETAPES` ; `coherence.js`
+  refuse une quête impossible à finir (même avec des « Bien »). Les deux
+  quêtes d'Halaé et « Mes sous-titres » sont validées par elle (15/11) : un
+  test vérifie que leurs textes n'ont pas changé.
+- **Commandes du jour** (`js/jeu/generateur.js`, `data/modeles-commandes.json`) :
+  tirées avec la graine et le jour (reproductibles), identifiants
+  `jour-<jour>-<n>`, recopiées dans la partie une fois acceptées
+  (`commandes.aleatoires`) ; seules les associations réussissables
+  « parfaitement » sont tirées. Les listes de commandes de l'interface
+  passent par `commandesConnues()`.
 - **Portraits** (visio, commandes) : `moteur.photographier()` dessine une
   autre scène dans un coin de la toile et la recopie dans la même tâche
   (`js/monde/portrait.js`) : pas de second moteur 3D.
@@ -140,8 +157,10 @@ accessibilité de base, réglages, sauvegarde/export/import/copies, copie
 d'urgence, hors ligne, mise à jour proposée, absence de requête externe,
 contrastes, et (jalon 1) la scène 3D, le toucher, le clavier, « Aller à… »,
 « Examiner », la caméra, le choix du personnage, le petit écran,
-(jalon 2) l'horloge, le sommeil, les habitants et les dialogues, et
-(jalon 3) l'ordinateur, la visio, l'atelier, la livraison et les comptes.
+(jalon 2) l'horloge, le sommeil, les habitants et les dialogues,
+(jalon 3) l'ordinateur, la visio, l'atelier, la livraison et les comptes,
+et (jalon 4) le journal, la quête suivie, parler à Théo à 16 h, les étapes
+facultatives et les commandes du jour.
 Dans les textes affichés, la typographie met des espaces fines insécables
 avant « : ! ? » : normaliser les espaces (`\s+`) avant de comparer.
 Petit serveur local : `node outils/serveur.mjs`.
