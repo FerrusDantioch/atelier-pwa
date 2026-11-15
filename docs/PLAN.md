@@ -189,6 +189,8 @@ Décidé avec Ferrus (14 novembre 2026) :
   pantalon bleu, pas de barbe ; teint clair (choisi par lui le 14/11).
 - **Jalon 2** : fiche d'Halaé et répliques du mentor validées « pour
   l'instant » ; d'éventuelles corrections seront vues plus tard.
+- **Jalon 3** : validé par Ferrus le 15/11 (« Tout est bon »), répliques
+  du mentor en visio et commande d'essai comprises.
 
 Recommandations appliquées en attendant une réponse contraire :
 
@@ -213,4 +215,4 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
 6. *(Réglée : tablette Android, Brave.)*
 7. *(Réglée : première commande d'Halaé validée le 15/11 ; elle la
    présente de vive voix, avant toutes les autres.)*
-8. **Répliques du mentor en visio** (jalon 3) : à valider par Ferrus.
+8. *(Réglée : répliques du mentor en visio validées par Ferrus le 15/11.)*

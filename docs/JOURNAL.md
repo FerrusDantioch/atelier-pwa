@@ -1,12 +1,12 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1) — publié, à valider
+## ✅ Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1, 15 novembre 2026)
 
-Fusionné dans `main` le 14 novembre 2026 à la demande de Ferrus (version
-0.4.0), pour l'essayer sur sa tablette. Version 0.4.1 (fusionnée le
-15 novembre) : les corrections qu'il a demandées après son essai (parois
-de la salle d'eau, cheveux d'Halaé, sa commande donnée de vive voix).
-Validation en attente.
+Validé par Ferrus le 15 novembre 2026 (« Tout est bon »), répliques du
+mentor en visio comprises. Publié en deux temps dans `main` : la version
+0.4.0 le 14 novembre, pour l'essayer sur sa tablette, puis la 0.4.1 le
+15 novembre, avec les corrections demandées après cet essai (parois de la
+salle d'eau, cheveux d'Halaé, sa commande donnée de vive voix).
 
 ### Ce qui est fait
 
@@ -105,11 +105,6 @@ Validation en attente.
 - Lors de sa visite, le mentor dit toujours « Bientôt, ton ordinateur
   recevra les premières commandes », même quand elles sont arrivées
   (phrase validée : à reformuler si Ferrus le souhaite).
-
-### En attente
-
-- La validation par Ferrus des répliques du mentor en visio (tutoriel,
-  conseils).
 
 ## ✅ Jalon 2 — Les habitants et le temps qui passe (version 0.3.0, 14 novembre 2026)
 

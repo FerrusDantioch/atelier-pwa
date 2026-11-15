@@ -217,7 +217,7 @@
       "id": "ferrus",
       "modele": "ferrus",
       "presentation": "Ferrus Dantioch, qui a imaginé ce jeu, passe de temps en temps voir comment avance l'atelier.",
-      "aValider": "Répliques du mentor proposées par Claude : celles des visites validées par Ferrus le 14/11/2026 ; celles de la visio (jalon 3) à valider par Ferrus. Quand on joue Ferrus, le mentor n'apparaît qu'en visio, comme « le vrai Ferrus, depuis le monde réel ».",
+      "aValider": "Répliques du mentor proposées par Claude : celles des visites validées par Ferrus le 14/11/2026, celles de la visio (jalon 3) le 15/11/2026. Quand on joue Ferrus, le mentor n'apparaît qu'en visio, comme « le vrai Ferrus, depuis le monde réel ».",
       "absentSiJoueur": "ferrus",
       "routine": [
         { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" }
