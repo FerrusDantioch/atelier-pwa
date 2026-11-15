@@ -1,8 +1,9 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.0) — à valider
+## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.0) — publié, à valider
 
-Sur la branche de travail, pas encore dans `main`. Les deux quêtes d'Halaé,
+Fusionné dans `main` le 15 novembre 2026 à la demande de Ferrus, pour
+l'essayer sur sa tablette. Validation en attente. Les deux quêtes d'Halaé,
 et sa nouvelle commande « Mes sous-titres », ont été validées par elle (via
 Ferrus) le 15 novembre 2026, telles que proposées.
 
