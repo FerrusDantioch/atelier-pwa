@@ -29,6 +29,7 @@ const MARGE_SOCLE = 0.6;
 const BAS_FENETRE = 0.9;
 const HAUT_OUVERTURE = 2.1;
 const CHAPEAU_PAROI = 0.06; // le bord opaque en haut d'une paroi translucide
+const DEPASSE = 0.015; // les traverses d'une fenêtre dépassent de 1,5 cm (voir plus bas)
 
 // La direction de la caméra (vue de dessus) pour une rotation donnée : 0 =
 // caméra au sud-est, puis par quarts de tour.
@@ -265,8 +266,12 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
         morceau(troncon, debut, fin, 0, BAS_FENETRE);
         morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur);
         element(troncon, d, f, BAS_FENETRE, HAUT_OUVERTURE, c('vitre'), EPAISSEUR * 0.3);
-        element(troncon, d, f, BAS_FENETRE - 0.05, BAS_FENETRE, cadre);
-        element(troncon, d, f, HAUT_OUVERTURE, HAUT_OUVERTURE + 0.05, cadre);
+        // Les traverses du bas et du haut dépassent un peu dans l'ouverture :
+        // deux faces exactement au même endroit (le dessus du mur et celui de
+        // l'appui) « scintilleraient » quand la vue bouge, la carte graphique
+        // hésitant à chaque image entre les deux.
+        element(troncon, d, f, BAS_FENETRE - 0.05, BAS_FENETRE + DEPASSE, cadre);
+        element(troncon, d, f, HAUT_OUVERTURE - DEPASSE, HAUT_OUVERTURE + 0.05, cadre);
         element(troncon, d, d + 0.05, BAS_FENETRE, HAUT_OUVERTURE, cadre);
         element(troncon, f - 0.05, f, BAS_FENETRE, HAUT_OUVERTURE, cadre);
         if (f - d > 1.2) element(troncon, (d + f) / 2 - 0.025, (d + f) / 2 + 0.025, BAS_FENETRE, HAUT_OUVERTURE, cadre);

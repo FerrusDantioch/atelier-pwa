@@ -1,9 +1,11 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.0) — publié, à valider
+## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.1) — publié, à valider
 
-Fusionné dans `main` le 15 novembre 2026 à la demande de Ferrus, pour
-l'essayer sur sa tablette. Validation en attente. Les deux quêtes d'Halaé,
+Fusionné dans `main` le 15 novembre 2026 à la demande de Ferrus (version
+0.5.0), pour l'essayer. Version 0.5.1 : les corrections demandées après son
+essai sur téléphone (la barre du haut qui changeait de forme, les fenêtres
+qui scintillaient). Validation en attente. Les deux quêtes d'Halaé,
 et sa nouvelle commande « Mes sous-titres », ont été validées par elle (via
 Ferrus) le 15 novembre 2026, telles que proposées.
 
@@ -60,6 +62,19 @@ Ferrus) le 15 novembre 2026, telles que proposées.
 - Sauvegarde au format 3 (les commandes du jour acceptées) : une partie de
   la 0.4 est mise à niveau, et ce qui est déjà fait compte (les premières
   quêtes se terminent toutes seules, avec leur récompense).
+- **0.5.1 — la barre du haut ne saute plus** : les chiffres de la police
+  n'ont pas tous la même largeur (« 14 h 10 » est plus étroit que
+  « 14 h 46 ») ; selon l'heure, le bouton Pause tenait sur la première
+  ligne ou passait à la suivante, et toute la barre changeait de forme
+  chaque minute, en faisant bouger la scène. L'heure garde maintenant la
+  place de la plus large de la journée (mesurée dans la police choisie,
+  OpenDyslexic compris), et sur petit écran l'objectif et Pause partagent
+  la deuxième ligne : une ligne de moins qu'avant.
+- **0.5.1 — les fenêtres ne scintillent plus** : le dessus du mur sous la
+  fenêtre et celui de l'appui étaient exactement à la même hauteur ; la
+  carte graphique hésitait entre les deux à chaque image, d'où des
+  rayures qui bougeaient avec la vue. Les traverses dépassent maintenant
+  de 1,5 cm.
 
 ### Vérifications faites
 
@@ -70,7 +85,8 @@ Ferrus) le 15 novembre 2026, telles que proposées.
   (reproductibles, 300 jours tous réussissables, renouvelées, gardées une
   fois acceptées, fichier trafiqué refusé), la mise à niveau du format 2,
   l'heure de retour d'une personne et le « de » devant un nom (« d'Antoine »).
-- 50 tests dans Chromium, dont 5 nouveaux : le journal (bouton, touche J,
+- 51 tests dans Chromium, dont 6 nouveaux : la barre du haut qui garde
+  sa forme d'une minute à l'autre (0.5.1), le journal (bouton, touche J,
   Pause, « Y aller »), Théo à 16 h (absent, puis sa commande, puis ses
   nouvelles et la fin de la quête), suivre une autre quête et la
   télévision, les commandes du jour (niveau 3, puis le lendemain), le

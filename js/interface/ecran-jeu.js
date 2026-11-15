@@ -454,6 +454,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     reputation.valeur.textContent = t('hud.niveau', { niveau: niveau.niveau, nom: niveau.nom });
     reputation.court.textContent = t('hud.niveauCourt', { niveau: niveau.niveau });
     const heure = formaterHeure(partie.temps.minute);
+    reserverPlaceDeLHeure(partie.temps.jour);
     moment.valeur.textContent = `${t('hud.jour', { jour: partie.temps.jour })} · ${heure}`;
     // L'objectif : la quête suivie, sinon les commandes.
     objectifActuel = calculerObjectif(partie);
@@ -466,6 +467,49 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     moment.court.textContent = `${t('hud.jourCourt', { jour: partie.temps.jour })} · ${heure}`;
     adapterBarres();
   }
+
+  // L'heure garde toujours la même place : celle de l'heure la plus large de
+  // la journée, écrite avec le chiffre le plus large de la police choisie.
+  // Sinon, avec des chiffres de largeurs différentes (« 14 h 10 » est plus
+  // étroit que « 14 h 46 »), la barre changerait de forme d'une minute à
+  // l'autre, le bouton Pause passant d'une ligne à l'autre.
+  let placeDeLHeure = null;
+  function reserverPlaceDeLHeure(jour) {
+    const libelles = [[moment.valeur, t('hud.jour', { jour })], [moment.court, t('hud.jourCourt', { jour })]];
+    const styles = libelles.map(([libelle]) => getComputedStyle(libelle));
+    const cle = [jour, ...styles.map((s) => `${s.font}|${s.fontSize}|${s.fontFamily}|${s.letterSpacing}|${s.wordSpacing}`)].join('/');
+    if (cle === placeDeLHeure) return;
+    placeDeLHeure = cle;
+    const mesure = el('span', { 'aria-hidden': 'true' });
+    document.body.append(mesure);
+    libelles.forEach(([libelle, debut], index) => {
+      const style = styles[index];
+      for (const propriete of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fontVariantNumeric', 'letterSpacing', 'wordSpacing']) {
+        mesure.style[propriete] = style[propriete];
+      }
+      mesure.style.position = 'absolute';
+      mesure.style.visibility = 'hidden';
+      mesure.style.whiteSpace = 'nowrap';
+      let chiffre = '0';
+      let plusLarge = 0;
+      for (const essai of '0123456789') {
+        mesure.textContent = essai;
+        const largeur = mesure.getBoundingClientRect().width;
+        if (largeur > plusLarge) {
+          plusLarge = largeur;
+          chiffre = essai;
+        }
+      }
+      mesure.textContent = `${debut} · ${formaterHeure(23 * 60 + 59).replace(/\d/g, chiffre)}`;
+      libelle.style.minWidth = `${Math.ceil(mesure.getBoundingClientRect().width) + 1}px`;
+    });
+    mesure.remove();
+  }
+  // Une police tout juste chargée a d'autres largeurs : on remesure.
+  document.fonts?.ready.then(() => {
+    placeDeLHeure = null;
+    rafraichir();
+  });
 
   function calculerObjectif(partie) {
     if (!donnees) return null;

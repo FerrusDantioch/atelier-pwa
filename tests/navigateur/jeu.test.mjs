@@ -257,6 +257,28 @@ test('téléphone et texte « Énorme » : barres compactes, rien ne déborde', 
   await contexte.close();
 });
 
+test('la barre du haut garde sa forme quand l\'heure change (chiffres de largeurs différentes)', async () => {
+  // À cette largeur, « 14 h 10 » laissait Pause sur la première ligne, mais
+  // pas « 14 h 46 » : la barre sautait d'une forme à l'autre chaque minute.
+  const contexte = await outils.contexte({ viewport: { width: 380, height: 844 } });
+  const page = await ouvrirJeu(contexte, outils.adresse);
+  await nouvellePartie(page);
+  const formes = await page.evaluate(async () => {
+    const { modifierPartie } = await import('/js/noyau/etat.js');
+    const vues = new Set();
+    for (let minute = 7 * 60; minute <= 23 * 60; minute += 7) {
+      modifierPartie((partie) => { partie.temps.minute = minute; partie.argent = 367; partie.reputation = 30; });
+      const barre = document.querySelector('.barre-haut');
+      const pause = document.querySelector('.bouton-pause');
+      vues.add(`${barre.offsetHeight}/${pause.offsetTop}/${pause.offsetLeft}`);
+    }
+    return [...vues];
+  });
+  assert.equal(formes.length, 1, `la barre change de forme : ${formes.join(' | ')}`);
+  assert.deepEqual(page.erreurs, []);
+  await contexte.close();
+});
+
 test('une partie du jalon 0 (sans personnage) passe d\'abord par le choix du personnage', async () => {
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);

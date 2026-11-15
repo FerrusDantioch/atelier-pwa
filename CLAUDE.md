@@ -84,7 +84,9 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   moteur ne redessine que si quelque chose bouge (`moteur.animer()`,
   `moteur.redessiner()`). Le décor fixe est fusionné en une géométrie
   (couleurs par sommet) : garder peu de dessins par image (test : moins de
-  40). Pas d'ombres calculées.
+  40). Pas d'ombres calculées. Jamais deux faces exactement au même
+  endroit (elles « scintillent » quand la vue bouge) : décaler d'au moins
+  1 cm, comme les traverses des fenêtres (`DEPASSE` dans `lieu.js`).
 - **Accessibilité des lieux** : `js/noyau/coherence.js` refuse au démarrage
   un lieu où une pièce ou un objet à examiner n'est pas atteignable à pied
   ET en fauteuil roulant (passages ≥ 1 m = 2 cases). Tout nouveau lieu ou
@@ -140,6 +142,10 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   instantanée dans localStorage en quittant + copies de secours. Toute
   évolution de la forme d'une partie passe par `VERSION_FORMAT` et
   `MIGRATIONS` (`js/noyau/format-sauvegarde.js`).
+- **Les barres fixes ne changent pas de forme** quand un texte change
+  souvent : l'heure garde la place de la plus large de la journée
+  (`reserverPlaceDeLHeure()` dans `ecran-jeu.js`, mesurée dans la police
+  choisie) ; un test vérifie la barre d'une minute à l'autre.
 - Accessibilité : cibles ≥ 48 px, contour de focus visible, un seul `<h1>`
   visible, aucune information par la couleur ou le son seuls, animations
   réduites respectées, pas de clignotement ni de chronomètre punitif.

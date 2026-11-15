@@ -222,6 +222,9 @@
   min-height: var(--cible);
   font-weight: 700;
   white-space: nowrap;
+  /* Des chiffres de même largeur (si la police le permet) : l'argent et
+     l'heure ne font pas bouger la barre en changeant. */
+  font-variant-numeric: tabular-nums;
 }
 
 .libelle-court {
@@ -267,8 +270,10 @@
   display: inline;
 }
 
-/* Les indicateurs se suivent et passent à la ligne d'eux-mêmes ; Pause reste
-   à droite, l'objectif prend la dernière ligne. */
+/* Les indicateurs se suivent sur la première ligne (et passent à la ligne
+   d'eux-mêmes si le texte est très grand) ; l'objectif et Pause partagent
+   la ligne suivante. Rien ne dépend de l'heure affichée : la barre garde
+   sa forme pendant que le temps passe. */
 .barre-haut.compacte .barre-gauche,
 .barre-haut.compacte .barre-droite {
   display: contents;
@@ -278,15 +283,17 @@
   order: 1;
 }
 
-.barre-haut.compacte .bouton-pause {
+.barre-haut.compacte .barre-centre {
   order: 2;
-  margin-left: auto;
+  /* Presque toute la largeur : l'objectif commence toujours une nouvelle
+     ligne, et il reste juste la place de Pause à côté. */
+  flex: 1 1 calc(100% - 6rem);
+  justify-content: flex-start;
 }
 
-.barre-haut.compacte .barre-centre {
+.barre-haut.compacte .bouton-pause {
   order: 3;
-  flex-basis: 100%;
-  justify-content: flex-start;
+  margin-left: 0;
 }
 
 .barre-haut.compacte .objectif {
