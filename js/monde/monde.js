@@ -90,6 +90,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   const deplacement = creerDeplacement({ depart, vitesse: donnees.jeu.deplacement.vitesse });
   let pieceActuelle = grille.piece(depart.x, depart.z);
   let cibleVisee = null; // l'objet vers lequel on marche
+  let pnjAttendu = null; // la personne qu'on attend, là où elle va s'arrêter
   let objetProche = null; // l'objet qu'on peut examiner, là où l'on est
   let directionClavier = null;
   let actif = true;
@@ -147,10 +148,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   }
 
   // Les cases d'où l'on peut examiner un objet (ou parler à quelqu'un).
-  function casesPourCible(cible, distances) {
+  // versOuIlVa : pour quelqu'un qui marche, autour de là où il s'arrêtera
+  // (pour le rejoindre) plutôt qu'autour de là où il est.
+  function casesPourCible(cible, distances, { versOuIlVa = false } = {}) {
     const ici = deplacement.case;
     if (cible.type === 'pnj') {
-      const caseHabitant = habitants.caseDe(cible.id);
+      const caseHabitant = versOuIlVa ? habitants.destinationDe(cible.id) : habitants.caseDe(cible.id);
       if (!caseHabitant) return [];
       const cases = [];
       for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
@@ -213,6 +216,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   // --- Déplacements -------------------------------------------------------------
   function partir(chemin, destination) {
     if (!chemin || chemin.length === 0) return false;
+    pnjAttendu = null;
     // Déjà dans la bonne case (peut-être entre deux) : on va à son centre.
     if (chemin.length === 1) deplacement.revenirAuCentre();
     else deplacement.suivre(lisserChemin(grille, chemin, profil));
@@ -241,7 +245,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   function allerVersCible(cible) {
     const depart = caseDeDepartChemin();
     const distances = distancesDepuis(grille, depart, profil);
-    const cases = casesPourCible(cible, distances);
+    const cases = casesPourCible(cible, distances, { versOuIlVa: true });
     if (cases.length === 0) {
       rappels.surBloque?.(infosObjet(cible));
       return false;
@@ -307,6 +311,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     for (const [dx, dz] of directionsPourAller(sol.x, sol.z)) {
       if (grille.peutAller(ici.x, ici.z, ici.x + dx, ici.z + dz, profil)) {
         cibleVisee = null;
+        pnjAttendu = null;
         reperes.cacherDestination();
         deplacement.suivre([ici, { x: ici.x + dx, z: ici.z + dz }]);
         definirObjetProche(null);
@@ -319,9 +324,48 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     if (angle !== null) deplacement.regarder(Math.round(angle / 45) * 45, { instantane: animationsReduites() });
   }
 
+  // Une personne qui marche : on va là où elle s'arrêtera. Si elle n'y est
+  // pas encore, on l'attend (elle sera « proche » en arrivant) ; si elle a
+  // changé de chemin, on la rejoint (quelques fois au plus, jamais sans fin).
+  let poursuites = 0;
+  const POURSUITES_MAX = 4;
+  const aCote = (caseA, ici) => Boolean(caseA) && Math.max(Math.abs(caseA.x - ici.x), Math.abs(caseA.z - ici.z)) <= 1;
+
+  // La personne attendue s'est-elle arrêtée à côté de nous ? Elle devient
+  // alors « proche » (« Parler à Théo »), et on se tourne vers elle.
+  function verifierPnjAttendu() {
+    const ici = deplacement.case;
+    const caseHabitant = habitants.caseDe(pnjAttendu.id);
+    const ouIlVa = habitants.destinationDe(pnjAttendu.id);
+    if (caseHabitant && ouIlVa && (ouIlVa.x !== caseHabitant.x || ouIlVa.z !== caseHabitant.z)) return; // elle marche encore
+    const cible = pnjAttendu;
+    pnjAttendu = null;
+    if (!aCote(caseHabitant, ici)) return; // partie, ou arrêtée ailleurs
+    arriveSurPlace(cible, ici.x, ici.z);
+    definirObjetProche(cible);
+    rappels.surArrivee?.(infosObjet(cible));
+  }
+
   function quandArrive() {
     reperes.cacherDestination();
     const ici = deplacement.case;
+    if (cibleVisee?.type === 'pnj' && !aCote(habitants.caseDe(cibleVisee.id), ici)) {
+      const cible = cibleVisee;
+      cibleVisee = null;
+      if (aCote(habitants.destinationDe(cible.id), ici)) {
+        // Elle arrive : on se tourne vers elle et on l'attend.
+        arriveSurPlace(cible, ici.x, ici.z);
+        pnjAttendu = cible;
+        poursuites = 0;
+        rappels.surPosition?.({ x: ici.x, z: ici.z, angle: Math.round(deplacement.angle) });
+        return;
+      }
+      if (habitants.caseDe(cible.id) && poursuites < POURSUITES_MAX) {
+        poursuites += 1;
+        if (allerVersCible(cible)) return;
+      }
+    }
+    poursuites = 0;
     if (cibleVisee) {
       arriveSurPlace(cibleVisee, ici.x, ici.z);
       const cible = cibleVisee;
@@ -353,6 +397,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   function image(dt) {
     const reduit = animationsReduites();
     const habitantsBougent = habitants.avancer(dt, reduit);
+    if (pnjAttendu) verifierPnjAttendu();
     if (habitantsBougent || objetProche?.type === 'pnj') revoirObjetProche(dt);
     const resultat = deplacement.avancer(dt, { tournerInstantanement: reduit });
     if (!deplacement.enRoute && directionClavier) pasAuClavier();
@@ -375,7 +420,8 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
     const cameraBouge = camera.mettreAJour(dt, deplacement.position);
     lumieres.regler({ azimut: camera.azimut });
-    return deplacement.enRoute || persoBouge || cameraBouge || resultat.tourne || directionClavier !== null || habitantsBougent;
+    return deplacement.enRoute || persoBouge || cameraBouge || resultat.tourne || directionClavier !== null || habitantsBougent
+      || pnjAttendu !== null;
   }
 
   // --- La caméra ------------------------------------------------------------------
@@ -566,6 +612,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     },
 
     allerVers(destination) {
+      poursuites = 0;
       if (destination.type === 'piece') return allerDansPiece(destination.id);
       const cible = destination.type === 'pnj'
         ? habitants.cibles().find((c) => c.id === destination.id)

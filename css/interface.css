@@ -407,6 +407,22 @@
   display: none;
 }
 
+/* Les boutons y sont un peu moins larges (toujours au moins 48 px)… */
+.barre-bas.compacte .bouton {
+  padding-inline: 0.65em;
+}
+
+/* … et le bouton « Journal » ne garde que son icône (son nom reste lu). */
+.barre-bas.compacte .libelle-journal {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* Un bouton peut passer à la ligne entre les mots, jamais au milieu d'un mot. */
 .barre-bas .bouton {
   overflow-wrap: normal;
@@ -1092,4 +1108,140 @@ input[type="range"] {
 
 .fenetre-notifications .notification {
   box-shadow: none;
+}
+
+/* --- Le journal des quêtes (jalon 4) --- */
+/* minmax(0, 1fr) : une carte peut rétrécir avec l'écran (très grand texte
+   sur téléphone) au lieu de déborder sur le côté. */
+.liste-quetes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+.carte-quete {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+  background: var(--surface-2);
+}
+
+/* La quête suivie : bordure de la couleur d'accent ET étiquette « suivie »
+   (jamais la couleur seule). */
+.carte-quete-suivie {
+  border-color: var(--accent);
+}
+
+.carte-quete p {
+  margin: 0;
+}
+
+.carte-quete h4 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.carte-quete h5 {
+  margin: 0.4rem 0 0;
+  font-size: 1rem;
+}
+
+.carte-quete-entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+}
+
+.carte-quete-entete .etiquette,
+.carte-quete-suivie-texte {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.carte-quete-donneur {
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+.carte-quete-suivie-texte {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.carte-quete > .bouton {
+  align-self: flex-start;
+}
+
+.etapes-quete {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etape-quete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+}
+
+.etape-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.1em 0.6em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.etape-statut .icone {
+  width: 1em;
+  height: 1em;
+}
+
+.etape-texte {
+  flex: 1 1 10em;
+  min-width: 0;
+}
+
+.etape-quete .aide {
+  display: flex;
+  gap: 0.4em;
+  align-items: flex-start;
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.etape-faite .etape-statut {
+  color: var(--succes);
+}
+
+.etape-maintenant {
+  border-width: var(--epaisseur-bordure);
+  border-color: var(--accent);
+}
+
+.etape-maintenant .etape-statut {
+  color: var(--accent);
+}
+
+.etape-ensuite,
+.etape-ensuite .etape-statut {
+  color: var(--texte-doux);
 }

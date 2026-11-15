@@ -4,8 +4,8 @@
 // Toujours les mêmes informations aux mêmes places :
 //   en haut   : l'argent, la réputation, l'objectif actif, le jour et
 //               l'heure, le bouton Pause ;
-//   en bas    : « Aller à… », l'action du moment (« Examiner le lit »),
-//               la pièce où l'on se trouve ;
+//   en bas    : le journal des quêtes (J), « Aller à… », l'action du
+//               moment (« Examiner le lit »), la pièce où l'on se trouve ;
 //   à droite  : la caméra (tourner, zoomer, recentrer).
 // Entre les barres : la scène 3D. On y touche le sol pour se déplacer, ou
 // un meuble pour s'en approcher. Tout ce que montre la 3D a un équivalent
@@ -18,6 +18,9 @@
 // =============================================================================
 
 import { commandesAProposer, objectifDuMoment, proposerCommande } from '../jeu/commandes.js';
+import { commandesConnues, commandesDuJourOuvertes } from '../jeu/generateur.js';
+import { etapesVers, objectifDeQuete, sujetsPour } from '../jeu/quetes.js';
+import { prochainPassage } from '../jeu/routines.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
 import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
@@ -29,8 +32,10 @@ import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
 import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
+import { ouvrirJournal } from './journal.js';
 import { direAuxLecteurs, notifier } from './notifications.js';
 import { ouvrirOrdinateur } from './ordinateur.js';
+import { demarrerProgression, messageDesQuetes, progresserQuetes } from './progression.js';
 
 // Le monde 3D affiché (pour les tests automatiques et la fenêtre « Aller à… »).
 let mondeActuel = null;
@@ -67,13 +72,26 @@ function boutonCamera(nomIcone, libelle, raccourci, surClic) {
  * Renvoie { element, monde, detruire() }.
  */
 export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerMonde, menu }) {
+  const paliers = jeu.reputation.paliers;
+  const quetes = donnees?.quetes?.quetes || [];
+  // Les personnes qu'on peut nommer : habitants, visiteurs, clientes et
+  // clients des commandes du jour.
+  const personnes = new Map([...(donnees?.pnj.pnj || []), ...(donnees?.modelesCommandes?.clients || [])]
+    .map((personne) => [personne.id, personne]));
+  const nomDe = (id) => {
+    const personne = personnes.get(id);
+    return personne?.modele === 'ferrus' ? donnees.personnages.ferrus.nom : personne?.nom || '';
+  };
+  // Le menu Pause, avec le journal en plus.
+  const menuComplet = { ...menu, surJournal: () => ouvrirLeJournal() };
+
   // --- Barre du haut ---------------------------------------------------------------
   const argent = indicateur('piece', t('hud.argent'));
   const reputation = indicateur('etoile', t('hud.reputation'));
   const moment = indicateur('horloge', t('hud.moment'));
 
-  // L'objectif du moment (en attendant le journal des quêtes) : le toucher
-  // mène à l'endroit où il se joue (le bureau).
+  // L'objectif : l'étape en cours de la quête suivie (sinon, ce qu'il y a à
+  // faire avec les commandes). Le toucher mène là où il se joue.
   const texteObjectif = el('span', {}, t('hud.aucunObjectif'));
   let objectifActuel = null;
   const objectif = el('button', {
@@ -86,7 +104,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     class: 'bouton bouton-pause',
     type: 'button',
     'aria-label': t('hud.pause'),
-    onClick: () => ouvrirMenuPause(menu),
+    onClick: () => ouvrirMenuPause(menuComplet),
   }, icone('pause'), el('span', { class: 'libelle-pause', 'aria-hidden': 'true' }, t('hud.pause')));
 
   const barre = el('header', { class: 'barre-haut' },
@@ -108,6 +126,16 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     }, icone('fermer')));
 
   // --- Barre du bas -------------------------------------------------------------------
+  // Sur petit écran (barre compacte), seule l'icône reste visible ; le mot
+  // « Journal » reste lu par les lecteurs d'écran (et en bulle d'aide).
+  const boutonJournal = el('button', {
+    class: 'bouton bouton-journal',
+    type: 'button',
+    title: `${t('journal.bouton')} (${t('journal.raccourci')})`,
+    'aria-keyshortcuts': 'J',
+    onClick: () => ouvrirLeJournal(),
+  }, icone('journal'), el('span', { class: 'libelle-journal' }, t('journal.bouton')),
+  el('kbd', { class: 'raccourci', 'aria-hidden': 'true' }, t('journal.raccourci')));
   const boutonAllerA = el('button', {
     class: 'bouton',
     type: 'button',
@@ -142,7 +170,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     icone('lieu'), el('span', { class: 'visuellement-cache' }, t('jeu.lieuActuel')), texteLieu);
 
   const barreBas = el('footer', { class: 'barre-bas' },
-    el('div', { class: 'barre-zone' }, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur),
+    el('div', { class: 'barre-zone' }, boutonJournal, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur),
     lieuActuel);
 
   const camera = el('div', { class: 'commandes-camera', role: 'group', 'aria-label': t('jeu.camera.titre') },
@@ -190,19 +218,42 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const infos = mondeActuel?.parler(id);
     if (!infos) return;
     fermerBulle();
-    // A-t-elle une commande à présenter de vive voix (Halaé) ?
+    // A-t-elle une commande à présenter de vive voix (Halaé, Théo) ?
     const partie = partieEnCours();
     const commande = donnees && partie
-      ? commandesAProposer(partie, donnees.commandes.commandes, jeu.reputation.paliers).find((c) => c.client === id)
+      ? commandesAProposer(partie, donnees.commandes.commandes, paliers).find((c) => c.client === id)
       : null;
     const demande = commande ? {
       commande,
       surProposee: () => {
         modifierPartie((p) => proposerCommande(p, commande), { important: true });
-        notifier(t('livraison.nouvelle', { client: infos.nom, titre: commande.titre }), { type: 'info' });
+        // Un seul message (les lecteurs d'écran le lisent en entier).
+        const message = [t('livraison.nouvelle', { client: infos.nom, titre: commande.titre }),
+          messageDesQuetes(progresserQuetes({ annoncer: false }))].filter(Boolean).join(' ');
+        notifier(message, { type: 'info' });
       },
     } : null;
-    ouvrirDialogue({ infos, pnj: infos.pnj, creneau: infos.creneau, demande, surFermeture: () => mondeActuel?.finParler(id) });
+    // Les questions de quête à lui poser (« Alors, cette application ? »).
+    const sujets = partie ? sujetsPour(partie, quetes, id, paliers).map(({ quete, etape }) => ({
+      question: etape.question,
+      replique: etape.replique,
+      surDit: () => progresserQuetes({ geste: { quete, etape } }),
+    })) : [];
+    ouvrirDialogue({
+      infos, pnj: infos.pnj, creneau: infos.creneau, demande, sujets, surFermeture: () => mondeActuel?.finParler(id),
+    });
+  }
+
+  // S'approcher d'un endroit qu'une quête attend (« regarde sa nouvelle
+  // vidéo, à la télévision ») : l'étape est faite, et ce qu'on y voit est dit.
+  function approcher(infos) {
+    const partie = partieEnCours();
+    if (!partie || infos.type === 'pnj') return;
+    for (const { quete, etape } of etapesVers(partie, quetes, infos.id, paliers)) {
+      const evenements = progresserQuetes({ geste: { quete, etape }, annoncer: false });
+      const message = [etape.message ? typographier(etape.message) : '', messageDesQuetes(evenements)].filter(Boolean).join(' ');
+      if (message) notifier(message, { type: 'succes' });
+    }
   }
 
   function agir() {
@@ -218,15 +269,36 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
 
   // Toucher l'objectif : on part vers l'endroit où il se joue.
   function allerVersObjectif() {
-    const destination = objectifActuel?.destination
-      ? mondeActuel?.destinations().find((d) => d.id === objectifActuel.destination)
-      : null;
-    if (!destination) {
-      notifier(t('hud.journalBientot'), { type: 'info' });
+    allerVers(objectifActuel?.destination || null);
+  }
+
+  // Aller là où se joue une étape (objectif du haut, « Y aller » du journal) :
+  // un meuble, un endroit ou une personne. Une personne absente : on dit
+  // quand elle revient (rien n'est caché, tout est prévisible).
+  function allerVers(id) {
+    const destination = id ? mondeActuel?.destinations().find((d) => d.id === id) : null;
+    if (destination) {
+      fermerBulle();
+      if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
       return;
     }
+    const pnj = id ? donnees?.pnj.pnj.find((p) => p.id === id) : null;
+    const partie = partieEnCours();
+    if (!pnj || !partie) {
+      notifier(t('quetes.sansEndroit'), { type: 'info' });
+      return;
+    }
+    const retour = prochainPassage(pnj, partie.lieux.actuel, partie.temps.minute, partie.joueur);
+    const nom = nomDe(id);
+    if (!retour) notifier(t('quetes.absentJamais', { nom }), { type: 'info' });
+    else notifier(t(retour.demain ? 'quetes.absentDemain' : 'quetes.absent', { nom, heure: formaterHeure(retour.minute) }), { type: 'info' });
+  }
+
+  // Le journal des quêtes (bouton, touche J, Pause › Journal).
+  function ouvrirLeJournal() {
+    if (!donnees?.quetes) return;
     fermerBulle();
-    if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
+    ouvrirJournal({ donnees, nomDe, surAller: allerVers });
   }
 
   // Dormir : la journée suivante commence au matin (avec une copie de
@@ -248,7 +320,9 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     horloge.tardAnnonce = false;
     const temps = partieEnCours().temps;
     mondeActuel?.nouvelleJournee(temps.minute);
-    notifier(t('temps.bonjour', { jour: temps.jour }), { type: 'succes' });
+    // Les commandes du jour ont changé pendant la nuit.
+    const nouvelles = donnees && commandesDuJourOuvertes(partieEnCours(), donnees.modelesCommandes, paliers);
+    notifier(t(nouvelles ? 'temps.bonjourCommandes' : 'temps.bonjour', { jour: temps.jour }), { type: 'succes' });
   }
 
   const rappels = {
@@ -266,6 +340,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
         boutonAction.hidden = false;
         boutonDormir.hidden = !infos.actions?.includes('dormir');
         boutonOrdinateur.hidden = !infos.actions?.includes('ordinateur');
+        approcher(infos);
       } else {
         for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur]) {
           if (bouton === document.activeElement) bouton.blur();
@@ -380,17 +455,25 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     reputation.court.textContent = t('hud.niveauCourt', { niveau: niveau.niveau });
     const heure = formaterHeure(partie.temps.minute);
     moment.valeur.textContent = `${t('hud.jour', { jour: partie.temps.jour })} · ${heure}`;
-    // L'objectif du moment.
-    objectifActuel = donnees ? objectifDuMoment(partie, donnees.commandes.commandes, jeu.reputation.paliers) : null;
-    const nomClient = (id) => {
-      const pnj = donnees.pnj.pnj.find((p) => p.id === id);
-      return pnj?.modele === 'ferrus' ? donnees.personnages.ferrus.nom : pnj?.nom || '';
-    };
-    texteObjectif.textContent = objectifActuel
-      ? t(`objectifs.${objectifActuel.cle}`, { client: objectifActuel.commande ? nomClient(objectifActuel.commande.client) : '' })
-      : t('hud.aucunObjectif');
+    // L'objectif : la quête suivie, sinon les commandes.
+    objectifActuel = calculerObjectif(partie);
+    if (!objectifActuel) texteObjectif.textContent = t('hud.aucunObjectif');
+    else if (objectifActuel.cle) {
+      texteObjectif.textContent = t(`objectifs.${objectifActuel.cle}`, {
+        client: objectifActuel.commande ? nomDe(objectifActuel.commande.client) : '',
+      });
+    } else texteObjectif.textContent = typographier(objectifActuel.etape.texte);
     moment.court.textContent = `${t('hud.jourCourt', { jour: partie.temps.jour })} · ${heure}`;
     adapterBarres();
+  }
+
+  function calculerObjectif(partie) {
+    if (!donnees) return null;
+    const commandes = commandesConnues(partie, donnees);
+    return objectifDeQuete(partie, { quetes, commandes, paliers })
+      || objectifDuMoment(partie, commandes, paliers, {
+        demain: commandesDuJourOuvertes(partie, donnees.modelesCommandes, paliers),
+      });
   }
 
   // Barre compacte si elle prend plus d'une ligne ; la caméra évite les barres.
@@ -409,11 +492,18 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   observateur.observe(element);
 
   // Échap : ferme d'abord la bulle, sinon ouvre le menu Pause.
+  // J (même place sur un clavier AZERTY ou QWERTY) : le journal.
   function surTouche(evenement) {
-    if (evenement.key !== 'Escape' || fenetreOuverte() || !ecranActif) return;
+    if (fenetreOuverte() || !ecranActif) return;
+    if (evenement.code === 'KeyJ' && !evenement.ctrlKey && !evenement.metaKey && !evenement.altKey) {
+      evenement.preventDefault();
+      ouvrirLeJournal();
+      return;
+    }
+    if (evenement.key !== 'Escape') return;
     evenement.preventDefault();
     if (!bulle.hidden) fermerBulle({ rendreFocus: true });
-    else ouvrirMenuPause(menu);
+    else ouvrirMenuPause(menuComplet);
   }
 
   const arrets = [
@@ -427,6 +517,9 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   ];
   document.addEventListener('keydown', surTouche);
   document.body.classList.add('en-jeu');
+  // Les quêtes avancent toutes seules (progression.js) ; au début d'une
+  // partie, la première commence.
+  const arreterProgression = donnees?.quetes ? demarrerProgression(donnees) : () => {};
   rafraichir();
 
   return {
@@ -441,6 +534,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
       if (!oui) requestAnimationFrame(adapterBarres);
     },
     detruire() {
+      arreterProgression();
       clearInterval(horloge.minuteur);
       arrets.forEach((arreter) => arreter());
       observateur.disconnect();
@@ -467,6 +561,10 @@ export function ouvrirMenuPause(menu) {
       el('p', { class: 'aide' }, t('pause.explication')),
       el('ul', { class: 'menu-liste' },
         ligne('jouer', t('pause.reprendre'), () => fenetre.fermer()),
+        menu.surJournal ? ligne('journal', t('pause.journal'), () => {
+          fenetre.fermer();
+          menu.surJournal();
+        }) : null,
         ligne('personnage', t('pause.personnage'), () => {
           fenetre.fermer();
           menu.surPersonnage();

@@ -14,11 +14,13 @@
 
 import { commandesAProposer, idsDesOffres, livrerProjet, nouvellesOffres } from '../jeu/commandes.js';
 import { capaciteDuProjet, chargeDuProjet, evaluerProjet, nettoyerProjet } from '../jeu/creation.js';
+import { DRAPEAU_TEXTE_AGRANDI } from '../jeu/quetes.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, typographier } from '../noyau/textes.js';
 import { el, identifiant, vider } from './dom.js';
 import { ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
+import { phrasesDesQuetes, progresserQuetes } from './progression.js';
 
 // L'état de la jauge, en mots (jamais seulement par la couleur).
 function etatDeCharge(charge, capacite, tolerance) {
@@ -166,7 +168,13 @@ export function ecranAtelier(ctx, commande) {
           name: `atelier-confort-${reglage.id}`,
           value: valeur.id,
           checked: projet.confort[reglage.id] === valeur.id,
-          onChange: () => changer((p) => { p.confort[reglage.id] = valeur.id; }),
+          onChange: () => {
+            changer((p) => { p.confort[reglage.id] = valeur.id; });
+            // Un texte plus grand essayé : une étape (facultative) de la quête de bienvenue.
+            if (reglage.id === 'texte' && valeur.id !== reglage.defaut && !partieEnCours().drapeaux[DRAPEAU_TEXTE_AGRANDI]) {
+              modifierPartie((partie) => { partie.drapeaux[DRAPEAU_TEXTE_AGRANDI] = true; });
+            }
+          },
         }),
         el('span', { class: 'option-contenu' }, icone('coche', 'option-coche'), valeur.nom)))))));
 
@@ -263,6 +271,8 @@ export function ecranAtelier(ctx, commande) {
     let resultat = null;
     modifierPartie((partie) => { resultat = livrerProjet(partie, commande, evaluation, ctx.paliers); }, { important: true });
     if (!resultat) return;
+    // Les quêtes avancent tout de suite : on le dit dans cette fenêtre.
+    const evenementsQuetes = resultat.livree ? progresserQuetes({ annoncer: false }) : [];
     const contenu = [el('p', { class: 'replique' },
       el('strong', {}, typographier(`${client} : `)), typographier(`« ${commande.reactions[evaluation.note]} »`))];
     if (resultat.livree) {
@@ -276,12 +286,13 @@ export function ecranAtelier(ctx, commande) {
       for (const offre of nouvellesOffres(avant, apres, ctx.listeCommandes)) {
         contenu.push(ctx.encadre('enveloppe', 'info', t('livraison.nouvelle', { client: ctx.nomDe(offre.client), titre: offre.titre })));
       }
-      // Quelqu'un veut présenter sa commande de vive voix (Halaé).
+      // Quelqu'un veut présenter sa commande de vive voix (Halaé, Théo).
       for (const aProposer of commandesAProposer(partieEnCours(), ctx.listeCommandes, ctx.paliers)) {
         if (!aProposerAvant.has(aProposer.id)) {
           contenu.push(ctx.encadre('parler', 'info', t('livraison.aProposer', { client: ctx.nomDe(aProposer.client) })));
         }
       }
+      for (const phrase of phrasesDesQuetes(evenementsQuetes)) contenu.push(ctx.encadre(phrase.icone, phrase.type, phrase.texte));
     } else {
       contenu.push(
         ctx.encadre('info', 'info', t('livraison.garde')),

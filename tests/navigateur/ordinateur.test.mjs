@@ -1,5 +1,6 @@
 // Tests navigateur (jalon 3) : l'ordinateur du bureau, la visio avec le
-// mentor, le mini-jeu de création, l'argent et la réputation.
+// mentor, le mini-jeu de création, l'argent et la réputation (avec, depuis
+// le jalon 4, les quêtes qui avancent à chaque livraison).
 
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
@@ -9,9 +10,14 @@ let outils;
 before(async () => { outils = await preparer(); });
 after(async () => { await outils.fermer(); });
 
-// Toucher l'objectif mène au bureau ; on y allume l'ordinateur.
-async function allumerOrdinateur(page) {
-  await page.locator('.objectif').click();
+// On va au bureau (en touchant l'objectif, ou par « Aller à… » : l'objectif
+// peut mener ailleurs, selon la quête suivie) ; on y allume l'ordinateur.
+async function allumerOrdinateur(page, { parObjectif = false } = {}) {
+  if (parObjectif) await page.locator('.objectif').click();
+  else {
+    await page.getByRole('button', { name: 'Aller à…' }).click();
+    await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Bureau', exact: true }).click();
+  }
   const bouton = page.getByRole('button', { name: "Utiliser l'ordinateur" });
   await bouton.waitFor({ timeout: 20000 });
   await bouton.click();
@@ -45,7 +51,7 @@ test('premier allumage : Ferrus appelle en visio (le temps s\'arrête), puis la 
   await nouvellePartie(page);
   assert.match(await texteBarre(page), /Objectif : allume ton ordinateur, au bureau/);
 
-  const fenetre = await allumerOrdinateur(page);
+  const fenetre = await allumerOrdinateur(page, { parObjectif: true });
   await fenetre.getByRole('heading', { name: 'Ferrus t\'appelle en visio.' }).waitFor();
   const minute = (await lirePartieEnCours(page)).temps.minute;
   await page.waitForTimeout(1500);
@@ -71,13 +77,16 @@ test('premier allumage : Ferrus appelle en visio (le temps s\'arrête), puis la 
   assert.equal(await fenetre.locator('.dialogue-fil .replique').count(), 6);
   await fenetre.getByRole('button', { name: 'Raccrocher' }).click();
   await fenetre.getByRole('heading', { name: /Que veux-tu faire/ }).waitFor();
-  await fenetre.locator('.notification-texte', { hasText: /Nouvelle commande\s:\sFerrus, «\sMa liste de courses\s»/ }).waitFor();
+  // Un seul message : la commande arrive, l'étape de la quête est faite.
+  await fenetre.locator('.notification-texte', {
+    hasText: /Nouvelle commande\s:\sFerrus, «\sMa liste de courses\s»\.\sÉtape terminée\s:\sallume ton ordinateur/,
+  }).waitFor();
   assert.match(await lireTexte(fenetre.getByRole('button', { name: /^Commandes/ })), /1 nouvelle commande/);
   assert.equal((await lirePartieEnCours(page)).drapeaux['visio-accueil'], true);
 
   await page.keyboard.press('Escape');
   await fenetre.waitFor({ state: 'detached' });
-  assert.match(await texteBarre(page), /Objectif : choisis une commande, au bureau/);
+  assert.match(await texteBarre(page), /Objectif : lis la commande de Ferrus, au bureau/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
 });
@@ -87,7 +96,7 @@ test('accepter, tester, livrer : « Parfait », l\'argent et la réputation mont
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
   await apresLaVisio(page);
-  const fenetre = await allumerOrdinateur(page);
+  const fenetre = await allumerOrdinateur(page, { parObjectif: true });
   await fenetre.getByRole('button', { name: /^Commandes/ }).click();
   await fenetre.getByRole('button', { name: 'Lire la commande : Ma liste de courses' }).click();
   await fenetre.getByText('Cocher ce que j\'ai déjà pris').waitFor();
@@ -117,18 +126,22 @@ test('accepter, tester, livrer : « Parfait », l\'argent et la réputation mont
   assert.match(texte, /Tu gagnes 25 pièces et 5 points de réputation/);
   // La première vraie cliente, Halaé, présente sa commande de vive voix.
   assert.match(texte, /Halaé a une demande pour toi : va lui parler/);
+  // La quête de bienvenue se termine (sa récompense), la suivante commence.
+  assert.match(texte, /Quête terminée : « Bienvenue à l'atelier » ! Tu gagnes 20 pièces et 5 points de réputation/);
+  assert.match(texte, /Nouvelle quête : « Le planning de publication »/);
   await livraison.getByRole('button', { name: 'Continuer' }).click();
   await fenetre.getByRole('heading', { name: 'Commandes', exact: true }).waitFor();
 
   const partie = await lirePartieEnCours(page);
-  assert.equal(partie.argent, 125);
-  assert.equal(partie.reputation, 5);
+  assert.equal(partie.argent, 145, '100 + 25 (commande) + 20 (quête)');
+  assert.equal(partie.reputation, 10);
+  assert.deepEqual(partie.quetes.finies, ['bienvenue']);
   assert.deepEqual(partie.commandes.enCours, {});
   assert.deepEqual(partie.commandes.livrees.map((l) => [l.id, l.note]), [['essai-courses', 'parfait']]);
   assert.equal(await fenetre.getByRole('button', { name: /^Lire la commande/ }).count(), 0);
   assert.match(await lireTexte(fenetre), /Halaé a une demande pour toi/);
   await fenetre.locator('.fenetre-pied').getByRole('button', { name: 'Fermer', exact: true }).click();
-  assert.match(await texteBarre(page), /125 pièces/);
+  assert.match(await texteBarre(page), /145 pièces/);
   assert.match(await texteBarre(page), /Objectif : parle à Halaé/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
@@ -140,6 +153,9 @@ test('« À retravailler » : rien n\'est perdu, le projet reste tel quel (même
   await nouvellePartie(page);
   await apresLaVisio(page, { livrees: ['essai-courses', 'halae-planning'], reputation: 15 });
   let fenetre = await allumerOrdinateur(page);
+  // Les deux premières quêtes se sont terminées (leurs récompenses comprises).
+  const depart = (await lirePartieEnCours(page)).argent;
+  assert.equal(depart, 140);
   await fenetre.getByRole('button', { name: /^Commandes/ }).click();
   await fenetre.getByRole('button', { name: 'Lire la commande : Mes médicaments' }).click();
   await fenetre.getByRole('button', { name: 'Accepter la commande' }).click();
@@ -155,8 +171,9 @@ test('« À retravailler » : rien n\'est perdu, le projet reste tel quel (même
   assert.match(texte, /Statistiques détaillées/);
   assert.match(texte, /Ton projet est gardé tel quel/);
   await resultat.getByRole('button', { name: 'Retour à l\'atelier' }).click();
-  assert.equal((await lirePartieEnCours(page)).argent, 100, 'rien n\'est gagné');
-  assert.match(await texteBarre(page), /reprends l'appli de Madeleine/);
+  assert.equal((await lirePartieEnCours(page)).argent, depart, 'rien n\'est gagné');
+  // L'objectif reste celui de la quête suivie (Théo, qui passe à 16 h).
+  assert.match(await texteBarre(page), /Objectif : parle à Théo, vers 16 h/);
 
   // On recharge la page : le projet est toujours là.
   await page.evaluate(async () => (await import('/js/noyau/etat.js')).sauvegarderMaintenant());
@@ -179,7 +196,7 @@ test('« À retravailler » : rien n\'est perdu, le projet reste tel quel (même
   await fenetre.getByRole('button', { name: 'Livrer' }).click();
   await page.getByRole('dialog', { name: 'Livraison : parfait !' }).getByRole('button', { name: 'Continuer' }).click();
   const partie = await lirePartieEnCours(page);
-  assert.equal(partie.argent, 170);
+  assert.equal(partie.argent, depart + 70);
   assert.deepEqual(partie.commandes.livrees.map((l) => l.id), ['essai-courses', 'halae-planning', 'madeleine-medicaments']);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
@@ -201,16 +218,18 @@ test('Halaé, la première cliente, présente sa commande de vive voix ; elle ar
   const texte = await lireTexte(dialogue);
   assert.match(texte, /Halaé : « Je publie une vidéo par semaine/);
   assert.match(texte, /Sa commande t'attend sur ton ordinateur/);
-  await dialogue.locator('.notification-texte', { hasText: /Nouvelle commande\s:\sHalaé, «\sMon planning de vidéos\s»/ }).waitFor();
+  await dialogue.locator('.notification-texte', {
+    hasText: /Nouvelle commande\s:\sHalaé, «\sMon planning de vidéos\s»\.\sÉtape terminée\s:\sparle à Halaé/,
+  }).waitFor();
   assert.equal(await dialogue.getByRole('button', { name: /Tu as besoin d'une application/ }).count(), 0, 'la question est posée une seule fois');
   assert.equal((await lirePartieEnCours(page)).drapeaux['proposee-halae-planning'], true);
   await dialogue.getByRole('button', { name: /À plus tard/ }).click();
-  assert.match(await texteBarre(page), /Objectif : choisis une commande, au bureau/);
+  assert.match(await texteBarre(page), /Objectif : lis la commande d'Halaé, au bureau/);
 
   const fenetre = await allumerOrdinateur(page);
   await fenetre.getByRole('button', { name: /^Commandes/ }).click();
   await fenetre.getByRole('button', { name: 'Lire la commande : Mon planning de vidéos' }).click();
-  assert.match(await lireTexte(fenetre), /Commande de Halaé/);
+  assert.match(await lireTexte(fenetre), /Commande d'Halaé/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
 });
@@ -219,7 +238,7 @@ test('jouer Ferrus : le mentor en visio est « le vrai Ferrus, depuis le monde r
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page, { modele: 'ferrus' });
-  const fenetre = await allumerOrdinateur(page);
+  const fenetre = await allumerOrdinateur(page, { parObjectif: true });
   await fenetre.getByRole('button', { name: 'Décrocher' }).click();
   assert.match(await lireTexte(fenetre.locator('figcaption')), /Ferrus, en direct depuis le monde réel/);
   assert.match(await lireTexte(fenetre.locator('.dialogue-fil')), /Ici Ferrus, le vrai, depuis le monde réel/);

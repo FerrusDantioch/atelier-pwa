@@ -7,9 +7,11 @@
 //   - ce qu'elle dit (première rencontre, puis salutation) ;
 //   - puis on peut lui demander « Qu'est-ce que tu fais ? », ou lui dire
 //     « À plus tard » ;
-//   - si la personne a une commande à présenter de vive voix (Halaé), on
-//     peut lui demander « Tu as besoin d'une application ? » : elle explique
-//     sa demande, qui arrive ensuite sur l'ordinateur.
+//   - si une quête attend qu'on lui parle, sa question est proposée
+//     (« Alors, cette application ? ») : la personne répond, l'étape est faite ;
+//   - si la personne a une commande à présenter de vive voix (Halaé, Théo),
+//     on peut lui demander « Tu as besoin d'une application ? » : elle
+//     explique sa demande, qui arrive ensuite sur l'ordinateur.
 // Chaque nouvelle réplique est lue par les lecteurs d'écran. Rien n'est
 // dit seulement à l'oral : tout est écrit.
 // =============================================================================
@@ -32,9 +34,10 @@ function replique(nom, texte, classe = '') {
  *   pnj          sa fiche (data/pnj.json)
  *   creneau      son créneau de routine en cours (ou null)
  *   demande      { commande, surProposee() } si elle a une commande à présenter
+ *   sujets       [{ question, replique, surDit() }] : les questions de quête
  *   surFermeture appelée à la fin de la conversation
  */
-export function ouvrirDialogue({ infos, pnj, creneau, demande = null, surFermeture }) {
+export function ouvrirDialogue({ infos, pnj, creneau, demande = null, sujets = [], surFermeture }) {
   const partie = partieEnCours();
   const moment = { graine: partie.graine, jour: partie.temps.jour, minute: partie.temps.minute };
   const drapeau = drapeauDeRencontre(pnj);
@@ -52,6 +55,21 @@ export function ouvrirDialogue({ infos, pnj, creneau, demande = null, surFermetu
     const restants = [...f.pied.querySelectorAll('button')];
     restants[restants.length - 1].focus();
   };
+  for (const sujet of sujets) {
+    const question = typographier(sujet.question);
+    actions.push({
+      texte: question,
+      surClic: (f) => {
+        fil.append(
+          replique(t('dialogue.toi'), sujet.question, 'replique-joueur'),
+          replique(infos.nom, sujet.replique),
+        );
+        sujet.surDit();
+        questionPosee(f, question);
+        return false;
+      },
+    });
+  }
   if (demande) {
     const question = t('dialogue.besoin');
     actions.push({

@@ -76,6 +76,9 @@ const DESSINS = {
   calendrier: [['rect', { x: 4, y: 5.5, width: 16, height: 14.5, rx: 2 }], ['path', { d: 'M4 10h16M8.5 3.5v4M15.5 3.5v4' }]],
   graphique: [['path', { d: 'M4 4v16h16' }], ['path', { d: 'M8 16v-4M12 16V8M16 16v-6' }]],
   cadenas: [['rect', { x: 5, y: 11, width: 14, height: 9.5, rx: 2 }], ['path', { d: 'M8 11V8a4 4 0 0 1 8 0v3' }]],
+  // Jalon 4 : le journal des quêtes, et la fonction « Sous-titres ».
+  journal: [['path', { d: 'M5 4.5h11a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z' }], ['path', { d: 'M5 18a2 2 0 0 1 2-2h11M9 8.5h5M9 11.5h5' }]],
+  sousTitres: [['rect', { x: 3, y: 5, width: 18, height: 14, rx: 2 }], ['path', { d: 'M7 13.5h6M15 13.5h2M7 16h10' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

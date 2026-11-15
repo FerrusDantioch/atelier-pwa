@@ -51,7 +51,6 @@
     "moment": "Jour et heure",
     "objectif": "Objectif :",
     "aucunObjectif": "aucun pour l'instant",
-    "journalBientot": "Le journal des quêtes arrivera avec les premières quêtes.",
     "objectifAide": "Objectif : {objectif}. Touche pour y aller.",
     "pause": "Pause",
     "jour": "Jour {jour}",
@@ -110,7 +109,8 @@
     "dormirMessage": "Tu te réveilleras demain à {heure}.",
     "dormirCopie": "Une copie de secours de ta partie est faite au passage.",
     "dormirOui": "Dormir",
-    "bonjour": "Jour {jour} : bonne journée !"
+    "bonjour": "Jour {jour} : bonne journée !",
+    "bonjourCommandes": "Jour {jour} : bonne journée ! De nouvelles commandes t'attendent sur l'ordinateur."
   },
   "choixPerso": {
     "titre": "Qui veux-tu incarner ?",
@@ -184,6 +184,7 @@
       "zoom": { "geste": "+ et −", "effet": "rapprocher ou éloigner la vue" },
       "recentrer": { "geste": "C", "effet": "recentrer la vue" },
       "agir": { "geste": "Entrée ou Espace", "effet": "examiner l'objet proche" },
+      "journal": { "geste": "J", "effet": "ouvrir le journal des quêtes" },
       "naviguer": { "geste": "Tab", "effet": "passer d'un bouton à l'autre" },
       "pause": { "geste": "Échap", "effet": "pause, ou fermer une fenêtre" }
     }
@@ -199,6 +200,7 @@
     "titre": "Pause",
     "explication": "Le jeu est en pause : rien ne se passe tant que ce menu est ouvert.",
     "reprendre": "Reprendre",
+    "journal": "Journal des quêtes",
     "personnage": "Ton personnage",
     "commandes": "Commandes",
     "reglages": "Réglages",
@@ -410,9 +412,11 @@
     "retravailler": "reprends l'appli de {client}",
     "terminer": "termine l'appli de {client}",
     "choisir": "choisis une commande, au bureau",
+    "accepter": "lis la commande de {client}, au bureau",
     "parler": "parle à {client}",
     "attendre": "fais grandir ta réputation",
-    "fini": "tout est livré, bravo !"
+    "fini": "tout est livré, bravo !",
+    "demain": "de nouvelles commandes arrivent demain"
   },
   "reputation": {
     "points": {
@@ -451,6 +455,9 @@
       "enCours": "Projets en cours",
       "nouvelles": "Nouvelles commandes",
       "livrees": "Commandes livrées",
+      "duJour": "Commandes du jour",
+      "duJourAide": "Elles changent chaque matin : celles que tu n'acceptes pas laissent leur place à d'autres. Une commande acceptée t'attend jusqu'à sa livraison.",
+      "demain": "Tout est livré. De nouvelles commandes arriveront demain matin.",
       "aucuneAvantVisio": "Les commandes arriveront après l'appel de {nom}.",
       "attendre": "Aucune nouvelle commande pour le moment : d'autres arriveront quand ta réputation grandira.",
       "fini": "Toutes les commandes sont livrées. Bravo !",
@@ -571,5 +578,47 @@
     "historique": "Commandes livrées",
     "aucune": "Aucune commande livrée pour l'instant.",
     "depenses": "Bientôt, tu pourras dépenser tes pièces pour aménager l'atelier."
+  },
+  "quetes": {
+    "nouvelle": "Nouvelle quête : « {titre} ». Elle est dans ton journal.",
+    "etape": "Étape terminée : {etape}.",
+    "etapeFacultative": "Étape facultative terminée : {etape}.",
+    "finie": "Quête terminée : « {titre} » !",
+    "gains": "Tu gagnes {argent} et {reputation} de réputation.",
+    "absent": "{nom} n'est pas là pour l'instant : retour prévu à {heure}.",
+    "absentDemain": "{nom} n'est pas là pour l'instant : retour prévu demain, à {heure}.",
+    "absentJamais": "{nom} n'est pas là.",
+    "sansEndroit": "Cette étape ne se joue pas à un endroit précis : relis-la dans ton journal (touche J)."
+  },
+  "journal": {
+    "titre": "Journal",
+    "bouton": "Journal",
+    "raccourci": "J",
+    "intro": "Tes quêtes : ce que les gens autour de toi attendent. Rien ne presse : aucune n'expire.",
+    "enCours": "En cours",
+    "terminees": "Terminées",
+    "aucune": "Aucune quête pour l'instant.",
+    "aucuneEnCours": "Aucune quête en cours pour l'instant.",
+    "toutesFinies": "Tu as terminé toutes les quêtes. Bravo ! L'atelier continue : de nouvelles commandes arrivent sur l'ordinateur.",
+    "principe": "Principe : {nom}.",
+    "deLaPart": "De la part de {nom}",
+    "etapes": "Étapes",
+    "encorePossible": "Encore possible",
+    "statuts": {
+      "faite": "Faite",
+      "maintenant": "Maintenant",
+      "ensuite": "Ensuite",
+      "facultative": "Facultative",
+      "facultativeFaite": "Facultative, faite"
+    },
+    "etiquetteSuivie": "suivie",
+    "etiquetteTerminee": "terminée",
+    "suivre": "Suivre",
+    "suivreComplement": "cette quête",
+    "suivie": "Quête suivie : son étape s'affiche en haut de l'écran.",
+    "nouvelleSuivie": "Tu suis maintenant « {titre} ».",
+    "yAller": "Y aller",
+    "recompense": "Récompense : {argent} et {reputation} de réputation.",
+    "obtenue": "Gagné : {argent} et {reputation} de réputation."
   }
 }

@@ -18,6 +18,7 @@ import { remplir, t, typographier } from '../noyau/textes.js';
 import { el } from './dom.js';
 import { icone } from './icones.js';
 import { notifier } from './notifications.js';
+import { messageDesQuetes, progresserQuetes } from './progression.js';
 
 const TAILLE_VISIO = { largeur: 320, hauteur: 240 };
 
@@ -58,16 +59,20 @@ export function ecranVisio(ctx, { appelEntrant = false } = {}) {
   }
   const dire = (texte) => ajouterLigne(replique(nom, texte));
 
-  // La fin du premier appel : la commande d'essai arrive sur l'ordinateur.
+  // La fin du premier appel : la commande d'essai arrive sur l'ordinateur, et
+  // l'étape de la quête de bienvenue est faite (un seul message pour tout).
   function finDuPremierAppel() {
-    const commandes = ctx.listeCommandes;
-    const avant = idsDesOffres(partieEnCours(), commandes, ctx.paliers);
+    const avant = idsDesOffres(partieEnCours(), ctx.listeCommandes, ctx.paliers);
     modifierPartie((p) => { p.drapeaux[DRAPEAU_VISIO_ACCUEIL] = true; }, { important: true });
+    const evenements = progresserQuetes({ annoncer: false });
+    const commandes = ctx.listeCommandes;
     const nouvelles = nouvellesOffres(avant, idsDesOffres(partieEnCours(), commandes, ctx.paliers), commandes);
     ctx.aller.accueil();
-    for (const offre of nouvelles) {
-      notifier(t('livraison.nouvelle', { client: ctx.nomDe(offre.client), titre: offre.titre }), { type: 'info' });
-    }
+    const messages = [
+      ...nouvelles.map((offre) => t('livraison.nouvelle', { client: ctx.nomDe(offre.client), titre: offre.titre })),
+      messageDesQuetes(evenements),
+    ].filter(Boolean);
+    if (messages.length > 0) notifier(messages.join(' '), { type: 'info' });
   }
 
   function raccrocher() {

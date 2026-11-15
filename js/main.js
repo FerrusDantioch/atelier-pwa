@@ -33,6 +33,7 @@ import { ouvrirAPropos } from './interface/a-propos.js';
 import { afficherAccueil, ouvrirBienvenue } from './interface/accueil.js';
 import { afficherChoixPerso } from './interface/choix-perso.js';
 import { afficherEcranJeu } from './interface/ecran-jeu.js';
+import { messageDesQuetes, progresserQuetes } from './interface/progression.js';
 import { confirmer, fermerToutes, informer } from './interface/fenetres.js';
 import { installerLeJeu } from './interface/installation.js';
 import { initialiserNotifications, notifier } from './interface/notifications.js';
@@ -270,7 +271,10 @@ async function demanderNouvellePartie() {
       });
       await enregistrerPartie(partie);
       await jouer(partie);
-      notifier(t('nouvellePartie.commencee'), { type: 'succes' });
+      // La première quête commence : un seul message pour les deux nouvelles
+      // (les lecteurs d'écran ne liraient que le second de deux messages).
+      const quetes = messageDesQuetes(progresserQuetes({ annoncer: false }));
+      notifier([t('nouvellePartie.commencee'), quetes].filter(Boolean).join(' '), { type: 'succes' });
     },
     surAnnuler: () => montrerAccueil({ focaliser: true }),
   });

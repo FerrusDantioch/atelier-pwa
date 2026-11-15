@@ -3,7 +3,8 @@
 // -----------------------------------------------------------------------------
 // Une seule fenêtre, dont le contenu change d'« écran » :
 //   accueil    Commandes, Visio avec Ferrus, Tes comptes ;
-//   commandes  projets en cours, nouvelles commandes, commandes livrées ;
+//   commandes  projets en cours, nouvelles commandes, commandes du jour
+//              (renouvelées chaque matin), commandes livrées ;
 //   commande   ce que la personne demande, puis « Accepter la commande » ;
 //   atelier    le mini-jeu de création (atelier.js) ;
 //   visio      l'appel avec le mentor (visio.js) ;
@@ -13,8 +14,11 @@
 // Comme pour toute fenêtre, le temps du jeu s'arrête tant qu'elle est ouverte.
 // =============================================================================
 
-import { DRAPEAU_VISIO_ACCUEIL, accepterCommande, commandesAProposer, etatDesCommandes } from '../jeu/commandes.js';
+import {
+  DRAPEAU_VISIO_ACCUEIL, accepterCommande, commandesAProposer, estCommandeDuJour, etatDesCommandes,
+} from '../jeu/commandes.js';
 import { progressionReputation } from '../jeu/economie.js';
+import { commandesConnues, commandesDuJourOuvertes } from '../jeu/generateur.js';
 import { apparenceDuJoueur, nettoyerApparence } from '../jeu/personnage.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, tPluriel, typographier } from '../noyau/textes.js';
@@ -52,7 +56,9 @@ export function encadre(nomIcone, type, ...contenu) {
  */
 export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}) {
   const jeu = donnees.jeu;
-  const pnjParId = new Map(donnees.pnj.pnj.map((pnj) => [pnj.id, pnj]));
+  // Les personnes qui passent commande : habitants, visiteurs, et clientes
+  // ou clients des commandes du jour.
+  const pnjParId = new Map([...donnees.pnj.pnj, ...(donnees.modelesCommandes?.clients || [])].map((pnj) => [pnj.id, pnj]));
 
   const fenetre = ouvrirFenetre({
     titre: t('ordinateur.titre'), contenu: [], large: true, boutonFermer: false, surFermeture,
@@ -86,7 +92,9 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
     donnees,
     jeu,
     creation: donnees.creation,
-    listeCommandes: donnees.commandes.commandes,
+    // Toutes les commandes connues de la partie, à jour à chaque lecture
+    // (data/commandes.json, commandes du jour acceptées, offres du jour).
+    get listeCommandes() { return commandesConnues(partieEnCours(), donnees); },
     paliers: jeu.reputation.paliers,
     fenetre,
     montrer,
@@ -115,7 +123,7 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
       toile.setAttribute('aria-label', t('visio.portrait', { nom: ctx.nomDe(id) }));
       return toile;
     },
-    etat: () => etatDesCommandes(partieEnCours(), donnees.commandes.commandes, jeu.reputation.paliers),
+    etat: () => etatDesCommandes(partieEnCours(), ctx.listeCommandes, jeu.reputation.paliers),
     cahierDesCharges,
     encadre,
     complement,
@@ -191,17 +199,30 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
         bouton: { texte: t('ordinateur.commandes.reprendre'), icone: 'ordinateur', principal: true, surClic: () => ctx.aller.atelier(commande) },
       }))));
     }
-    if (etat.offres.length > 0) {
-      contenu.push(section(t('ordinateur.commandes.nouvelles'), etat.offres.map((commande) => carte(commande, {
-        recompense: true,
-        bouton: { texte: t('ordinateur.commandes.lire'), icone: 'enveloppe', surClic: () => ecranCommande(commande) },
-      }))));
-    } else if (partie.drapeaux[DRAPEAU_VISIO_ACCUEIL]) {
-      const toutes = ctx.listeCommandes.length;
-      const aProposer = commandesAProposer(partie, ctx.listeCommandes, ctx.paliers);
+    const carteOffre = (commande) => carte(commande, {
+      recompense: true,
+      bouton: { texte: t('ordinateur.commandes.lire'), icone: 'enveloppe', surClic: () => ecranCommande(commande) },
+    });
+    const offres = etat.offres.filter((commande) => !estCommandeDuJour(commande.id));
+    const duJour = etat.offres.filter((commande) => estCommandeDuJour(commande.id));
+    if (offres.length > 0) contenu.push(section(t('ordinateur.commandes.nouvelles'), offres.map(carteOffre)));
+    if (duJour.length > 0) {
+      contenu.push(el('section', { class: 'groupe-commandes' },
+        el('h4', {}, t('ordinateur.commandes.duJour')),
+        el('p', { class: 'aide' }, t('ordinateur.commandes.duJourAide')),
+        el('ul', { class: 'liste-commandes-recues' }, duJour.map(carteOffre))));
+    }
+    if (etat.offres.length === 0 && partie.drapeaux[DRAPEAU_VISIO_ACCUEIL]) {
+      const fixes = donnees.commandes.commandes;
+      const livrees = new Set(partie.commandes.livrees.map((livraison) => livraison.id));
+      const aProposer = commandesAProposer(partie, fixes, ctx.paliers);
       if (aProposer.length > 0) contenu.push(encadre('parler', 'info', t('livraison.aProposer', { client: ctx.nomDe(aProposer[0].client) })));
-      else if (etat.livrees.length === toutes) contenu.push(encadre('succes', 'succes', t('ordinateur.commandes.fini')));
-      else if (etat.livrees.length + etat.enCours.length < toutes) contenu.push(el('p', { class: 'aide' }, t('ordinateur.commandes.attendre')));
+      else if (fixes.some((commande) => !livrees.has(commande.id) && !partie.commandes.enCours[commande.id])) {
+        contenu.push(el('p', { class: 'aide' }, t('ordinateur.commandes.attendre')));
+      } else if (etat.enCours.length === 0) {
+        const demain = commandesDuJourOuvertes(partie, donnees.modelesCommandes, ctx.paliers);
+        contenu.push(encadre('succes', 'succes', t(demain ? 'ordinateur.commandes.demain' : 'ordinateur.commandes.fini')));
+      }
     }
     if (etat.livrees.length > 0) {
       contenu.push(section(t('ordinateur.commandes.livrees'), etat.livrees.map(({ commande, livraison }) => carte(commande, { livraison }))));

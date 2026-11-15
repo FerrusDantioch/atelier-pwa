@@ -208,6 +208,13 @@ export function creerHabitants({ scene, lieu, grille, donnees, palette, joueur }
       return habitant?.present ? habitant.deplacement.case : null;
     },
 
+    // Là où il s'arrêtera : la fin de son trajet s'il marche, sinon sa case.
+    destinationDe(id) {
+      const habitant = this.trouver(id);
+      if (!habitant?.present) return null;
+      return habitant.deplacement.destination || habitant.deplacement.case;
+    },
+
     // On lui parle : il s'arrête au centre de sa case et se tourne vers nous.
     arreter(id, versX, versZ, reduit) {
       const habitant = this.trouver(id);
