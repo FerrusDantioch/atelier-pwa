@@ -3,9 +3,10 @@
 ## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1) — publié, à valider
 
 Fusionné dans `main` le 14 novembre 2026 à la demande de Ferrus (version
-0.4.0), pour l'essayer sur sa tablette. Version 0.4.1 (15 novembre) : les
-corrections qu'il a demandées après son essai (parois de la salle d'eau,
-cheveux d'Halaé, sa commande donnée de vive voix). Validation en attente.
+0.4.0), pour l'essayer sur sa tablette. Version 0.4.1 (fusionnée le
+15 novembre) : les corrections qu'il a demandées après son essai (parois
+de la salle d'eau, cheveux d'Halaé, sa commande donnée de vive voix).
+Validation en attente.
 
 ### Ce qui est fait
 
@@ -67,16 +68,18 @@ cheveux d'Halaé, sa commande donnée de vive voix). Validation en attente.
 
 ### Vérifications faites
 
-- 93 tests sans navigateur, dont les notes (besoin manquant, chose qui
+- 94 tests sans navigateur, dont les notes (besoin manquant, chose qui
   gêne, confort, fonction inutile, charge), les récompenses, un projet
-  importé nettoyé, le déblocage des commandes, le niveau 2, et la
-  lisibilité des couleurs de l'aperçu (contraste normal et élevé).
-- 44 tests dans Chromium, dont 6 nouveaux : premier allumage (temps
+  importé nettoyé, le déblocage des commandes (celle d'Halaé d'abord
+  présentée de vive voix), le niveau 2, les parois de la salle d'eau, et
+  la lisibilité des couleurs de l'aperçu (contraste normal et élevé).
+- 45 tests dans Chromium, dont 7 nouveaux : premier allumage (temps
   arrêté, portrait, tutoriel, commande d'essai), livraison « Parfait »
   (argent, réputation, nouvelles commandes), « À retravailler » gardé même
-  après rechargement puis corrigé, jouer Ferrus (« le vrai Ferrus »),
-  clavier (focus, Échap), téléphone (pas de défilement de côté, boutons du
-  bas sur deux lignes, jauge toujours visible).
+  après rechargement puis corrigé, Halaé qui présente sa commande de vive
+  voix, jouer Ferrus (« le vrai Ferrus »), clavier (focus, Échap),
+  téléphone (pas de défilement de côté, boutons du bas sur deux lignes,
+  jauge toujours visible).
 
 ### Comment tester sur tablette
 
