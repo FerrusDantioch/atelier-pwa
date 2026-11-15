@@ -17,7 +17,7 @@
 // de l'écran.
 // =============================================================================
 
-import { objectifDuMoment } from '../jeu/commandes.js';
+import { commandesAProposer, objectifDuMoment, proposerCommande } from '../jeu/commandes.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
 import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
@@ -190,7 +190,19 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const infos = mondeActuel?.parler(id);
     if (!infos) return;
     fermerBulle();
-    ouvrirDialogue({ infos, pnj: infos.pnj, creneau: infos.creneau, surFermeture: () => mondeActuel?.finParler(id) });
+    // A-t-elle une commande à présenter de vive voix (Halaé) ?
+    const partie = partieEnCours();
+    const commande = donnees && partie
+      ? commandesAProposer(partie, donnees.commandes.commandes, jeu.reputation.paliers).find((c) => c.client === id)
+      : null;
+    const demande = commande ? {
+      commande,
+      surProposee: () => {
+        modifierPartie((p) => proposerCommande(p, commande), { important: true });
+        notifier(t('livraison.nouvelle', { client: infos.nom, titre: commande.titre }), { type: 'info' });
+      },
+    } : null;
+    ouvrirDialogue({ infos, pnj: infos.pnj, creneau: infos.creneau, demande, surFermeture: () => mondeActuel?.finParler(id) });
   }
 
   function agir() {
@@ -214,7 +226,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
       return;
     }
     fermerBulle();
-    if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('objectifs.enRoute'));
+    if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
   }
 
   // Dormir : la journée suivante commence au matin (avec une copie de

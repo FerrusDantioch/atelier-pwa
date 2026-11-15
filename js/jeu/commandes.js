@@ -8,6 +8,9 @@
 //   livrée    rangée dans partie.commandes.livrees avec sa note et ses gains.
 // Une commande se débloque selon « debloquee » : un drapeau (l'appel de
 // bienvenue du mentor), d'autres commandes livrées, un niveau de réputation.
+// Une commande « enPersonne » (Halaé, qui vit au domicile) est d'abord
+// demandée de vive voix : il faut parler à la personne pour qu'elle arrive
+// sur l'ordinateur.
 //
 // JavaScript pur (sans page ni 3D) : testé par tests/creation.test.mjs.
 // =============================================================================
@@ -22,13 +25,38 @@ export const DRAPEAU_VISIO_ACCUEIL = 'visio-accueil';
 // Le meuble où l'on travaille (data/lieux/domicile.json).
 export const ID_BUREAU = 'bureau';
 
-export function commandeDebloquee(commande, partie, paliers) {
+// Le drapeau posé quand la personne a présenté sa commande de vive voix.
+export function drapeauDeProposition(commande) {
+  return `proposee-${commande.id}`;
+}
+
+// Les conditions de « debloquee » sont-elles remplies ?
+function conditionsRemplies(commande, partie, paliers) {
   const condition = commande.debloquee || {};
   if (condition.drapeau && !partie.drapeaux[condition.drapeau]) return false;
   const livrees = new Set(partie.commandes.livrees.map((livraison) => livraison.id));
   if ((condition.apres || []).some((id) => !livrees.has(id))) return false;
   if (condition.niveau && niveauDeReputation(partie.reputation, paliers).niveau < condition.niveau) return false;
   return true;
+}
+
+export function commandeDebloquee(commande, partie, paliers) {
+  if (!conditionsRemplies(commande, partie, paliers)) return false;
+  return !commande.enPersonne || Boolean(partie.drapeaux[drapeauDeProposition(commande)]);
+}
+
+// Les commandes qu'une personne attend de présenter de vive voix.
+export function commandesAProposer(partie, commandes, paliers) {
+  const livrees = new Set(partie.commandes.livrees.map((livraison) => livraison.id));
+  return commandes.filter((commande) => commande.enPersonne
+    && !partie.drapeaux[drapeauDeProposition(commande)]
+    && !livrees.has(commande.id) && !partie.commandes.enCours[commande.id]
+    && conditionsRemplies(commande, partie, paliers));
+}
+
+// La personne a présenté sa commande : elle arrive sur l'ordinateur.
+export function proposerCommande(partie, commande) {
+  partie.drapeaux[drapeauDeProposition(commande)] = true;
 }
 
 // Les commandes rangées par état, dans l'ordre de data/commandes.json.
@@ -93,6 +121,7 @@ export function livrerProjet(partie, commande, evaluation, paliers) {
  *   allumer       le premier appel du mentor attend sur l'ordinateur ;
  *   retravailler  un projet est à reprendre ;
  *   terminer      un projet est en cours ;
+ *   parler        quelqu'un veut présenter sa commande de vive voix ;
  *   choisir       des commandes attendent d'être acceptées ;
  *   attendre      il faut plus de réputation pour les suivantes ;
  *   fini          toutes les commandes sont livrées.
@@ -103,6 +132,8 @@ export function objectifDuMoment(partie, commandes, paliers) {
   const aReprendre = etat.enCours.find((element) => element.projet.resultat === 'aRetravailler');
   if (aReprendre) return { cle: 'retravailler', commande: aReprendre.commande, destination: ID_BUREAU };
   if (etat.enCours.length > 0) return { cle: 'terminer', commande: etat.enCours[0].commande, destination: ID_BUREAU };
+  const aProposer = commandesAProposer(partie, commandes, paliers);
+  if (aProposer.length > 0) return { cle: 'parler', commande: aProposer[0], destination: aProposer[0].client };
   if (etat.offres.length > 0) return { cle: 'choisir', destination: ID_BUREAU };
   if (etat.livrees.length === commandes.length) return { cle: 'fini' };
   return { cle: 'attendre' };

@@ -1,5 +1,5 @@
 {
-  "aValider": "Commandes proposées par Claude : clients fictifs et applications fictives. La commande d'essai vient du mentor : ses répliques sont à valider par Ferrus.",
+  "aValider": "Commandes proposées par Claude : applications fictives. La commande d'essai vient du mentor : ses répliques sont à valider par Ferrus. La commande d'Halaé (« Mon planning de vidéos ») a été validée par elle, via Ferrus, le 15/11/2026 : ne rien y changer sans son accord.",
   "commandes": [
     {
       "id": "essai-courses",
@@ -27,6 +27,32 @@
       }
     },
     {
+      "id": "halae-planning",
+      "client": "halae",
+      "enPersonne": true,
+      "titre": "Mon planning de vidéos",
+      "resume": "Un planning simple, qui rappelle chaque étape de la semaine.",
+      "demande": "Je publie une vidéo par semaine. Entre le tournage, le montage et les commentaires, je m'y perds un peu. Il me faudrait un planning simple, qui me rappelle chaque étape.",
+      "besoins": [
+        { "apporte": "planifier", "texte": "Voir les étapes de ma semaine" },
+        { "apporte": "rappel-ecran", "texte": "Un rappel à l'écran pour chaque étape" }
+      ],
+      "bonus": [
+        { "apporte": "vue-ensemble", "texte": "Voir ma semaine d'un coup d'œil" }
+      ],
+      "aEviter": [
+        { "apporte": "statistiques", "texte": "J'ai déjà des chiffres partout ; ici, je veux du calme" }
+      ],
+      "confort": [],
+      "recompense": { "argent": 50, "reputation": 10, "bonus": 10 },
+      "debloquee": { "apres": ["essai-courses"] },
+      "reactions": {
+        "parfait": "C'est exactement ça !",
+        "bien": "Ça m'aide déjà beaucoup.",
+        "aRetravailler": "Prends ton temps, je tourne ma prochaine vidéo en attendant."
+      }
+    },
+    {
       "id": "theo-changements",
       "client": "theo",
       "titre": "Prévenu à l'avance",
@@ -47,7 +73,7 @@
       ],
       "apercu": { "agenda": ["Lundi · 9 h · Maths, salle 12", "Mardi · 14 h · Bibliothèque", "Jeudi · 10 h · Anglais"] },
       "recompense": { "argent": 60, "reputation": 12, "bonus": 10 },
-      "debloquee": { "apres": ["essai-courses"] },
+      "debloquee": { "apres": ["halae-planning"] },
       "reactions": {
         "parfait": "C'est exactement ce qu'il me fallait. Je sais ce qui m'attend demain : je dors mieux.",
         "bien": "Elle m'aide déjà beaucoup. Il reste quelques détails, mais je vais m'en servir dès ce soir.",
@@ -77,7 +103,7 @@
       ],
       "apercu": { "liste": ["Matin · comprimé rond", "Soir · gélule bleue"] },
       "recompense": { "argent": 70, "reputation": 14, "bonus": 10 },
-      "debloquee": { "apres": ["essai-courses"] },
+      "debloquee": { "apres": ["halae-planning"] },
       "reactions": {
         "parfait": "Je lis tout sans ma loupe ! Et elle me dit les noms à voix haute. Merci, vraiment.",
         "bien": "Je m'en sors avec. Un ou deux détails me gênent encore, mais c'est déjà bien mieux qu'avant.",
@@ -106,7 +132,7 @@
       ],
       "apercu": { "minuteur": ["Baguettes · 12 min", "Croissants · 18 min"] },
       "recompense": { "argent": 60, "reputation": 12, "bonus": 5 },
-      "debloquee": { "apres": ["essai-courses"] },
+      "debloquee": { "apres": ["halae-planning"] },
       "reactions": {
         "parfait": "Un geste, et c'est parti ! Plus une seule fournée trop cuite. Passe à la boutique, je t'offre un croissant.",
         "bien": "Elle me rend déjà service. Avec un ou deux réglages de plus, ce serait idéal.",
@@ -137,7 +163,7 @@
       ],
       "apercu": { "agenda": ["10 h · Pause", "12 h · Huiler la scie", "15 h 30 · Pause"] },
       "recompense": { "argent": 70, "reputation": 14, "bonus": 10 },
-      "debloquee": { "apres": ["essai-courses"] },
+      "debloquee": { "apres": ["halae-planning"] },
       "reactions": {
         "parfait": "Je la sens vibrer, je la vois de loin : enfin des rappels faits pour moi. Merci !",
         "bien": "Elle me sert déjà. Quelques détails à revoir, mais je la garde.",

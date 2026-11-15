@@ -23,7 +23,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | J0 | Squelette : installation, hors ligne, réglages, sauvegarde | ✅ livré (version 0.1.0) |
 | J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | ✅ livré (version 0.2.0) |
 | J2 | Personnages, routines, dialogues | ✅ livré (version 0.3.0) |
-| J3 | L'ordinateur : commandes et création d'applications | 🧪 publié, à valider (version 0.4.0) |
+| J3 | L'ordinateur : commandes et création d'applications | 🧪 publié, à valider (version 0.4.1) |
 | J4 | Quêtes et journal (premier livrable jouable) | à venir |
 | J5 | Progression, bureaux, nouveaux lieux | à venir |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
@@ -43,6 +43,8 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 - **L'ordinateur** (au bureau, « Utiliser l'ordinateur ») : la visio avec
   Ferrus, les commandes des voisins (applications fictives), l'atelier de
   création et tes comptes. Toucher l'objectif, en haut, t'y emmène.
+  Halaé, ta toute première cliente, vit avec toi : c'est en lui parlant
+  qu'elle te présente sa commande.
 - **Créer une application** : choisis un modèle, ajoute les fonctions utiles
   (pas trop : chaque fonction pèse dans la « charge »), règle le confort,
   teste comme la personne, puis livre. Parfait, Bien ou À retravailler :

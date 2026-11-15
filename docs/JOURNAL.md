@@ -1,9 +1,11 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.0) — publié, à valider
+## 🧪 Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1) — publié, à valider
 
-Fusionné dans `main` le 14 novembre 2026 à la demande de Ferrus, pour
-l'essayer sur sa tablette. Sa validation est en attente.
+Fusionné dans `main` le 14 novembre 2026 à la demande de Ferrus (version
+0.4.0), pour l'essayer sur sa tablette. Version 0.4.1 (15 novembre) : les
+corrections qu'il a demandées après son essai (parois de la salle d'eau,
+cheveux d'Halaé, sa commande donnée de vive voix). Validation en attente.
 
 ### Ce qui est fait
 
@@ -52,6 +54,13 @@ l'essayer sur sa tablette. Sa validation est en attente.
   voit encore à travers (des murs pleins cacheraient les pièces voisines
   dans la vue de trois quarts). Les autres cloisons restent coupées au
   genou.
+- **Halaé, la toute première cliente** : quand on lui parle, on peut lui
+  demander « Tu as besoin d'une application ? ». Elle présente alors sa
+  commande, « Mon planning de vidéos » (validée par elle), qui arrive
+  ensuite sur l'ordinateur. Les commandes de Théo, Madeleine, Samia et
+  Karim arrivent après la sienne. L'objectif « parle à Halaé » mène
+  jusqu'à elle.
+- **Halaé a ses cheveux** : longs et noirs (son choix, le 15/11).
 - **Teint clair** pour Ferrus et pour Halaé : leur choix (le teint
   « neutre », lilas, avait été mis faute d'information ; il reste au choix
   des joueurs).
@@ -76,11 +85,14 @@ l'essayer sur sa tablette. Sa validation est en attente.
 2. « Décrocher » : écoute Ferrus (« Suivant »), puis « Raccrocher ».
 3. « Commandes » › « Lire la commande » › « Accepter » : choisis « Liste à
    cocher », ajoute « Partage », puis « Tester comme Ferrus » et « Livrer ».
-4. Prends la commande de Madeleine et ajoute « Statistiques détaillées » :
+4. Touche l'objectif « parle à Halaé », puis « Parler à Halaé » › « Tu as
+   besoin d'une application ? ». Sa commande arrive sur l'ordinateur :
+   prépare-lui son planning (un agenda avec des rappels à l'écran).
+5. Prends ensuite la commande de Madeleine et ajoute « Statistiques détaillées » :
    « À retravailler » explique pourquoi. Corrige (texte grand, contraste
    élevé, police très lisible) et livre à nouveau.
-5. Regarde l'argent et la réputation monter (en haut, et dans « Tes
-   comptes »).
+6. Regarde l'argent et la réputation monter (en haut, et dans « Tes
+   comptes »). Regarde aussi la salle d'eau et ses parois.
 
 ### Limites connues
 
@@ -93,10 +105,6 @@ l'essayer sur sa tablette. Sa validation est en attente.
 
 ### En attente
 
-- **Halaé, la toute première cliente** : sa première commande n'est pas
-  encore dans le jeu, puisque tout ajout la concernant doit d'abord être
-  validé par elle. Une proposition est faite dans le compte rendu (hors du
-  dépôt) ; une fois validée, elle passera juste après l'essai du mentor.
 - La validation par Ferrus des répliques du mentor en visio (tutoriel,
   conseils).
 

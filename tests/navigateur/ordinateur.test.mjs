@@ -115,7 +115,8 @@ test('accepter, tester, livrer : « Parfait », l\'argent et la réputation mont
   await livraison.waitFor();
   const texte = await lireTexte(livraison);
   assert.match(texte, /Tu gagnes 25 pièces et 5 points de réputation/);
-  assert.match(texte, /Nouvelle commande : Théo, « Prévenu à l'avance »/);
+  // La première vraie cliente, Halaé, présente sa commande de vive voix.
+  assert.match(texte, /Halaé a une demande pour toi : va lui parler/);
   await livraison.getByRole('button', { name: 'Continuer' }).click();
   await fenetre.getByRole('heading', { name: 'Commandes', exact: true }).waitFor();
 
@@ -124,9 +125,11 @@ test('accepter, tester, livrer : « Parfait », l\'argent et la réputation mont
   assert.equal(partie.reputation, 5);
   assert.deepEqual(partie.commandes.enCours, {});
   assert.deepEqual(partie.commandes.livrees.map((l) => [l.id, l.note]), [['essai-courses', 'parfait']]);
-  assert.equal(await fenetre.getByRole('button', { name: /^Lire la commande/ }).count(), 4);
+  assert.equal(await fenetre.getByRole('button', { name: /^Lire la commande/ }).count(), 0);
+  assert.match(await lireTexte(fenetre), /Halaé a une demande pour toi/);
   await fenetre.locator('.fenetre-pied').getByRole('button', { name: 'Fermer', exact: true }).click();
   assert.match(await texteBarre(page), /125 pièces/);
+  assert.match(await texteBarre(page), /Objectif : parle à Halaé/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
 });
@@ -135,7 +138,7 @@ test('« À retravailler » : rien n\'est perdu, le projet reste tel quel (même
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await apresLaVisio(page, { livrees: ['essai-courses'], reputation: 5 });
+  await apresLaVisio(page, { livrees: ['essai-courses', 'halae-planning'], reputation: 15 });
   let fenetre = await allumerOrdinateur(page);
   await fenetre.getByRole('button', { name: /^Commandes/ }).click();
   await fenetre.getByRole('button', { name: 'Lire la commande : Mes médicaments' }).click();
@@ -177,7 +180,37 @@ test('« À retravailler » : rien n\'est perdu, le projet reste tel quel (même
   await page.getByRole('dialog', { name: 'Livraison : parfait !' }).getByRole('button', { name: 'Continuer' }).click();
   const partie = await lirePartieEnCours(page);
   assert.equal(partie.argent, 170);
-  assert.deepEqual(partie.commandes.livrees.map((l) => l.id), ['essai-courses', 'madeleine-medicaments']);
+  assert.deepEqual(partie.commandes.livrees.map((l) => l.id), ['essai-courses', 'halae-planning', 'madeleine-medicaments']);
+  assert.deepEqual(page.erreurs, []);
+  await contexte.close();
+});
+
+test('Halaé, la première cliente, présente sa commande de vive voix ; elle arrive ensuite sur l\'ordinateur', async () => {
+  const contexte = await outils.contexte();
+  const page = await ouvrirJeu(contexte, outils.adresse);
+  await nouvellePartie(page);
+  await apresLaVisio(page, { livrees: ['essai-courses'], reputation: 5 });
+  assert.match(await texteBarre(page), /Objectif : parle à Halaé/);
+  // Toucher l'objectif mène à Halaé.
+  await page.locator('.objectif').click();
+  const parler = page.getByRole('button', { name: /Parler à Halaé/ });
+  await parler.waitFor({ timeout: 20000 });
+  await parler.click();
+  const dialogue = page.getByRole('dialog', { name: 'Halaé' });
+  await dialogue.getByRole('button', { name: /Tu as besoin d'une application/ }).click();
+  const texte = await lireTexte(dialogue);
+  assert.match(texte, /Halaé : « Je publie une vidéo par semaine/);
+  assert.match(texte, /Sa commande t'attend sur ton ordinateur/);
+  await dialogue.locator('.notification-texte', { hasText: /Nouvelle commande\s:\sHalaé, «\sMon planning de vidéos\s»/ }).waitFor();
+  assert.equal(await dialogue.getByRole('button', { name: /Tu as besoin d'une application/ }).count(), 0, 'la question est posée une seule fois');
+  assert.equal((await lirePartieEnCours(page)).drapeaux['proposee-halae-planning'], true);
+  await dialogue.getByRole('button', { name: /À plus tard/ }).click();
+  assert.match(await texteBarre(page), /Objectif : choisis une commande, au bureau/);
+
+  const fenetre = await allumerOrdinateur(page);
+  await fenetre.getByRole('button', { name: /^Commandes/ }).click();
+  await fenetre.getByRole('button', { name: 'Lire la commande : Mon planning de vidéos' }).click();
+  assert.match(await lireTexte(fenetre), /Commande de Halaé/);
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
 });
@@ -219,7 +252,7 @@ test('sur téléphone : l\'atelier tient dans l\'écran, sans défilement de cô
   const contexte = await outils.contexte({ viewport: { width: 390, height: 844 } });
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await apresLaVisio(page, { livrees: ['essai-courses'], reputation: 5 });
+  await apresLaVisio(page, { livrees: ['essai-courses', 'halae-planning'], reputation: 15 });
   const fenetre = await allumerOrdinateur(page);
   await fenetre.getByRole('button', { name: /^Commandes/ }).click();
   await fenetre.getByRole('button', { name: 'Lire la commande : Les fournées' }).click();

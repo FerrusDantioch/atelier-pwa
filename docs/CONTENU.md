@@ -174,6 +174,7 @@ modèles et les fonctions disent ce qu'ils apportent.
 | Champ | Rôle |
 |---|---|
 | `id`, `client` | identifiant, et la personne qui commande (un `id` de `data/pnj.json`) |
+| `enPersonne` | facultatif : `true` si la personne présente sa commande de vive voix (il faut lui parler : « Tu as besoin d'une application ? ») avant qu'elle arrive sur l'ordinateur. La personne doit venir dans un lieu |
 | `titre`, `resume`, `demande` | le nom de l'application, une ligne de résumé, et la demande dans les mots de la personne |
 | `besoins` | `{ "apporte", "texte" }` : ce qui doit être couvert (sinon « À retravailler ») |
 | `bonus` | les petits plus : ils ne changent pas la note, mais rapportent `recompense.bonus` pièces chacun |

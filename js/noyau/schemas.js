@@ -474,6 +474,9 @@ export const SCHEMA_COMMANDES = {
         champs: {
           id: texte,
           client: texte,
+          // Demandée de vive voix (il faut parler à la personne) avant
+          // d'arriver sur l'ordinateur.
+          enPersonne: { type: 'booleen', facultatif: true },
           titre: texte,
           resume: texte,
           demande: texte,

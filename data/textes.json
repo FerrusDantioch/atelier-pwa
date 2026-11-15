@@ -92,7 +92,9 @@
     "parler": "Parler à {nom}",
     "toi": "Toi",
     "queFais": "Qu'est-ce que tu fais ?",
-    "aPlusTard": "À plus tard !"
+    "aPlusTard": "À plus tard !",
+    "besoin": "Tu as besoin d'une application ?",
+    "commandeEnvoyee": "Sa commande t'attend sur ton ordinateur, au bureau."
   },
   "pnj": {
     "arrive": "{nom} arrive.",
@@ -408,9 +410,9 @@
     "retravailler": "reprends l'appli de {client}",
     "terminer": "termine l'appli de {client}",
     "choisir": "choisis une commande, au bureau",
+    "parler": "parle à {client}",
     "attendre": "fais grandir ta réputation",
-    "fini": "tout est livré, bravo !",
-    "enRoute": "En route vers ton bureau."
+    "fini": "tout est livré, bravo !"
   },
   "reputation": {
     "points": {
@@ -540,6 +542,7 @@
     "gainsCourt": "+{argent} · +{reputation} de réputation",
     "niveau": "Nouveau niveau de réputation : {niveau}, {nom} !",
     "nouvelle": "Nouvelle commande : {client}, « {titre} ».",
+    "aProposer": "{client} a une demande pour toi : va lui parler.",
     "garde": "Ton projet est gardé tel quel : corrige ce qui gêne, puis livre à nouveau. Rien ne presse.",
     "continuer": "Continuer"
   },

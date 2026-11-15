@@ -8,8 +8,8 @@ import {
   chargeDuProjet, confortParDefaut, evaluerProjet, meilleurProjet, nettoyerProjet, projetVide,
 } from '../js/jeu/creation.js';
 import {
-  DRAPEAU_VISIO_ACCUEIL, accepterCommande, etatDesCommandes, idsDesOffres, livrerProjet, nouvellesOffres,
-  objectifDuMoment,
+  DRAPEAU_VISIO_ACCUEIL, accepterCommande, commandesAProposer, etatDesCommandes, idsDesOffres, livrerProjet,
+  nouvellesOffres, objectifDuMoment, proposerCommande,
 } from '../js/jeu/commandes.js';
 import { gagner, progressionReputation } from '../js/jeu/economie.js';
 import { nouvellePartie, verifierPartie } from '../js/noyau/format-sauvegarde.js';
@@ -162,13 +162,32 @@ test('les commandes : appel du mentor, essai, puis les suivantes', () => {
   assert.equal(partie.reputation, 5);
   assert.deepEqual(partie.commandes.enCours, {});
   assert.equal(partie.commandes.livrees[0].note, 'parfait');
-  const nouvelles = nouvellesOffres(avant, idsDesOffres(partie, commandes, paliers), commandes).map((c) => c.id);
+  // Halaé, la première cliente, présente sa commande de vive voix.
+  assert.deepEqual(nouvellesOffres(avant, idsDesOffres(partie, commandes, paliers), commandes), []);
+  const objectif = objectifDuMoment(partie, commandes, paliers);
+  assert.equal(objectif.cle, 'parler');
+  assert.equal(objectif.destination, 'halae');
+  const halae = commande('halae-planning');
+  assert.deepEqual(commandesAProposer(partie, commandes, paliers).map((c) => c.id), ['halae-planning']);
+  proposerCommande(partie, halae);
+  assert.deepEqual(commandesAProposer(partie, commandes, paliers), []);
+  assert.deepEqual([...idsDesOffres(partie, commandes, paliers)], ['halae-planning']);
+  assert.equal(objectifDuMoment(partie, commandes, paliers).cle, 'choisir');
+
+  // Sa commande livrée, les suivantes arrivent.
+  const projetHalae = accepterCommande(partie, halae, creation);
+  Object.assign(projetHalae, { modele: 'agenda', fonctions: ['rappels-ecran', 'vue-semaine'] });
+  const avantHalae = idsDesOffres(partie, commandes, paliers);
+  const evaluationHalae = evaluerProjet(projetHalae, halae, creation);
+  assert.equal(evaluationHalae.note, 'parfait');
+  assert.equal(livrerProjet(partie, halae, evaluationHalae, paliers).livree, true);
+  const nouvelles = nouvellesOffres(avantHalae, idsDesOffres(partie, commandes, paliers), commandes).map((c) => c.id);
   assert.deepEqual(nouvelles, ['theo-changements', 'madeleine-medicaments', 'samia-fournees', 'karim-atelier']);
   assert.ok(!nouvelles.includes('hugo-notes'), 'Hugo attend le niveau 2 de réputation');
   assert.deepEqual(verifierPartie(partie), []);
 
   etat = etatDesCommandes(partie, commandes, paliers);
-  assert.equal(etat.livrees.length, 1);
+  assert.equal(etat.livrees.length, 2);
 });
 
 test('Hugo arrive avec le bouche-à-oreille (niveau 2 de réputation)', () => {

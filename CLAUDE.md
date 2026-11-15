@@ -105,7 +105,9 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   récompense), `commandes.js` (offres, livraison, objectif du moment),
   `economie.js`. `coherence.js` refuse une commande impossible à réussir
   « parfaitement » ou qui ne se débloque jamais avec des « Bien ». Chaque
-  commande affiche « application fictive ».
+  commande affiche « application fictive ». Une commande « enPersonne »
+  (celle d'Halaé) est d'abord présentée de vive voix dans le dialogue
+  (drapeau `proposee-<id>`), puis arrive sur l'ordinateur.
 - **Portraits** (visio, commandes) : `moteur.photographier()` dessine une
   autre scène dans un coin de la toile et la recopie dans la même tâche
   (`js/monde/portrait.js`) : pas de second moteur 3D.

@@ -136,8 +136,10 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 
 - **PNJ n°1 : Halaé** (nom fictif choisi par Ferrus). Elle vit au domicile
   et c'est la première cliente ; créatrice de vidéos ; fauteuil roulant
-  rouge ; teint clair (choisi par elle le 14/11). Le reste de l'apparence
-  est à décrire par elle (neutre en attendant).
+  rouge ; teint clair (choisi par elle le 14/11), cheveux longs et noirs
+  (15/11). Le reste de l'apparence est à décrire par elle (neutre en
+  attendant). Sa première commande, « Mon planning de vidéos », validée par
+  elle le 15/11, est donnée de vive voix (elle vit au domicile).
   Fiche (présentation, journée, répliques) **validée par elle et par Ferrus
   le 14 novembre 2026** ; toute modification ou tout ajout la concernant
   lui est de nouveau soumis avant publication (dépôt public).
@@ -209,7 +211,6 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.
 6. *(Réglée : tablette Android, Brave.)*
-7. **Halaé, première cliente (jalon 3)** : valider avec elle la proposition
-   de sa première commande (faite dans le compte rendu, hors du dépôt)
-   avant de l'ajouter.
+7. *(Réglée : première commande d'Halaé validée le 15/11 ; elle la
+   présente de vive voix, avant toutes les autres.)*
 8. **Répliques du mentor en visio** (jalon 3) : à valider par Ferrus.

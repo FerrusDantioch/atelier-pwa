@@ -12,7 +12,7 @@
 // Les règles sont dans js/jeu/creation.js (testées à part).
 // =============================================================================
 
-import { idsDesOffres, livrerProjet, nouvellesOffres } from '../jeu/commandes.js';
+import { commandesAProposer, idsDesOffres, livrerProjet, nouvellesOffres } from '../jeu/commandes.js';
 import { capaciteDuProjet, chargeDuProjet, evaluerProjet, nettoyerProjet } from '../jeu/creation.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, typographier } from '../noyau/textes.js';
@@ -259,6 +259,7 @@ export function ecranAtelier(ctx, commande) {
   function livrer() {
     const evaluation = evaluerProjet(lireProjet(), commande, creation);
     const avant = idsDesOffres(partieEnCours(), ctx.listeCommandes, ctx.paliers);
+    const aProposerAvant = new Set(commandesAProposer(partieEnCours(), ctx.listeCommandes, ctx.paliers).map((c) => c.id));
     let resultat = null;
     modifierPartie((partie) => { resultat = livrerProjet(partie, commande, evaluation, ctx.paliers); }, { important: true });
     if (!resultat) return;
@@ -274,6 +275,12 @@ export function ecranAtelier(ctx, commande) {
       const apres = idsDesOffres(partieEnCours(), ctx.listeCommandes, ctx.paliers);
       for (const offre of nouvellesOffres(avant, apres, ctx.listeCommandes)) {
         contenu.push(ctx.encadre('enveloppe', 'info', t('livraison.nouvelle', { client: ctx.nomDe(offre.client), titre: offre.titre })));
+      }
+      // Quelqu'un veut présenter sa commande de vive voix (Halaé).
+      for (const aProposer of commandesAProposer(partieEnCours(), ctx.listeCommandes, ctx.paliers)) {
+        if (!aProposerAvant.has(aProposer.id)) {
+          contenu.push(ctx.encadre('parler', 'info', t('livraison.aProposer', { client: ctx.nomDe(aProposer.client) })));
+        }
       }
     } else {
       contenu.push(

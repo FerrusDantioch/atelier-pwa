@@ -6,7 +6,10 @@
 //   - qui est la personne (une ligne de présentation) ;
 //   - ce qu'elle dit (première rencontre, puis salutation) ;
 //   - puis on peut lui demander « Qu'est-ce que tu fais ? », ou lui dire
-//     « À plus tard ».
+//     « À plus tard » ;
+//   - si la personne a une commande à présenter de vive voix (Halaé), on
+//     peut lui demander « Tu as besoin d'une application ? » : elle explique
+//     sa demande, qui arrive ensuite sur l'ordinateur.
 // Chaque nouvelle réplique est lue par les lecteurs d'écran. Rien n'est
 // dit seulement à l'oral : tout est écrit.
 // =============================================================================
@@ -28,9 +31,10 @@ function replique(nom, texte, classe = '') {
  *   infos        ce que le monde sait de lui (nom…)
  *   pnj          sa fiche (data/pnj.json)
  *   creneau      son créneau de routine en cours (ou null)
+ *   demande      { commande, surProposee() } si elle a une commande à présenter
  *   surFermeture appelée à la fin de la conversation
  */
-export function ouvrirDialogue({ infos, pnj, creneau, surFermeture }) {
+export function ouvrirDialogue({ infos, pnj, creneau, demande = null, surFermeture }) {
   const partie = partieEnCours();
   const moment = { graine: partie.graine, jour: partie.temps.jour, minute: partie.temps.minute };
   const drapeau = drapeauDeRencontre(pnj);
@@ -42,18 +46,38 @@ export function ouvrirDialogue({ infos, pnj, creneau, surFermeture }) {
 
   let fenetre = null;
   const actions = [];
-  if (activite) {
+  // Une question posée : son bouton disparaît, le focus va à « À plus tard ».
+  const questionPosee = (f, texte) => {
+    [...f.pied.querySelectorAll('button')].find((bouton) => bouton.textContent === texte)?.remove();
+    const restants = [...f.pied.querySelectorAll('button')];
+    restants[restants.length - 1].focus();
+  };
+  if (demande) {
+    const question = t('dialogue.besoin');
     actions.push({
-      texte: t('dialogue.queFais'),
+      texte: question,
       surClic: (f) => {
         fil.append(
-          replique(t('dialogue.toi'), t('dialogue.queFais'), 'replique-joueur'),
+          replique(t('dialogue.toi'), question, 'replique-joueur'),
+          replique(infos.nom, demande.commande.demande),
+          el('p', { class: 'aide' }, t('dialogue.commandeEnvoyee')),
+        );
+        demande.surProposee();
+        questionPosee(f, question);
+        return false;
+      },
+    });
+  }
+  if (activite) {
+    const question = t('dialogue.queFais');
+    actions.push({
+      texte: question,
+      surClic: (f) => {
+        fil.append(
+          replique(t('dialogue.toi'), question, 'replique-joueur'),
           replique(infos.nom, activite.texte),
         );
-        // La question est posée : le bouton disparaît, le focus va à « À plus tard ».
-        const boutons = [...f.pied.querySelectorAll('button')];
-        boutons[0].remove();
-        boutons[boutons.length - 1].focus();
+        questionPosee(f, question);
         return false;
       },
     });

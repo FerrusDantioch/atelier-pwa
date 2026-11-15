@@ -280,6 +280,10 @@ function verifierCommandes(donnees, signaler) {
   for (const commande of commandes) {
     const ou = `commandes › ${commande.id}`;
     if (!clients.has(commande.client)) signaler(chemin, `${ou} › client : « ${commande.client} » n'existe pas dans data/pnj.json`);
+    const client = (donnees.pnj?.pnj || []).find((pnj) => pnj.id === commande.client);
+    if (commande.enPersonne && client && client.routine.length === 0) {
+      signaler(chemin, `${ou} › enPersonne : ${commande.client} ne vient dans aucun lieu (routine vide), on ne pourra jamais lui parler`);
+    }
     for (const groupe of ['besoins', 'bonus', 'aEviter']) {
       for (const attente of commande[groupe]) {
         if (!apportsConnus.has(attente.apporte)) {

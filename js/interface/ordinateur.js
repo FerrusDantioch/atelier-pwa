@@ -13,7 +13,7 @@
 // Comme pour toute fenêtre, le temps du jeu s'arrête tant qu'elle est ouverte.
 // =============================================================================
 
-import { DRAPEAU_VISIO_ACCUEIL, accepterCommande, etatDesCommandes } from '../jeu/commandes.js';
+import { DRAPEAU_VISIO_ACCUEIL, accepterCommande, commandesAProposer, etatDesCommandes } from '../jeu/commandes.js';
 import { progressionReputation } from '../jeu/economie.js';
 import { apparenceDuJoueur, nettoyerApparence } from '../jeu/personnage.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
@@ -198,7 +198,9 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
       }))));
     } else if (partie.drapeaux[DRAPEAU_VISIO_ACCUEIL]) {
       const toutes = ctx.listeCommandes.length;
-      if (etat.livrees.length === toutes) contenu.push(encadre('succes', 'succes', t('ordinateur.commandes.fini')));
+      const aProposer = commandesAProposer(partie, ctx.listeCommandes, ctx.paliers);
+      if (aProposer.length > 0) contenu.push(encadre('parler', 'info', t('livraison.aProposer', { client: ctx.nomDe(aProposer[0].client) })));
+      else if (etat.livrees.length === toutes) contenu.push(encadre('succes', 'succes', t('ordinateur.commandes.fini')));
       else if (etat.livrees.length + etat.enCours.length < toutes) contenu.push(el('p', { class: 'aide' }, t('ordinateur.commandes.attendre')));
     }
     if (etat.livrees.length > 0) {
