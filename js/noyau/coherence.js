@@ -32,7 +32,7 @@ import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personn
 import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
 import { heureEnMinutes } from './format-sauvegarde.js';
 import { casesPourAtteindre, distancesDepuis } from '../monde/chemin.js';
-import { PROFILS, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
+import { PROFILS, TAILLE_CASE, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
 
 const NOMS_PROFILS = { pieton: 'à pied', fauteuil: 'en fauteuil roulant (passages d\'au moins 1 m)' };
 
@@ -203,6 +203,42 @@ function verifierLieu(lieu, donnees, signaler) {
     }
     if (point.x >= largeur || point.z >= profondeur || !casesDePiece.has(`${point.x},${point.z}`)) {
       probleme(`points › ${point.id} : la case ${point.x},${point.z} n'est dans aucune pièce`);
+    }
+    if (point.lien && globalThis.CONFIG_JEU && !globalThis.CONFIG_JEU[point.lien]) {
+      probleme(`points › ${point.id} › lien : « ${point.lien} » n'a pas d'adresse dans js/config.js`);
+    }
+  }
+
+  // Affiches : sur un mur extérieur (un bord du lieu), sans porte ni fenêtre
+  // derrière, assez petites pour le mur, et reliées à un point à examiner.
+  const pointsParId = new Map((lieu.points || []).map((point) => [point.id, point]));
+  const bordsDOuvertures = new Set(lieu.ouvertures
+    .filter((ouverture) => segmentValide(ouverture.de, ouverture.a, largeur, profondeur))
+    .flatMap((ouverture) => bordsDuSegment(ouverture.de, ouverture.a)));
+  const idsAffiches = new Set();
+  for (const affiche of lieu.affiches || []) {
+    const ou = `affiches › ${affiche.id}`;
+    if (idsAffiches.has(affiche.id)) probleme(`${ou} : identifiant en double`);
+    idsAffiches.add(affiche.id);
+    const [x1, z1] = affiche.de;
+    const [x2, z2] = affiche.a;
+    const surUnBord = (x1 === x2 && (x1 === 0 || x1 === largeur)) || (z1 === z2 && (z1 === 0 || z1 === profondeur));
+    if (!segmentValide(affiche.de, affiche.a, largeur, profondeur) || !surUnBord) {
+      probleme(`${ou} : une affiche se pose sur un mur extérieur (un bord du lieu), le long d'une ligne droite`);
+    } else {
+      const bords = bordsDuSegment(affiche.de, affiche.a);
+      if (!bords.every((bord) => bordsDeMur.has(bord))) probleme(`${ou} : il n'y a pas de mur sur tout le segment`);
+      if (bords.some((bord) => bordsDOuvertures.has(bord))) probleme(`${ou} : une porte ou une fenêtre est derrière l'affiche`);
+      const longueur = (Math.abs(x2 - x1) + Math.abs(z2 - z1)) * TAILLE_CASE;
+      if (affiche.largeur > longueur) {
+        probleme(`${ou} : l'affiche (${affiche.largeur} m) est plus large que son morceau de mur (${longueur} m)`);
+      }
+    }
+    if (affiche.bas >= affiche.haut || affiche.haut > lieu.hauteurMurs) {
+      probleme(`${ou} : « bas » doit être sous « haut », et « haut » sous le plafond (${lieu.hauteurMurs} m)`);
+    }
+    if (affiche.point && !pointsParId.get(affiche.point)?.description) {
+      probleme(`${ou} › point : « ${affiche.point} » n'est pas un point à examiner (avec une description)`);
     }
   }
 

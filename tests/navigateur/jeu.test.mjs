@@ -257,6 +257,37 @@ test('téléphone et texte « Énorme » : barres compactes, rien ne déborde', 
   await contexte.close();
 });
 
+test('l\'affiche de l\'Omni-système : près de la porte, à examiner, avec le lien vers son site', async () => {
+  const contexte = await outils.contexte();
+  const page = await ouvrirJeu(contexte, outils.adresse);
+  await nouvellePartie(page);
+  const affichesVisibles = () => page.evaluate(async () => (await import('/js/interface/ecran-jeu.js')).mondeAffiche().affichesVisibles);
+  assert.deepEqual(await affichesVisibles(), ['affiche-omni']);
+  await page.getByRole('button', { name: 'Aller à…' }).click();
+  await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Affiche de l\'Omni-système' }).click();
+  const examiner = page.getByRole('button', { name: /Examiner l'affiche de l'Omni-système/ });
+  await examiner.waitFor({ timeout: 20000 });
+  await examiner.click();
+  const bulle = page.getByRole('region', { name: 'Affiche de l\'Omni-système' });
+  await bulle.waitFor();
+  assert.match(await bulle.innerText(), /la famille d'applications dont ce jeu fait partie/);
+  // L'adresse est celle de js/config.js ; elle s'ouvre dans un nouvel onglet.
+  const lien = bulle.getByRole('link', { name: /Découvrir l'Omni-système/ });
+  assert.equal(await lien.getAttribute('href'), await page.evaluate(() => self.CONFIG_JEU.siteOmni));
+  assert.equal(await lien.getAttribute('target'), '_blank');
+  // La vue tourne d'un demi-tour : le mur de l'affiche est coupé, elle disparaît.
+  await page.keyboard.press('Escape');
+  await page.evaluate(async () => {
+    const monde = (await import('/js/interface/ecran-jeu.js')).mondeAffiche();
+    monde.tourner(1);
+    monde.tourner(1);
+  });
+  await attendre(page, async () => (await import('/js/interface/ecran-jeu.js')).mondeAffiche().affichesVisibles.length === 0);
+  assert.ok((await etatDuMonde(page)).rendu.calls < 40, 'toujours peu de dessins par image');
+  assert.deepEqual(page.erreurs, []);
+  await contexte.close();
+});
+
 test('sur téléphone, la vue suit le personnage sans à-coups pendant qu\'il marche', async () => {
   // Avant : chaque minute de jeu, les barres étaient remesurées et la caméra
   // recentrée d'un coup sur le personnage : la vue « sautait » en marchant.

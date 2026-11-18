@@ -74,7 +74,7 @@
     { "id": "bureau", "meuble": "bureau", "x": 0, "z": 8, "rotation": 90 },
     { "id": "chaise-bureau", "meuble": "chaise-bureau", "x": 1, "z": 9, "rotation": 270 },
     { "id": "bibliotheque", "meuble": "bibliotheque", "x": 2, "z": 7, "rotation": 0 },
-    { "id": "porte-manteau", "meuble": "porte-manteau", "x": 0, "z": 15, "rotation": 0 },
+    { "id": "porte-manteau", "meuble": "porte-manteau", "x": 0, "z": 11, "rotation": 0 },
     { "id": "tapis-sejour", "meuble": "tapis", "x": 16, "z": 10, "rotation": 90 },
     { "id": "canape", "meuble": "canape", "x": 14, "z": 10, "rotation": 90 },
     { "id": "table-basse", "meuble": "table-basse", "x": 17, "z": 11, "rotation": 90 },
@@ -106,6 +106,20 @@
     { "id": "tournage", "x": 6, "z": 13, "angle": 0 },
     { "id": "devant-television", "x": 16, "z": 13, "angle": 90 },
     { "id": "chambre-repos", "x": 5, "z": 2, "angle": 270 },
-    { "id": "pres-du-bureau", "x": 2, "z": 10, "angle": 270 }
+    { "id": "pres-du-bureau", "x": 2, "z": 10, "angle": 270 },
+    {
+      "id": "affiche-omni",
+      "nom": "Affiche de l'Omni-système",
+      "designation": "l'affiche de l'Omni-système",
+      "description": "L'affiche de l'Omni-système, la famille d'applications dont ce jeu fait partie : son logo, son nom et l'adresse de son site.",
+      "lien": "siteOmni",
+      "x": 1, "z": 14, "angle": 270
+    }
+  ],
+  "affiches": [
+    {
+      "id": "affiche-omni", "dessin": "omni", "point": "affiche-omni",
+      "de": [0, 14], "a": [0, 16], "largeur": 0.7, "bas": 0.95, "haut": 1.9
+    }
   ]
 }

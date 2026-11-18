@@ -82,6 +82,7 @@ const FICHIERS = [
   'js/modeles/meubles.js',
   'js/modeles/palette.js',
   'js/modeles/personnage.js',
+  'js/monde/affiches.js',
   'js/monde/camera-iso.js',
   'js/monde/chemin.js',
   'js/monde/controles.js',

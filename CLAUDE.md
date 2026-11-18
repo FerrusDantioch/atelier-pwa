@@ -145,7 +145,16 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
 - **Les barres fixes ne changent pas de forme** quand un texte change
   souvent : l'heure garde la place de la plus large de la journée
   (`reserverPlaceDeLHeure()` dans `ecran-jeu.js`, mesurée dans la police
-  choisie) ; un test vérifie la barre d'une minute à l'autre.
+  choisie) ; un test vérifie la barre d'une minute à l'autre. Elles ne
+  sont remesurées que si leurs textes changent, sans compter les boutons
+  d'action ; **jamais de recentrage d'un coup de la caméra pendant le
+  jeu** (la vue « saute ») : `definirMarges()` ne fait rien si les marges
+  n'ont pas changé, et la caméra rejoint sa place en douceur.
+- **Affiches** (`lieu › affiches`, `js/monde/affiches.js`) : dessinées sur
+  une toile (textes de `data/textes.json`, couleurs de la palette), posées
+  contre un mur extérieur, visibles quand il est entier. Une adresse ne
+  s'écrit jamais dans les données : un point a un `lien` vers une clé de
+  `js/config.js` (`LIENS_CONNUS` dans `schemas.js`), confirmée par Ferrus.
 - Accessibilité : cibles ≥ 48 px, contour de focus visible, un seul `<h1>`
   visible, aucune information par la couleur ou le son seuls, animations
   réduites respectées, pas de clignotement ni de chronomètre punitif.

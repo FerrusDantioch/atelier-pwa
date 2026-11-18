@@ -20,7 +20,7 @@ import { icone } from './icones.js';
 
 // Lien vers un autre site : s'ouvre dans un nouvel onglet, seulement si la
 // personne le touche (rien n'est contacté sans son geste).
-function lienExterne(adresse, texte) {
+export function lienExterne(adresse, texte) {
   return el('a', { href: adresse, target: '_blank', rel: 'noopener noreferrer' },
     texte, ' ', icone('lienExterne'), el('span', { class: 'visuellement-cache' }, t('commun.nouvelOnglet')));
 }

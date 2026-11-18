@@ -14,10 +14,12 @@
 //
 // Tout le décor fixe (socle, sol, meubles) forme UNE seule géométrie, et les
 // murs une autre : deux dessins par image, c'est très léger pour la tablette.
+// Les affiches (une image contre un mur extérieur, voir affiches.js) sont
+// visibles quand leur mur est entier.
 // =============================================================================
 
 import {
-  Box3, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Mesh, Vector3,
+  Box3, EdgesGeometry, Group, LineBasicMaterial, LineSegments, Mesh, MeshLambertMaterial, PlaneGeometry, Vector3,
 } from '../../lib/three/three.module.js';
 import { creerConstructeur, matiereDecor, matiereParoi } from '../modeles/formes.js';
 import { creerAtelierDeMeubles } from '../modeles/meubles.js';
@@ -119,7 +121,9 @@ function preparerTroncons(lieu, grille) {
  *   montrerContours(oui)  traits sombres autour des formes (contraste élevé)
  *   liberer()
  */
-export function construireLieu({ lieu, grille, catalogue, palette }) {
+// dessinerAffiche(affiche) → la texture d'une affiche (affiches.js) ; sans
+// elle (tests sans navigateur), les affiches ne sont pas posées.
+export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffiche = null }) {
   const groupe = new Group();
   groupe.name = `lieu-${lieu.id}`;
   const atelier = creerAtelierDeMeubles(catalogue, palette);
@@ -189,6 +193,39 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     // La boîte s'étend vers ce que le point regarde (la porte dans le mur).
     boite.expandByPoint(new Vector3((point.x + 0.5 + Math.sin(angle) * 1.1) * TAILLE_CASE, 0, (point.z + 0.5 + Math.cos(angle) * 1.1) * TAILLE_CASE));
     cibles.push({ type: 'point', id: point.id, examinable: true, hauteur: HAUT_OUVERTURE, boite });
+  }
+
+  // --- Les affiches : une image contre un mur extérieur ------------------------
+  // Posée 1,5 cm devant le mur (deux faces au même endroit scintilleraient).
+  // Toucher l'affiche mène au point d'où on l'examine.
+  const affiches = [];
+  for (const affiche of dessinerAffiche ? lieu.affiches || [] : []) {
+    const [x1, z1] = affiche.de;
+    const [x2, z2] = affiche.a;
+    const leLongDeZ = x1 === x2;
+    const ligne = (leLongDeZ ? x1 : z1) * TAILLE_CASE;
+    const milieu = ((leLongDeZ ? z1 + z2 : x1 + x2) / 2) * TAILLE_CASE;
+    const versInterieur = ligne === 0 ? 1 : -1;
+    const ecart = EPAISSEUR / 2 + DEPASSE;
+    const mesh = new Mesh(
+      new PlaneGeometry(affiche.largeur, affiche.haut - affiche.bas),
+      new MeshLambertMaterial({ map: dessinerAffiche(affiche) }),
+    );
+    mesh.name = `affiche-${affiche.id}`;
+    const y = (affiche.bas + affiche.haut) / 2;
+    if (leLongDeZ) {
+      mesh.position.set(ligne + versInterieur * ecart, y, milieu);
+      mesh.rotation.y = versInterieur * Math.PI / 2;
+    } else {
+      mesh.position.set(milieu, y, ligne + versInterieur * ecart);
+      mesh.rotation.y = versInterieur > 0 ? 0 : Math.PI;
+    }
+    mesh.updateMatrixWorld(true);
+    groupe.add(mesh);
+    // La direction vers l'extérieur du mur (pour savoir s'il est entier).
+    affiches.push({ id: affiche.id, mesh, normale: leLongDeZ ? { x: -versInterieur, z: 0 } : { x: 0, z: -versInterieur } });
+    const cible = affiche.point ? cibles.find((c) => c.type === 'point' && c.id === affiche.point) : null;
+    cible?.boite.union(new Box3().setFromObject(mesh));
   }
 
   // --- Les murs (selon la rotation de la caméra) ------------------------------
@@ -328,6 +365,9 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     const r = ((rotation % 4) + 4) % 4;
     if (r === rotationMurs) return false;
     rotationMurs = r;
+    // Une affiche se voit quand son mur est entier (il tourne le dos à la caméra).
+    const camera = directionCamera(r);
+    for (const { mesh, normale } of affiches) mesh.visible = normale.x * camera.x + normale.z * camera.z < 0;
     const geometrie = construireMurs(r);
     if (meshMurs) {
       meshMurs.geometry.dispose();
@@ -374,7 +414,14 @@ export function construireLieu({ lieu, grille, catalogue, palette }) {
     hauteurMurs,
     tournerMurs,
     montrerContours,
+    // Les affiches visibles (pour les tests).
+    affichesVisibles: () => affiches.filter((affiche) => affiche.mesh.visible).map((affiche) => affiche.id),
     liberer() {
+      for (const { mesh } of affiches) {
+        mesh.geometry.dispose();
+        mesh.material.map?.dispose();
+        mesh.material.dispose();
+      }
       meshDecor.geometry.dispose();
       meshMurs?.geometry.dispose();
       meshParois?.geometry.dispose();

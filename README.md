@@ -55,6 +55,8 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
   (pas trop : chaque fonction pèse dans la « charge »), règle le confort,
   teste comme la personne, puis livre. Parfait, Bien ou À retravailler :
   rien n'est jamais perdu, et il n'y a pas de chronomètre.
+- **L'affiche de l'Omni-système**, près de la porte d'entrée : examine-la
+  pour découvrir le site de l'Omni-système (dans un nouvel onglet).
 - **La vue** : glisse un doigt pour la déplacer, pince ou utilise la molette
   pour zoomer ; les boutons à droite tournent, zooment et recentrent.
 

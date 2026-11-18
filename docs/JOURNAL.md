@@ -5,7 +5,8 @@
 Fusionné dans `main` le 15 novembre 2026 à la demande de Ferrus (version
 0.5.0), pour l'essayer. Version 0.5.1 : les corrections demandées après son
 essai sur téléphone (la barre du haut qui changeait de forme, les fenêtres
-qui scintillaient). Validation en attente. Les deux quêtes d'Halaé,
+qui scintillaient, les saccades en marchant) et l'affiche de l'Omni-système
+qu'il a demandée. Validation en attente. Les deux quêtes d'Halaé,
 et sa nouvelle commande « Mes sous-titres », ont été validées par elle (via
 Ferrus) le 15 novembre 2026, telles que proposées.
 
@@ -75,18 +76,34 @@ Ferrus) le 15 novembre 2026, telles que proposées.
   carte graphique hésitait entre les deux à chaque image, d'où des
   rayures qui bougeaient avec la vue. Les traverses dépassent maintenant
   de 1,5 cm.
+- **0.5.1 — plus de saccades en marchant** : chaque minute de jeu (une
+  seconde réelle), les barres étaient remesurées et la caméra recentrée
+  d'un coup sur le personnage, alors qu'elle le suivait en douceur : la
+  vue sautait de 15 à 19 pixels (sur tablette, la maison tient entière à
+  l'écran et la caméra ne bouge pas : on ne le voyait pas). Les barres ne
+  sont plus remesurées que si leurs textes changent, la caméra rejoint sa
+  place en douceur, et les boutons d'action (« Examiner… ») ne changent
+  plus la place laissée à la scène.
+- **0.5.1 — l'affiche de l'Omni-système**, à la demande de Ferrus : près
+  de la porte d'entrée (le porte-manteau passe de l'autre côté de la
+  porte), avec le logo, le nom et l'adresse du site (celle déjà donnée
+  dans « À propos », dans `js/config.js`). On peut la toucher et
+  l'examiner : la bulle propose « Découvrir l'Omni-système », qui s'ouvre
+  dans un nouvel onglet. Elle se voit quand son mur est entier (dans deux
+  des quatre angles de vue).
 
 ### Vérifications faites
 
-- 116 tests sans navigateur, dont 22 nouveaux : les quêtes (déblocage,
+- 117 tests sans navigateur, dont 23 nouveaux : les affiches (0.5.1), les quêtes (déblocage,
   étapes, facultatives, récompense donnée une seule fois, quête suivie,
   objectif, partie d'une ancienne version, textes validés par Halaé
   inchangés, données fautives refusées), les commandes du jour
   (reproductibles, 300 jours tous réussissables, renouvelées, gardées une
   fois acceptées, fichier trafiqué refusé), la mise à niveau du format 2,
   l'heure de retour d'une personne et le « de » devant un nom (« d'Antoine »).
-- 51 tests dans Chromium, dont 6 nouveaux : la barre du haut qui garde
-  sa forme d'une minute à l'autre (0.5.1), le journal (bouton, touche J,
+- 53 tests dans Chromium, dont 8 nouveaux : la barre du haut qui garde
+  sa forme d'une minute à l'autre, une marche sans à-coup sur téléphone,
+  l'affiche (examiner, lien, mur coupé) (0.5.1), le journal (bouton, touche J,
   Pause, « Y aller »), Théo à 16 h (absent, puis sa commande, puis ses
   nouvelles et la fin de la quête), suivre une autre quête et la
   télévision, les commandes du jour (niveau 3, puis le lendemain), le

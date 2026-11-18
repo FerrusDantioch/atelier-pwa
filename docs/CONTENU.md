@@ -79,7 +79,8 @@ fait 10 m × 8 m. La case `x = 0, z = 0` est en haut à gauche du plan
 | `murs` | segments sur les lignes de la grille : `{ "de": [x, z], "a": [x, z] }`, horizontaux ou verticaux |
 | `ouvertures` | sur un mur : `porte` (passage libre), `porte-entree` (porte fermée), `fenetre` |
 | `meubles` | `id` unique, `meuble` (du catalogue), case `x`, `z` (coin nord-ouest de l'emprise), `rotation` (0, 90, 180, 270), et une `description` facultative propre à ce lieu |
-| `points` | endroits à examiner qui ne sont pas des meubles (porte d'entrée…) : `id`, `nom`, `designation`, `description`, case et `angle` |
+| `points` | endroits à examiner qui ne sont pas des meubles (porte d'entrée…) : `id`, `nom`, `designation`, `description`, case et `angle` ; `lien` (facultatif) : une adresse de `js/config.js` (`siteOmni`) que la bulle « Examiner » propose d'ouvrir — jamais une adresse écrite dans les données |
+| `affiches` | une image contre un **mur extérieur** : `id`, `dessin` (`omni` : logo, nom et adresse de l'Omni-système), le morceau de mur `de`-`a` (l'affiche y est centrée), `largeur`, `bas` et `haut` en mètres, et le `point` d'où on l'examine. Elle se voit quand son mur est entier (selon l'angle de la vue) |
 
 Au démarrage (et dans les tests), le jeu vérifie que le lieu **tient
 debout** (pièces dans la grille, ouvertures posées sur un mur, meubles qui

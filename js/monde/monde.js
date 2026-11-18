@@ -24,6 +24,7 @@ import { brancherClavier } from './controles.js';
 import { creerDeplacement, directionsPourAller } from './deplacement.js';
 import { TAILLE_CASE, angleVers, caseDuPoint, creerGrille, profilDeDeplacement } from './grille.js';
 import { creerHabitants, ecartEnCases } from './habitants.js';
+import { dessinerAffiche } from './affiches.js';
 import { construireLieu } from './lieu.js';
 import { creerLumieres } from './lumieres.js';
 import { brancherPointage } from './pointage.js';
@@ -50,7 +51,10 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   scene.background = new Color(couleurDuTheme('--fond-scene', '#1f1733'));
   const lumieres = creerLumieres();
   scene.add(lumieres.groupe);
-  const construit = construireLieu({ lieu, grille, catalogue, palette });
+  const construit = construireLieu({
+    lieu, grille, catalogue, palette,
+    dessinerAffiche: (affiche) => dessinerAffiche(affiche, { palette, redessiner: () => moteur.redessiner() }),
+  });
   scene.add(construit.groupe);
   const reperes = creerReperes();
   scene.add(reperes.groupe);
@@ -134,7 +138,10 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     }
     if (cible.type === 'point') {
       const point = pointParId.get(cible.id);
-      return { id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description, actions: [] };
+      return {
+        id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description,
+        lien: point.lien || null, actions: [],
+      };
     }
     const emprise = grille.emprises.get(cible.id);
     const meuble = emprise.meuble;
@@ -738,6 +745,8 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     get zoom() { return camera.zoom; },
     // Pour les tests : ce que la carte graphique a dessiné à la dernière image.
     get infosRendu() { return { ...moteur.infos.render }; },
+    // Les affiches visibles (selon la rotation de la vue).
+    get affichesVisibles() { return construit.affichesVisibles(); },
 
     liberer() {
       clearTimeout(minuteurVue);

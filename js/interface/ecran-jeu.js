@@ -28,6 +28,7 @@ import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { obtenirReglages } from '../noyau/reglages.js';
 import { creerCopieDeSecours } from '../noyau/sauvegarde.js';
 import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
+import { lienExterne } from './a-propos.js';
 import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
 import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
@@ -115,8 +116,10 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // --- Bulle « Examiner » -------------------------------------------------------------
   const bulleTitre = el('h2', { class: 'bulle-titre', id: 'bulle-titre' });
   const bulleTexte = el('p', { class: 'bulle-texte' });
+  // Un lien vers une vraie adresse (l'affiche de l'Omni-système), s'il y en a un.
+  const bulleLien = el('p', { class: 'bulle-lien', hidden: true });
   const bulle = el('section', { class: 'bulle', 'aria-labelledby': 'bulle-titre', hidden: true },
-    el('div', { class: 'bulle-contenu' }, bulleTitre, bulleTexte),
+    el('div', { class: 'bulle-contenu' }, bulleTitre, bulleTexte, bulleLien),
     el('button', {
       class: 'bouton bouton-icone',
       type: 'button',
@@ -213,6 +216,10 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const description = typographier(infos.description || '');
     bulleTitre.textContent = infos.nom;
     bulleTexte.textContent = description;
+    // L'adresse vient de js/config.js (jamais écrite dans les données).
+    const adresse = infos.lien ? self.CONFIG_JEU[infos.lien] : null;
+    bulleLien.replaceChildren(...(adresse ? [lienExterne(adresse, t(`liens.${infos.lien}`))] : []));
+    bulleLien.hidden = !adresse;
     bulle.hidden = false;
     element.classList.add('bulle-ouverte');
     direAuxLecteurs(`${infos.nom}. ${description}`);

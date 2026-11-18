@@ -620,5 +620,13 @@
     "yAller": "Y aller",
     "recompense": "Récompense : {argent} et {reputation} de réputation.",
     "obtenue": "Gagné : {argent} et {reputation} de réputation."
+  },
+  "decor": {
+    "afficheOmni": {
+      "titre": "Omni-système"
+    }
+  },
+  "liens": {
+    "siteOmni": "Découvrir l'Omni-système"
   }
 }

@@ -176,6 +176,10 @@ const coordonnee = { type: 'nombre', entier: true, min: 0, max: 400 };
 const pointDeGrille = { type: 'liste', element: coordonnee, min: 2, max: 2 };
 const angle = { type: 'nombre', min: 0, max: 359 };
 
+// Les liens qu'un point peut proposer : des clés de js/config.js, où chaque
+// adresse a été confirmée par Ferrus (jamais d'adresse inventée).
+export const LIENS_CONNUS = ['siteOmni'];
+
 export const SCHEMA_LIEU = {
   type: 'objet',
   champs: {
@@ -249,9 +253,32 @@ export const SCHEMA_LIEU = {
           nom: { ...texte, facultatif: true },
           designation: { ...texte, facultatif: true },
           description: { ...texte, facultatif: true },
+          // Un lien vers une vraie adresse, prise dans js/config.js (jamais
+          // écrite ici) : « Examiner » propose alors de l'ouvrir.
+          lien: { type: 'choix', valeurs: LIENS_CONNUS, facultatif: true },
           x: coordonnee,
           z: coordonnee,
           angle,
+        },
+      },
+    },
+    // Affiches : un dessin contre un mur extérieur, sur le segment « de »-« a »
+    // (centré), de « bas » à « haut » (en mètres). « point » : l'endroit d'où
+    // on l'examine (toucher l'affiche y mène).
+    affiches: {
+      type: 'liste',
+      facultatif: true,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          dessin: { type: 'choix', valeurs: ['omni'] },
+          point: { ...texte, facultatif: true },
+          de: pointDeGrille,
+          a: pointDeGrille,
+          largeur: { type: 'nombre', min: 0.2, max: 4 },
+          bas: { type: 'nombre', min: 0, max: 5 },
+          haut: { type: 'nombre', min: 0.2, max: 6 },
         },
       },
     },

@@ -202,3 +202,24 @@ test('la salle d\'eau est fermée par des parois hautes (les autres pièces rest
   assert.equal(pieces.find((p) => p.id === 'salle-d-eau').paroisHautes, true);
   assert.deepEqual(pieces.filter((p) => p.paroisHautes).map((p) => p.id), ['salle-d-eau']);
 });
+
+test('une affiche se pose sur un mur extérieur, sans ouverture derrière, avec un point à examiner', () => {
+  const domicile = donnees.lieux.domicile;
+  assert.deepEqual(domicile.affiches.map((affiche) => affiche.id), ['affiche-omni']);
+  const point = domicile.points.find((p) => p.id === 'affiche-omni');
+  assert.equal(point.lien, 'siteOmni', 'l\'adresse vient de js/config.js, jamais des données');
+  const copie = JSON.parse(JSON.stringify(domicile));
+  copie.affiches.push(
+    { id: 'interieure', dessin: 'omni', de: [8, 1], a: [8, 3], largeur: 0.6, bas: 1, haut: 1.8 },
+    { id: 'sur-fenetre', dessin: 'omni', de: [2, 0], a: [5, 0], largeur: 0.6, bas: 1, haut: 1.8 },
+    { id: 'trop-large', dessin: 'omni', de: [0, 14], a: [0, 15], largeur: 2, bas: 1, haut: 1.8 },
+    { id: 'trop-haute', dessin: 'omni', de: [0, 14], a: [0, 16], largeur: 0.6, bas: 1, haut: 3.5 },
+    { id: 'sans-point', dessin: 'omni', de: [0, 14], a: [0, 16], largeur: 0.6, bas: 1, haut: 1.8, point: 'nulle-part' },
+  );
+  const texte = verifierCoherence({ ...donnees, lieux: { ...donnees.lieux, domicile: copie } }).join('\n');
+  assert.match(texte, /affiches › interieure : une affiche se pose sur un mur extérieur/);
+  assert.match(texte, /affiches › sur-fenetre : une porte ou une fenêtre est derrière l'affiche/);
+  assert.match(texte, /affiches › trop-large : l'affiche \(2 m\) est plus large que son morceau de mur \(0\.5 m\)/);
+  assert.match(texte, /affiches › trop-haute : « bas » doit être sous « haut », et « haut » sous le plafond/);
+  assert.match(texte, /affiches › sans-point › point : « nulle-part » n'est pas un point à examiner/);
+});
