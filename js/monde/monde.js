@@ -91,6 +91,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   let pieceActuelle = grille.piece(depart.x, depart.z);
   let cibleVisee = null; // l'objet vers lequel on marche
   let pnjAttendu = null; // la personne qu'on attend, là où elle va s'arrêter
+  let margesActuelles = null; // les marges des barres, déjà données à la caméra
   let objetProche = null; // l'objet qu'on peut examiner, là où l'on est
   let directionClavier = null;
   let actif = true;
@@ -695,11 +696,19 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     },
 
     // Les barres de l'interface cachent le haut et le bas de l'écran.
+    // Rien ne change si les marges sont les mêmes ; sinon, la première fois
+    // la vue se cale tout de suite, ensuite la caméra rejoint sa place en
+    // douceur (un recentrage d'un coup ferait « sauter » la vue pendant
+    // qu'on marche).
     definirMarges(marges) {
+      const cle = `${marges.haut}/${marges.bas}/${marges.gauche}/${marges.droite}`;
+      if (cle === margesActuelles) return;
+      const premiereFois = margesActuelles === null;
+      margesActuelles = cle;
       camera.definirMarges(marges);
       ajusterZoomAuto();
-      if (!camera.libre) camera.recadrer(deplacement.position);
-      moteur.redessiner();
+      if (premiereFois && !camera.libre) camera.recadrer(deplacement.position);
+      moteur.animer(image);
     },
 
     appliquerReglages,

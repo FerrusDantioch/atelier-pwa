@@ -257,6 +257,43 @@ test('téléphone et texte « Énorme » : barres compactes, rien ne déborde', 
   await contexte.close();
 });
 
+test('sur téléphone, la vue suit le personnage sans à-coups pendant qu\'il marche', async () => {
+  // Avant : chaque minute de jeu, les barres étaient remesurées et la caméra
+  // recentrée d'un coup sur le personnage : la vue « sautait » en marchant.
+  const contexte = await outils.contexte({ viewport: { width: 392, height: 870 } });
+  const page = await ouvrirJeu(contexte, outils.adresse);
+  await nouvellePartie(page);
+  await page.getByRole('button', { name: 'Masquer ce message' }).first().click();
+  await page.waitForTimeout(800);
+  await page.evaluate(async () => {
+    const ecran = await import('/js/interface/ecran-jeu.js');
+    const monde = ecran.mondeAffiche();
+    window.recadrages = 0;
+    const definirMarges = monde.definirMarges;
+    monde.definirMarges = (marges) => { window.recadrages += 1; definirMarges(marges); };
+    window.positions = [];
+    const suivre = () => {
+      window.positions.push(monde.positionEcranDeCase(10, 8));
+      window.suivi = requestAnimationFrame(suivre);
+    };
+    window.suivi = requestAnimationFrame(suivre);
+  });
+  await page.getByRole('button', { name: 'Aller à…' }).click();
+  await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Lit', exact: true }).click();
+  await page.waitForTimeout(500);
+  await attendreArrivee(page);
+  await page.waitForTimeout(800);
+  const { positions, recadrages } = await page.evaluate(() => {
+    cancelAnimationFrame(window.suivi);
+    return { positions: window.positions, recadrages: window.recadrages };
+  });
+  const ecarts = positions.slice(1).map((p, i) => Math.hypot(p.x - positions[i].x, p.y - positions[i].y));
+  assert.ok(Math.max(...ecarts) < 10, `la vue saute de ${Math.round(Math.max(...ecarts))} px d'une image à l'autre`);
+  assert.equal(recadrages, 0, 'les barres n\'ont pas changé : la caméra n\'est pas recadrée');
+  assert.deepEqual(page.erreurs, []);
+  await contexte.close();
+});
+
 test('la barre du haut garde sa forme quand l\'heure change (chiffres de largeurs différentes)', async () => {
   // À cette largeur, « 14 h 10 » laissait Pause sur la première ligne, mais
   // pas « 14 h 46 » : la barre sautait d'une forme à l'autre chaque minute.

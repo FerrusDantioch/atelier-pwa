@@ -169,6 +169,12 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   const lieuActuel = el('p', { class: 'lieu-actuel' },
     icone('lieu'), el('span', { class: 'visuellement-cache' }, t('jeu.lieuActuel')), texteLieu);
 
+  // Les boutons qui vont et viennent selon l'endroit (voir adapterBarres), la
+  // dernière hauteur connue de la barre du bas, et les textes déjà mesurés.
+  const boutonsDuMoment = [boutonAction, boutonDormir, boutonOrdinateur];
+  let hauteurBarreBas = null;
+  let miseEnPage = null;
+
   const barreBas = el('footer', { class: 'barre-bas' },
     el('div', { class: 'barre-zone' }, boutonJournal, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur),
     lieuActuel);
@@ -340,12 +346,14 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
         boutonAction.hidden = false;
         boutonDormir.hidden = !infos.actions?.includes('dormir');
         boutonOrdinateur.hidden = !infos.actions?.includes('ordinateur');
+        placerAuDessusDeLaBarre();
         approcher(infos);
       } else {
         for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur]) {
           if (bouton === document.activeElement) bouton.blur();
           bouton.hidden = true;
         }
+        placerAuDessusDeLaBarre();
         fermerBulle();
       }
     },
@@ -465,7 +473,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
       });
     } else texteObjectif.textContent = typographier(objectifActuel.etape.texte);
     moment.court.textContent = `${t('hud.jourCourt', { jour: partie.temps.jour })} · ${heure}`;
-    adapterBarres();
+    adapterBarresSiBesoin();
   }
 
   // L'heure garde toujours la même place : celle de l'heure la plus large de
@@ -521,16 +529,43 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   }
 
   // Barre compacte si elle prend plus d'une ligne ; la caméra évite les barres.
+  // La forme des barres (compacte ou non) et la place laissée à la scène ne
+  // dépendent pas des boutons d'action (« Examiner le lit », « Dormir »…),
+  // qui apparaissent et disparaissent en marchant : on mesure sans eux (le
+  // temps de la mesure, ils sont mis hors de la barre, sans être cachés, pour
+  // ne pas perdre le focus du clavier). Ainsi la vue 3D ne bouge pas quand
+  // un de ces boutons arrive.
   function adapterBarres() {
+    boutonsDuMoment.forEach((bouton) => { bouton.style.position = 'absolute'; });
     barre.classList.remove('compacte');
     barreBas.classList.remove('compacte');
     const hauteurLigne = boutonPause.offsetHeight || 48;
     if (barre.offsetHeight > hauteurLigne * 1.9) barre.classList.add('compacte');
     if (barreBas.offsetHeight > (boutonAllerA.offsetHeight || 48) * 1.9) barreBas.classList.add('compacte');
     const marges = { haut: barre.offsetHeight, bas: barreBas.offsetHeight, gauche: 0, droite: 0 };
+    boutonsDuMoment.forEach((bouton) => { bouton.style.position = ''; });
     document.documentElement.style.setProperty('--hauteur-barre-haut', `${marges.haut}px`);
-    document.documentElement.style.setProperty('--hauteur-barre-bas', `${marges.bas}px`);
     mondeActuel?.definirMarges(marges);
+    placerAuDessusDeLaBarre();
+  }
+
+  // Les boutons de la caméra se placent au-dessus de la barre du bas, telle
+  // qu'elle est vraiment (avec ou sans bouton d'action).
+  function placerAuDessusDeLaBarre() {
+    const hauteur = barreBas.offsetHeight;
+    if (hauteur === hauteurBarreBas) return;
+    hauteurBarreBas = hauteur;
+    document.documentElement.style.setProperty('--hauteur-barre-bas', `${hauteur}px`);
+  }
+
+  // Les textes qui changent la taille des barres : on ne les remesure que
+  // s'ils ont changé (l'heure, elle, a toujours la même place).
+  function adapterBarresSiBesoin() {
+    const cle = [argent.valeur.textContent, reputation.valeur.textContent, texteObjectif.textContent,
+      moment.valeur.style.minWidth, moment.court.style.minWidth].join('|');
+    if (cle === miseEnPage) return;
+    miseEnPage = cle;
+    adapterBarres();
   }
   const observateur = new ResizeObserver(() => adapterBarres());
   observateur.observe(element);
