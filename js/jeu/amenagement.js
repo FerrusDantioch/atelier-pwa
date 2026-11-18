@@ -24,7 +24,8 @@
 
 import { casesPourAtteindre, distancesDepuis } from '../monde/chemin.js';
 import { PROFILS, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
-import { POINT_D_ARRIVEE } from './routines.js';
+import { lieuSelonOuvertures, ouvertures } from './lieux.js';
+import { POINT_D_ARRIVEE, creneauPossible } from './routines.js';
 
 export const ROTATIONS = [0, 90, 180, 270];
 
@@ -119,6 +120,7 @@ export function problemesDAcces(lieu, grille, catalogue) {
     }
     const distances = distancesDepuis(grille, depart, profil);
     for (const piece of lieu.pieces) {
+      if (piece.verrouillee) continue; // une pièce encore fermée (lieux.js)
       const atteinte = [...distances.keys()].some((cle) => {
         const [x, z] = cle.split(',').map(Number);
         return grille.piece(x, z) === piece.id;
@@ -145,6 +147,7 @@ export function problemesDAcces(lieu, grille, catalogue) {
 // La pièce a-t-elle un espace de demi-tour en fauteuil (un carré libre de
 // 1,50 m de côté, entièrement dans la pièce) ?
 export function aUnEspaceDeDemiTour(grille, piece) {
+  if (piece.verrouillee) return false;
   const cote = COTE_DEMI_TOUR;
   for (const [zx, zz, zl, zp] of piece.zones) {
     for (let x = zx; x <= zx + zl - cote; x += 1) {
@@ -165,11 +168,15 @@ export function aUnEspaceDeDemiTour(grille, piece) {
 /**
  * Les places où se tiennent les habitants dans ce lieu (data/pnj.json), et
  * leur façon de se déplacer : [{ id, nom, profil, points: [{ x, z }] }].
+ * ouvertes : seulement les créneaux qui ont lieu avec ces ouvertures
+ * (routines.js › creneauPossible) ; null : tous les créneaux.
  */
-export function placesDesHabitants(lieu, pnj, personnages) {
+export function placesDesHabitants(lieu, pnj, personnages, ouvertes = null) {
   const points = new Map((lieu.points || []).map((point) => [point.id, point]));
   return pnj.flatMap((personne) => {
-    const ids = [...new Set(personne.routine.filter((c) => c.lieu === lieu.id).map((c) => c.point))];
+    const ids = [...new Set(personne.routine
+      .filter((c) => c.lieu === lieu.id && (ouvertes === null || creneauPossible(c, ouvertes)))
+      .map((c) => c.point))];
     if (ids.length === 0) return [];
     const ferrus = personne.modele === 'ferrus';
     const apparence = ferrus ? personnages.ferrus.apparence : personne.apparence;
@@ -337,12 +344,13 @@ export function trierMeublesPoses({ lieu, catalogue, poses, habitants = [] }) {
  */
 export function rangerCeQuiNeTientPlus(partie, { lieux, meubles, pnj, personnages }) {
   const catalogue = new Map(meubles.map((meuble) => [meuble.id, meuble]));
+  const ouvertes = ouvertures(partie);
   let ranges = 0;
   for (const idLieu of Object.keys(partie.lieux.amenagements)) {
-    const lieu = lieux[idLieu];
+    const lieu = lieux[idLieu] ? lieuSelonOuvertures(lieux[idLieu], ouvertes) : null;
     const poses = meublesPoses(partie, idLieu);
     const aRanger = lieu
-      ? trierMeublesPoses({ lieu, catalogue, poses, habitants: placesDesHabitants(lieu, pnj, personnages) }).retires
+      ? trierMeublesPoses({ lieu, catalogue, poses, habitants: placesDesHabitants(lieu, pnj, personnages, ouvertes) }).retires
       : poses;
     // Un achat inconnu (absent des possessions) ne compte pas comme posé.
     const connus = new Set(poses.map((place) => place.id));

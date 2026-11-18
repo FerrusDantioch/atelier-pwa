@@ -48,7 +48,7 @@ test('les quêtes du premier livrable sont chargées : cinq, une par principe', 
     'Des sous-titres pour tout le monde', 'Réviser sans se noyer',
   ]);
   // Jalon 5 : aménager la maison.
-  assert.deepEqual(quetes.slice(5).map((q) => q.titre), ['Un intérieur où tout le monde passe']);
+  assert.deepEqual(quetes.slice(5).map((q) => q.titre), ['Un intérieur où tout le monde passe', 'Un vrai local', 'Un coin pour souffler']);
 });
 
 test('les textes validés par Halaé n\'ont pas changé', () => {

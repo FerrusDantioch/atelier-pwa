@@ -92,6 +92,7 @@ const DESSINS = {
   flecheBas: [['path', { d: 'M12 5v14M6 13l6 6 6-6' }]],
   flecheGauche: [['path', { d: 'M19 12H5M11 6l-6 6 6 6' }]],
   flecheDroite: [['path', { d: 'M5 12h14M13 6l6 6-6 6' }]],
+  cle: [['circle', { cx: 8, cy: 12, r: 4 }], ['path', { d: 'M12 12h9M18 12v3M21 12v2' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

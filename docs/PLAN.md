@@ -182,24 +182,27 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 | J2 | 0.3 | PNJ, routines, chemins, dialogues |
 | J3 | 0.4 | Ordinateur, mini-jeu, argent, réputation, visio |
 | J4 | 0.5 | Quêtes et journal → premier livrable jouable |
-| J5 | 0.6 à 0.9 | Achats, aménagement, bureaux, PNJ entre les lieux |
+| J5 | 0.6 | Achats, aménagement, bureaux, PNJ entre les lieux |
 | J6 | 1.0 | Vitrine, À propos complet, finitions, tablette, GitHub Pages |
 
 À la fin de chaque jalon : commits clairs, une note dans `docs/JOURNAL.md`,
 les instructions de test sur tablette, puis **arrêt et validation** avant
 le jalon suivant.
 
-### Jalon 5, par étapes
+### Jalon 5
 
-Le jalon 5 est livré en plusieurs versions, chacune publiée pour être
-essayée sur tablette ; Ferrus valide le jalon à la fin.
+Le jalon 5 est **livré en une fois** (choix de Ferrus, 18 novembre 2026),
+en version 0.6.0. Il contient :
 
-| Version | Contenu |
-|---|---|
-| 0.6 | **Boutique** sur l'ordinateur (meubles, matériel) et **aménagement** de la maison : poser, déplacer, tourner, ranger ; un meuble qui couperait un passage est refusé, avec la raison |
-| 0.7 | **Les bureaux** : un deuxième lieu, débloqué par la réputation et loué avec des pièces ; on y va par la porte d'entrée |
-| 0.8 | **Agrandir les bureaux** (salle de pause, salle de réunion, coin calme…) ; les **clients viennent en personne** aux bureaux, et des personnages passent d'un lieu à l'autre |
-| 0.9 | Quêtes du jalon, équilibrage, finitions |
+- la **boutique** sur l'ordinateur (meubles, matériel) et l'**aménagement**
+  des lieux : poser, déplacer, tourner, ranger ; un meuble qui couperait un
+  passage est refusé, avec la raison ;
+- **les bureaux** : un deuxième lieu, débloqué par la réputation et loué
+  avec des pièces ; on y va par la porte d'entrée ;
+- **agrandir les bureaux** (salle de pause, salle de réunion, coin calme),
+  pièce par pièce ; les **clients viennent en personne** aux bureaux, et
+  des personnages passent d'un lieu à l'autre ;
+- les quêtes du jalon.
 
 Décisions (18 novembre 2026) :
 
@@ -211,8 +214,8 @@ Décisions (18 novembre 2026) :
   quelques pièces de plus à chaque livraison, écrites sur sa fiche et dans
   le détail du paiement. Les meubles de décoration sont pour le plaisir.
   *(Recommandation appliquée : Ferrus n'avait pas de préférence.)*
-- **Par étapes** plutôt qu'en une fois *(recommandation appliquée : pas
-  de préférence)*.
+- **En une fois** : d'abord proposé par étapes (pas de préférence), Ferrus
+  a ensuite demandé une seule livraison.
 
 ## 7. Décisions et questions
 

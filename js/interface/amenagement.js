@@ -57,7 +57,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   function contexteDeVerification(id) {
     const partie = partieEnCours();
     const m = monde();
-    const lieu = m.lieuDeBase;
+    const lieu = m.lieuOuvert;
     const apparence = apparenceDuJoueur(partie.joueur, donnees.personnages);
     const ici = m.case;
     return {
@@ -65,9 +65,24 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
       catalogue: catalogue(),
       poses: meublesPoses(partie, lieu.id).filter((place) => place.id !== id),
       occupants: m.casesOccupees(),
-      habitants: placesDesHabitants(lieu, donnees.pnj.pnj, donnees.personnages),
+      habitants: placesDesHabitants(lieu, donnees.pnj.pnj, donnees.personnages, m.ouvertes),
       joueur: { x: ici.x, z: ici.z, profil: profilDeDeplacement(apparence.aide) },
     };
+  }
+
+  // La même place, avec toutes les pièces du lieu ouvertes : un meuble posé
+  // aujourd'hui ne doit pas bloquer la porte d'une pièce qui s'ouvrira demain.
+  function verifierPourPlusTard(place) {
+    const m = monde();
+    const complet = m.lieuComplet;
+    if (complet === m.lieuOuvert) return { ok: true };
+    return verifierPlacement({
+      lieu: complet,
+      catalogue: catalogue(),
+      poses: meublesPoses(partieEnCours(), complet.id).filter((p) => p.id !== place.id),
+      place,
+      habitants: placesDesHabitants(complet, donnees.pnj.pnj, donnees.personnages),
+    });
   }
 
   // La raison d'un refus, en toutes lettres.
@@ -95,12 +110,13 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   // Vérifie la place, montre le meuble, et dit si c'est possible.
   function verifierEtMontrer() {
     const place = placeChoisie();
-    const resultat = verifierPlacement({ ...contexteDeVerification(selection.id), place });
+    let resultat = verifierPlacement({ ...contexteDeVerification(selection.id), place });
+    if (resultat.ok) resultat = verifierPourPlusTard(place);
     selection.resultat = resultat;
     monde().montrerFantome({ meuble: place.meuble, x: place.x, z: place.z, rotation: place.rotation, valide: resultat.ok });
     const nom = majuscule(designation(place.meuble));
     const piece = monde().grille.piece(selection.milieu.x, selection.milieu.z);
-    const nomPiece = monde().lieuDeBase.pieces.find((p) => p.id === piece)?.designation || monde().lieuDeBase.designation;
+    const nomPiece = monde().lieuOuvert.pieces.find((p) => p.id === piece)?.designation || monde().lieuOuvert.designation;
     const texte = resultat.ok
       ? t('amenagement.possible', { meuble: nom, piece: nomPiece })
       : t('amenagement.impossible', { meuble: nom, raison: raison(resultat) });
@@ -179,7 +195,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
     let milieu;
     let rotation = 0;
     let origine = null;
-    if (posee && posee.lieu === monde().lieuDeBase.id) {
+    if (posee && posee.lieu === monde().lieuOuvert.id) {
       origine = { x: posee.place.x, z: posee.place.z, rotation: posee.place.rotation };
       rotation = posee.place.rotation;
       milieu = milieuDepuisCoin(meuble, rotation, posee.place);
@@ -201,7 +217,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
 
   function deplacer(dx, dz) {
     if (!selection) return;
-    const [largeur, profondeur] = monde().lieuDeBase.taille;
+    const [largeur, profondeur] = monde().lieuOuvert.taille;
     selection.milieu = {
       x: Math.min(largeur - 1, Math.max(0, selection.milieu.x + dx)),
       z: Math.min(profondeur - 1, Math.max(0, selection.milieu.z + dz)),
@@ -231,7 +247,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
     }
     const place = placeChoisie();
     const deplace = Boolean(selection.origine);
-    modifierPartie((partie) => poserMeuble(partie, monde().lieuDeBase.id, place), { important: true });
+    modifierPartie((partie) => poserMeuble(partie, monde().lieuOuvert.id, place), { important: true });
     monde().actualiserLieu();
     const message = [
       t(deplace ? 'amenagement.deplace' : 'amenagement.pose', { meuble: designation(place.meuble) }),
@@ -257,7 +273,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
     const { origine, id, meuble } = selection;
     let message = null;
     if (origine) {
-      modifierPartie((partie) => poserMeuble(partie, monde().lieuDeBase.id, { id, ...origine }), { important: true });
+      modifierPartie((partie) => poserMeuble(partie, monde().lieuOuvert.id, { id, ...origine }), { important: true });
       monde().actualiserLieu();
       message = t('amenagement.remis', { meuble: majuscule(designation(meuble)) });
     }
@@ -296,7 +312,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
         surDirection: ({ dx, dz }) => deplacer(dx, dz),
         surAgir: () => poser(),
       });
-      titre.textContent = t('amenagement.titre', { lieu: monde().lieuDeBase.designation });
+      titre.textContent = t('amenagement.titre', { lieu: monde().lieuOuvert.designation });
       element.hidden = false;
       surDebut?.();
     }

@@ -111,7 +111,7 @@ function commandeDuJourValide(id, commande) {
 const ID_ACHAT = /^achat-\d+$/;
 function possessionValide(possession) {
   return estObjet(possession) && typeof possession.id === 'string' && ID_ACHAT.test(possession.id)
-    && typeof possession.article === 'string' && ['meuble', 'materiel'].includes(possession.sorte)
+    && typeof possession.article === 'string' && ['meuble', 'materiel', 'lieu', 'piece'].includes(possession.sorte)
     && estEntier(possession.jour, 1) && estEntier(possession.prix);
 }
 

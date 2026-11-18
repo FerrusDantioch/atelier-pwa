@@ -2,6 +2,7 @@
   "id": "domicile",
   "nom": "Ton domicile",
   "designation": "ton domicile",
+  "vers": "chez toi",
   "taille": [20, 16],
   "hauteurMurs": 2.5,
   "depart": { "x": 9, "z": 12, "angle": 0 },
@@ -97,7 +98,7 @@
       "id": "porte-entree",
       "nom": "Porte d'entrée",
       "designation": "la porte d'entrée",
-      "description": "La porte d'entrée, de plain-pied et assez large pour tout le monde. Pour l'instant, tout se passe ici.",
+      "description": "La porte d'entrée, de plain-pied et assez large pour tout le monde. Une fois les bureaux de l'atelier loués, c'est par là qu'on y va.",
       "x": 0, "z": 12, "angle": 270
     },
     { "id": "table-cuisine", "x": 15, "z": 3, "angle": 0 },

@@ -1,14 +1,18 @@
 // =============================================================================
 // boutique.js — acheter des meubles et du matériel (jalon 5)
 // -----------------------------------------------------------------------------
-// La boutique (data/boutique.json) vend deux sortes d'articles :
+// La boutique (data/boutique.json) vend quatre sortes d'articles :
 //   meuble    un meuble du catalogue (data/meubles.json), à poser où l'on
 //             veut avec « Aménager » (voir amenagement.js) ;
 //   materiel  le matériel du poste de travail (grand écran, clavier,
 //             siège) : il s'installe tout seul sur le bureau, à la place
 //             d'un « élément » (les formes marquées « element » dans
 //             data/meubles.json), et rapporte quelques pièces de plus à
-//             chaque livraison (« bonus »). Il ne s'achète qu'une fois.
+//             chaque livraison (« bonus »). Il ne s'achète qu'une fois ;
+//   lieu      un lieu à louer (les bureaux de l'atelier) : il rejoint
+//             partie.lieux.debloques ;
+//   piece     une pièce à ouvrir dans un lieu loué (salle de pause…) ;
+//             voir lieux.js.
 // Un article se débloque avec un niveau de réputation (« niveau »).
 //
 // Dans la partie, chaque achat est une « possession » :
@@ -20,7 +24,10 @@
 
 import { niveauDeReputation } from '../noyau/format-sauvegarde.js';
 
-export const SORTES = ['meuble', 'materiel'];
+export const SORTES = ['meuble', 'materiel', 'lieu', 'piece'];
+
+// Les sortes qui ne s'achètent qu'une fois.
+const UNE_FOIS = new Set(['materiel', 'lieu', 'piece']);
 export const PREFIXE_ACHAT = 'achat-';
 
 // Tous les articles de la boutique, avec leur sorte : [{ id, sorte, … }].
@@ -39,6 +46,8 @@ export function articlesDeLaBoutique(boutique, meubles) {
         description: article.description || meuble?.description || '',
       };
     }),
+    ...(boutique.lieux || []).map((article) => ({ ...article, sorte: 'lieu' })),
+    ...(boutique.pieces || []).map((article) => ({ ...article, sorte: 'piece' })),
   ];
 }
 
@@ -53,16 +62,20 @@ export function nombrePossedes(partie, id) {
 
 /**
  * Peut-on acheter cet article maintenant ? Renvoie { possible, raison, … } :
- *   raison 'niveau'  il faut un niveau de réputation plus haut (niveau) ;
- *          'installe' du matériel déjà acheté ;
- *          'argent'  il manque des pièces (manque).
+ *   raison 'installe' du matériel déjà acheté, un lieu déjà loué, une pièce
+ *                     déjà ouverte ;
+ *          'lieu'     une pièce d'un lieu pas encore loué (lieu) ;
+ *          'niveau'   il faut un niveau de réputation plus haut (niveau) ;
+ *          'argent'   il manque des pièces (manque).
  */
 export function etatDeLArticle(article, partie, paliers) {
+  const deja = article.sorte === 'lieu' ? partie.lieux.debloques.includes(article.id) : nombrePossedes(partie, article.id) > 0;
+  if (UNE_FOIS.has(article.sorte) && deja) return { possible: false, raison: 'installe' };
+  if (article.sorte === 'piece' && !partie.lieux.debloques.includes(article.lieu)) {
+    return { possible: false, raison: 'lieu', lieu: article.lieu };
+  }
   if (article.niveau && niveauDeReputation(partie.reputation, paliers).niveau < article.niveau) {
     return { possible: false, raison: 'niveau', niveau: article.niveau };
-  }
-  if (article.sorte === 'materiel' && nombrePossedes(partie, article.id) > 0) {
-    return { possible: false, raison: 'installe' };
   }
   if (partie.argent < article.prix) return { possible: false, raison: 'argent', manque: article.prix - partie.argent };
   return { possible: true };
@@ -91,6 +104,8 @@ export function acheter(partie, article, paliers) {
   };
   partie.argent -= article.prix;
   partie.possessions.push(possession);
+  // Un lieu loué : on peut s'y rendre.
+  if (article.sorte === 'lieu' && !partie.lieux.debloques.includes(article.id)) partie.lieux.debloques.push(article.id);
   return possession;
 }
 

@@ -8,6 +8,12 @@
 // Les routines sont fixes et prévisibles : le même PNJ fait la même chose à
 // la même heure chaque jour (aucune surprise, mode calme ou non).
 //
+// Un créneau marqué « si » (jalon 5) n'a lieu que si cette ouverture est
+// faite dans la partie (voir lieux.js › ouvertures) : « si »: « bureaux »
+// une fois les bureaux loués, « si »: « coin-calme » une fois le coin calme
+// ouvert. Sans ces ouvertures (paramètre « ouvertes », un Set), seuls les
+// créneaux sans « si » comptent.
+//
 // Ce module n'utilise ni la 3D ni la page (testé avec node --test).
 // =============================================================================
 
@@ -16,31 +22,50 @@ import { heureEnMinutes } from '../noyau/format-sauvegarde.js';
 // Le point par où les visiteurs entrent et sortent, dans chaque lieu.
 export const POINT_D_ARRIVEE = 'porte-entree';
 
+// Un créneau a-t-il lieu avec ces ouvertures ?
+export function creneauPossible(creneau, ouvertes = null) {
+  return !creneau.si || Boolean(ouvertes?.has(creneau.si));
+}
+
+// Les créneaux qui ont lieu avec ces ouvertures.
+function creneauxPossibles(routine, ouvertes) {
+  return routine.filter((creneau) => creneauPossible(creneau, ouvertes));
+}
+
 // Le créneau en cours à cette minute (ou null : le PNJ n'est pas là).
-export function creneauA(routine, minute) {
-  const creneau = routine.find((c) => minute >= heureEnMinutes(c.de) && minute < heureEnMinutes(c.a));
+export function creneauA(routine, minute, ouvertes = null) {
+  const creneau = creneauxPossibles(routine, ouvertes)
+    .find((c) => minute >= heureEnMinutes(c.de) && minute < heureEnMinutes(c.a));
   if (!creneau || creneau.lieu === 'ailleurs') return null;
   return creneau;
 }
 
 // Le PNJ est-il présent dans ce lieu à cette minute ? Renvoie son créneau.
-export function presenceDans(pnj, lieu, minute, joueur) {
+export function presenceDans(pnj, lieu, minute, joueur, ouvertes = null) {
   if (pnj.absentSiJoueur && joueur?.modele === pnj.absentSiJoueur) return null;
-  const creneau = creneauA(pnj.routine, minute);
+  const creneau = creneauA(pnj.routine, minute, ouvertes);
   return creneau && creneau.lieu === lieu ? creneau : null;
 }
 
-// Quand la personne revient-elle dans ce lieu ? Renvoie { minute, demain } :
-// sa prochaine arrivée aujourd'hui, sinon la première de demain. null si
-// elle n'y vient jamais (ou pas quand on joue ce personnage-là).
-export function prochainPassage(pnj, lieu, minute, joueur) {
+// Où est la personne à cette minute ? Son créneau (avec son lieu), ou null.
+export function ouEst(pnj, minute, joueur, ouvertes = null) {
   if (pnj.absentSiJoueur && joueur?.modele === pnj.absentSiJoueur) return null;
-  const debuts = pnj.routine.filter((c) => c.lieu === lieu).map((c) => heureEnMinutes(c.de));
-  if (debuts.length === 0) return null;
-  const plusTard = debuts.filter((debut) => debut > minute);
-  return plusTard.length > 0
-    ? { minute: Math.min(...plusTard), demain: false }
-    : { minute: Math.min(...debuts), demain: true };
+  return creneauA(pnj.routine, minute, ouvertes);
+}
+
+// Quand la personne revient-elle dans ce lieu (ou dans n'importe quel lieu,
+// avec « lieu » à null) ? Renvoie { minute, demain, lieu } : sa prochaine
+// arrivée aujourd'hui, sinon la première de demain. null si elle n'y vient
+// jamais (ou pas quand on joue ce personnage-là).
+export function prochainPassage(pnj, lieu, minute, joueur, ouvertes = null) {
+  if (pnj.absentSiJoueur && joueur?.modele === pnj.absentSiJoueur) return null;
+  const creneaux = creneauxPossibles(pnj.routine, ouvertes)
+    .filter((c) => c.lieu !== 'ailleurs' && (lieu === null || c.lieu === lieu))
+    .map((c) => ({ minute: heureEnMinutes(c.de), lieu: c.lieu }))
+    .sort((a, b) => a.minute - b.minute);
+  if (creneaux.length === 0) return null;
+  const plusTard = creneaux.find((c) => c.minute > minute);
+  return plusTard ? { ...plusTard, demain: false } : { ...creneaux[0], demain: true };
 }
 
 /**

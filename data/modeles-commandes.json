@@ -1,6 +1,7 @@
 {
   "aValider": "Briques des commandes du jour, proposées par Claude : clientes et clients fictifs, applications fictives. Chaque matin, le jeu assemble une personne, un sujet, une contrainte et une récompense (voir js/jeu/generateur.js).",
   "parJour": 2,
+  "enPlus": { "lieu": "bureaux", "parJour": 1 },
   "debloquee": { "niveau": 3 },
   "recompense": { "argent": [40, 70], "reputation": [6, 12], "bonus": 10 },
   "clients": [

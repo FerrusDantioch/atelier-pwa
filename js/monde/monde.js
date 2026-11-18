@@ -9,8 +9,9 @@
 // bureau », « tourner la vue ») et il la prévient en retour (« arrivé »,
 // « nouvelle pièce », « objet à examiner à côté »), par les « rappels ».
 //
-// Le lieu montré est celui des données, avec les meubles posés par le
-// joueur (js/jeu/amenagement.js) et le matériel installé sur le bureau
+// Le lieu montré est celui des données, avec ses pièces ouvertes ou encore
+// fermées (js/jeu/lieux.js), les meubles posés par le joueur
+// (js/jeu/amenagement.js) et le matériel installé sur le bureau
 // (js/jeu/boutique.js) ; actualiserLieu() le reconstruit quand ils changent.
 // En mode « Aménager », le doigt et le clavier déplacent le meuble choisi
 // (fantome.js) au lieu du personnage.
@@ -21,7 +22,9 @@
 import { Color, Plane, Scene, Vector3 } from '../../lib/three/three.module.js';
 import { lieuAmenage, meublesPoses } from '../jeu/amenagement.js';
 import { catalogueEquipe, materielInstalle } from '../jeu/boutique.js';
+import { lieuSelonOuvertures, ouvertures, ouverturesDuLieu } from '../jeu/lieux.js';
 import { apparenceDuJoueur } from '../jeu/personnage.js';
+import { POINT_D_ARRIVEE } from '../jeu/routines.js';
 import { couleurDuTheme } from '../modeles/palette.js';
 import { animerPersonnage, construirePersonnage } from '../modeles/personnage.js';
 import { creerCameraIso } from './camera-iso.js';
@@ -59,7 +62,11 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     ? catalogueEquipe(donnees.meubles.meubles, materielInstalle(p, donnees.boutique))
     : catalogueDeBase);
   let catalogue = equiper(partie);
-  let lieu = lieuAmenage(lieuDeBase, meublesPoses(partie, lieuDeBase.id));
+  // Ce qui est ouvert (lieux loués, pièces ouvertes), le lieu tel qu'il est
+  // avec ces ouvertures, puis avec les meubles posés par le joueur.
+  let ouvertes = ouvertures(partie);
+  let lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
+  let lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
   let grille = creerGrille(lieu, catalogue);
   const nomsPieces = new Map(lieu.pieces.map((piece) => [piece.id, piece]));
 
@@ -125,7 +132,9 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
   // --- Les personnages non joueurs (PNJ) ------------------------------------------
   let minuteActuelle = partie.temps.minute;
-  const habitants = creerHabitants({ scene, lieu, grille, donnees, palette, joueur: () => joueurActuel });
+  const habitants = creerHabitants({
+    scene, lieu, grille, donnees, palette, joueur: () => joueurActuel, ouvertes: () => ouvertes,
+  });
   habitants.placer(minuteActuelle, deplacement.case);
 
   function placerPerso() {
@@ -138,7 +147,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   // --- Ce qu'on peut examiner ----------------------------------------------------
   let cibles = construit.cibles;
   let cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
-  const pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
+  let pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
   // Les meubles et points, plus les PNJ présents (qui bougent).
   const toutesLesCibles = () => [...cibles, ...habitants.cibles()];
 
@@ -159,9 +168,10 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     }
     if (cible.type === 'point') {
       const point = pointParId.get(cible.id);
+      // La porte d'entrée : on sort par là pour aller dans un autre lieu.
       return {
         id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description,
-        lien: point.lien || null, actions: [],
+        lien: point.lien || null, actions: point.id === POINT_D_ARRIVEE ? ['sortir'] : [],
       };
     }
     const emprise = grille.emprises.get(cible.id);
@@ -648,8 +658,11 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   // (la caméra, le personnage et les habitants restent où ils sont).
   function actualiserLieu() {
     catalogue = equiper(partie);
-    lieu = lieuAmenage(lieuDeBase, meublesPoses(partie, lieuDeBase.id));
+    ouvertes = ouvertures(partie);
+    lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
+    lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
     grille = creerGrille(lieu, catalogue);
+    pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
     scene.remove(construit.groupe);
     construit.liberer();
     construit = construire();
@@ -659,6 +672,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     cibles = construit.cibles;
     cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
     habitants.changerGrille(grille);
+    habitants.changerLieu(lieu);
     cibleVisee = null;
     // Le personnage ne peut pas se retrouver dans un meuble (l'aménagement
     // l'empêche) ; par sécurité, il va à la case libre la plus proche.
@@ -692,12 +706,14 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     get piece() { return nomsPieces.get(pieceActuelle) || null; },
     get objetProche() { return objetProche ? infosObjet(objetProche) : null; },
     get case() { return deplacement.case; },
+    get enRoute() { return deplacement.enRoute; },
     get profil() { return profil; },
 
     // La liste de « Aller à… » : pièces, personnes présentes, meubles et
     // points à examiner.
     destinations() {
-      const liste = lieu.pieces.map((piece) => ({ type: 'piece', id: piece.id, nom: piece.nom, designation: piece.designation, piece: piece.id }));
+      const liste = lieu.pieces.filter((piece) => !piece.verrouillee)
+        .map((piece) => ({ type: 'piece', id: piece.id, nom: piece.nom, designation: piece.designation, piece: piece.id }));
       for (const cible of habitants.cibles()) {
         const caseHabitant = habitants.caseDe(cible.id);
         liste.push({ ...infosObjet(cible), piece: grille.piece(caseHabitant.x, caseHabitant.z) });
@@ -820,8 +836,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       }
       return cases;
     },
-    // Le lieu tel qu'il est écrit dans les données (sans les meubles posés).
-    get lieuDeBase() { return lieuDeBase; },
+    // Le lieu avec ses pièces ouvertes, sans les meubles posés par le joueur.
+    get lieuOuvert() { return lieuOuvert; },
+    // Le même, toutes ses pièces ouvertes : un meuble posé aujourd'hui ne
+    // doit pas bloquer une pièce qui s'ouvrira demain.
+    get lieuComplet() { return lieuSelonOuvertures(lieuDeBase, new Set(ouverturesDuLieu(lieuDeBase))); },
+    get ouvertes() { return ouvertes; },
     get catalogueDeBase() { return catalogueDeBase; },
 
     // Examiner l'objet proche : on se tourne vers lui. Renvoie ses informations.

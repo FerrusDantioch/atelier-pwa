@@ -189,12 +189,12 @@ test('les places des personnages sont atteignables avec LEUR façon de se dépla
   const lieu = structuredClone(donnees.lieux.domicile);
   lieu.points.push({ id: 'recoin', x: 13, z: 5, angle: 90 });
   pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'recoin';
-  const problemes = verifierCoherence({ ...donnees, pnj, lieux: { domicile: lieu } }).join('\n');
+  const problemes = verifierCoherence({ ...donnees, pnj, lieux: { ...donnees.lieux, domicile: lieu } }).join('\n');
   assert.match(problemes, /pnj › halae › routine › n°1 : le point « recoin » n'est pas atteignable en fauteuil roulant/);
   // Théo, à pied, y arriverait.
   pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'table-cuisine';
-  pnj.pnj.find((p) => p.id === 'theo').routine[0].point = 'recoin';
-  assert.deepEqual(verifierCoherence({ ...donnees, pnj, lieux: { domicile: lieu } }), []);
+  pnj.pnj.find((p) => p.id === 'theo').routine.find((c) => c.lieu === 'domicile').point = 'recoin';
+  assert.deepEqual(verifierCoherence({ ...donnees, pnj, lieux: { ...donnees.lieux, domicile: lieu } }), []);
 });
 
 test('la salle d\'eau est fermée par des parois hautes (les autres pièces restent ouvertes)', () => {

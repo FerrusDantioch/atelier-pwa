@@ -144,6 +144,19 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   temps est arrêté et le doigt et le clavier déplacent le meuble
   (`js/monde/fantome.js`, `js/interface/amenagement.js`). Au chargement,
   un meuble qui ne tient plus à sa place retourne dans les affaires.
+- **Les bureaux** (jalon 5, `js/jeu/lieux.js`) : un lieu se loue (article
+  « lieu » → `partie.lieux.debloques`), ses pièces marquées `ouverture`
+  s'ouvrent une à une (articles « piece »). `lieuSelonOuvertures()` donne
+  le lieu tel qu'il est : pièces fermées « verrouillee » (pas de sol
+  praticable, sol de chantier), meubles et points retirés, portes
+  « porte-fermee ». `coherence.js` vérifie chaque lieu tout fermé, pièce
+  par pièce et tout ouvert ; un meuble posé ne doit pas bloquer une pièce
+  future (`lieuComplet`). Un créneau de routine `si` n'a lieu qu'avec son
+  ouverture. On change de lieu par la porte d'entrée (`voyager()` dans
+  `ecran-jeu.js` : trajet de `jeu.deplacement.trajet` minutes, nouveau
+  monde 3D) ; les objectifs mènent d'un lieu à l'autre. **Jamais plus de
+  deux personnages à la fois dans un lieu** (9 dessins par personnage :
+  test « moins de 40 dessins »).
 - **Tests navigateur** : pour attendre une condition qui importe des modules
   du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
   `page.waitForFunction` (qui n'attend pas les fonctions async).

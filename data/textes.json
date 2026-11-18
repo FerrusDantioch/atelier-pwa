@@ -74,6 +74,8 @@
     "rienAProximite": "Rien à examiner ici : approche-toi d'un meuble.",
     "inaccessible": "Impossible de t'approcher de {objet} pour l'instant.",
     "personnes": "Personnes présentes",
+    "autresLieux": "Autres lieux",
+    "allerVers": "Aller {vers}",
     "personneOu": "{nom} · {piece}",
     "camera": {
       "titre": "Caméra",
@@ -101,10 +103,12 @@
   },
   "actions": {
     "dormir": "Dormir",
-    "ordinateur": "Utiliser l'ordinateur"
+    "ordinateur": "Utiliser l'ordinateur",
+    "sortir": "Sortir…"
   },
   "temps": {
     "tard": "La journée est finie : l'horloge s'arrête. Va dormir quand tu veux (le lit, dans la chambre).",
+    "tardAilleurs": "La journée est finie : l'horloge s'arrête. Rentre chez toi pour dormir, quand tu veux (porte d'entrée).",
     "dormirTitre": "Dormir jusqu'à demain ?",
     "dormirMessage": "Tu te réveilleras demain à {heure}.",
     "dormirCopie": "Une copie de secours de ta partie est faite au passage.",
@@ -598,6 +602,9 @@
     "absent": "{nom} n'est pas là pour l'instant : retour prévu à {heure}.",
     "absentDemain": "{nom} n'est pas là pour l'instant : retour prévu demain, à {heure}.",
     "absentJamais": "{nom} n'est pas là.",
+    "ailleurs": "{nom} est {vers} en ce moment : en route !",
+    "prochainAilleurs": "{nom} n'est pas là pour l'instant : prochain passage {vers}, à {heure}.",
+    "prochainAilleursDemain": "{nom} n'est pas là pour l'instant : prochain passage {vers}, demain à {heure}.",
     "sansEndroit": "Cette étape ne se joue pas à un endroit précis : relis-la dans ton journal (touche J)."
   },
   "journal": {
@@ -640,8 +647,21 @@
     "photo": "Photo : {article}",
     "rayons": {
       "materiel": "Matériel pour ton bureau",
-      "meuble": "Meubles et décoration"
+      "meuble": "Meubles et décoration",
+      "lieu": "Les bureaux de l'atelier",
+      "piece": "Agrandir les bureaux"
     },
+    "lieuAide": "Un local en ville, où les gens viennent te voir. Ta maison reste à toi : tu pourras travailler aux deux endroits.",
+    "pieceAide": "Chaque pièce ouverte fait venir de nouvelles personnes aux bureaux.",
+    "louer": "Louer",
+    "ouvrir": "Ouvrir",
+    "loue": "Loué : c'est à toi",
+    "ouverte": "Ouverte",
+    "dAbordLouer": "D'abord, loue {lieu}.",
+    "confirmerLouer": "Louer {article} ?",
+    "confirmerOuvrir": "Ouvrir {article} ?",
+    "acheteLieu": "C'est loué : {article}. Pour t'y rendre, sors par la porte d'entrée ; le trajet prend {minutes} minutes.",
+    "achetePiece": "C'est ouvert : {article}, dans {lieu}.",
     "materielAide": "Chaque matériel s'installe une fois pour toutes, et te rapporte quelques pièces de plus à chaque livraison.",
     "meubleAide": "Tu poses tes meubles où tu veux avec « Aménager » (menu Pause) : le jeu veille à ce que tout le monde puisse toujours passer.",
     "prix": "Prix : {prix}",
@@ -707,6 +727,14 @@
       "coince": "Tu ne pourrais plus sortir de là où tu es.",
       "inconnu": "Ce meuble n'existe plus dans le jeu."
     }
+  },
+  "voyage": {
+    "titre": "Où aller ?",
+    "aide": "Le trajet prend {minutes} minutes : le temps passe pendant le trajet.",
+    "aucun": "Il n'y a pas d'autre lieu où aller pour l'instant. Avec le temps, tu pourras louer des bureaux (boutique de l'ordinateur).",
+    "enRoute": "Direction la porte d'entrée, pour aller {vers}.",
+    "arrivee": "Te voici {vers}.",
+    "depuis": "Tu sors de {lieu}."
   },
   "decor": {
     "afficheOmni": {

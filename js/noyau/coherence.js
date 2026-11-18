@@ -33,6 +33,7 @@ import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
 import { heureEnMinutes } from './format-sauvegarde.js';
 import { problemesDAcces } from '../jeu/amenagement.js';
 import { articlesDeLaBoutique } from '../jeu/boutique.js';
+import { etatsAVerifier, lieuSelonOuvertures, ouverturesDuLieu } from '../jeu/lieux.js';
 import { distancesDepuis } from '../monde/chemin.js';
 import { TAILLE_CASE, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
 
@@ -251,16 +252,35 @@ function verifierLieu(lieu, donnees, signaler) {
     }
   }
 
+  // Les points « fermee » : devant une pièce qui s'ouvre.
+  const ouverturesConnues = new Set(ouverturesDuLieu(lieu));
+  for (const point of lieu.points || []) {
+    if (point.fermee && !ouverturesConnues.has(point.fermee)) {
+      probleme(`points › ${point.id} › fermee : aucune pièce de ce lieu ne s'ouvre avec « ${point.fermee} »`);
+    }
+  }
+
   // L'accessibilité ne se vérifie que si le lieu tient debout (les mêmes
-  // règles que pour les meubles posés par le joueur : amenagement.js).
+  // règles que pour les meubles posés par le joueur : amenagement.js). Un
+  // lieu dont des pièces s'ouvrent (jalon 5) est vérifié tout fermé, avec
+  // chaque pièce ouverte, et tout ouvert.
   if (problemesDeStructure > 0) return;
-  const grille = creerGrille(lieu, catalogue);
-  for (const probleme of problemesDAcces(lieu, grille, catalogue)) {
-    const facon = NOMS_PROFILS[probleme.profil];
-    if (probleme.type === 'depart') signaler(chemin, `depart : la case ${lieu.depart.x},${lieu.depart.z} n'est pas libre ${facon}`);
-    else if (probleme.type === 'piece') signaler(chemin, `pieces › ${probleme.id} : impossible d'y entrer ${facon}`);
-    else if (probleme.type === 'meuble') signaler(chemin, `meubles › ${probleme.id} : impossible de s'en approcher ${facon}`);
-    else signaler(chemin, `points › ${probleme.id} : la case ${probleme.x},${probleme.z} n'est pas atteignable ${facon}`);
+  const dits = new Set();
+  for (const etat of etatsAVerifier(lieu)) {
+    const ouvert = lieuSelonOuvertures(lieu, etat.ouvertes);
+    const grille = creerGrille(ouvert, catalogue);
+    const quand = etat.nom ? ` (${etat.nom})` : '';
+    for (const probleme of problemesDAcces(ouvert, grille, catalogue)) {
+      const facon = NOMS_PROFILS[probleme.profil];
+      let message;
+      if (probleme.type === 'depart') message = `depart : la case ${lieu.depart.x},${lieu.depart.z} n'est pas libre ${facon}`;
+      else if (probleme.type === 'piece') message = `pieces › ${probleme.id} : impossible d'y entrer ${facon}`;
+      else if (probleme.type === 'meuble') message = `meubles › ${probleme.id} : impossible de s'en approcher ${facon}`;
+      else message = `points › ${probleme.id} : la case ${probleme.x},${probleme.z} n'est pas atteignable ${facon}`;
+      if (dits.has(message)) continue;
+      dits.add(message);
+      signaler(chemin, `${message}${quand}`);
+    }
   }
 }
 
@@ -322,6 +342,36 @@ function verifierBoutique(donnees, signaler) {
     else if (!meuble.designation) signaler(chemin, `${ou} : le meuble doit avoir une « designation » dans data/meubles.json (« le cactus »)`);
     if (meuble?.actions?.length) signaler(chemin, `${ou} : un meuble avec des actions (dormir, ordinateur) ne se vend pas`);
     if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+  }
+  // Les lieux à louer et les pièces à ouvrir (jalon 5).
+  const lieux = donnees.lieux || {};
+  const depart = donnees.jeu?.depart.lieu;
+  for (const article of boutique.lieux || []) {
+    const ou = `lieux › ${article.id}`;
+    if (!lieux[article.id]) signaler(chemin, `${ou} : le lieu « ${article.id} » n'existe pas dans data/lieux/index.json`);
+    if (article.id === depart) signaler(chemin, `${ou} : c'est le lieu de départ, il n'y a rien à louer`);
+    if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+  }
+  const pieces = new Map((boutique.pieces || []).map((article) => [article.id, article]));
+  for (const article of boutique.pieces || []) {
+    const ou = `pieces › ${article.id}`;
+    const lieu = lieux[article.lieu];
+    if (!lieu) signaler(chemin, `${ou} › lieu : « ${article.lieu} » n'existe pas`);
+    else if (!lieu.pieces.some((piece) => piece.ouverture === article.id)) {
+      signaler(chemin, `${ou} : aucune pièce de ${lieu.chemin} ne s'ouvre avec « ${article.id} » (« ouverture »)`);
+    }
+    if (article.lieu !== depart && !(boutique.lieux || []).some((l) => l.id === article.lieu)) {
+      signaler(chemin, `${ou} › lieu : « ${article.lieu} » ne se loue pas dans la boutique (« lieux »)`);
+    }
+    if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+  }
+  for (const lieu of Object.values(lieux)) {
+    for (const piece of lieu.pieces.filter((p) => p.ouverture)) {
+      const article = pieces.get(piece.ouverture);
+      if (!article || article.lieu !== lieu.id) {
+        signaler(lieu.chemin, `pieces › ${piece.id} › ouverture : « ${piece.ouverture} » n'est pas une pièce à ouvrir de data/boutique.json pour ce lieu`);
+      }
+    }
   }
 }
 
@@ -389,6 +439,9 @@ function verifierModelesCommandes(donnees, signaler) {
   }
   if (possibles.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} sujets possibles`);
   if (modeles.clients.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} clientes ou clients`);
+  if (modeles.enPlus && !donnees.lieux?.[modeles.enPlus.lieu]) {
+    signaler(chemin, `enPlus › lieu : « ${modeles.enPlus.lieu} » n'existe pas`);
+  }
   const commandes = new Set((donnees.commandes?.commandes || []).map((commande) => commande.id));
   for (const id of modeles.debloquee?.apres || []) {
     if (!commandes.has(id)) signaler(chemin, `debloquee › apres : la commande « ${id} » n'existe pas dans data/commandes.json`);
@@ -461,6 +514,8 @@ function verifierQuetes(donnees, signaler) {
           signaler(chemin, `${ici} : seuls les meubles se placent (le matériel s'installe tout seul)`);
         }
         if (etape.lieu && !donnees.lieux?.[etape.lieu]) signaler(chemin, `${ici} › lieu : « ${etape.lieu} » n'existe pas`);
+      } else if (etape.type === 'lieu' && !donnees.lieux?.[etape.lieu]) {
+        signaler(chemin, `${ici} › lieu : « ${etape.lieu} » n'existe pas`);
       }
       if (etape.destination && !endroits.has(etape.destination) && !pnjParId.has(etape.destination)) {
         signaler(chemin, `${ici} › destination : « ${etape.destination} » n'est ni un endroit d'un lieu, ni une personne`);
@@ -486,10 +541,18 @@ function verifierQuetes(donnees, signaler) {
     commandes: { enCours: {}, livrees: [], aleatoires: {} },
     quetes: { actives: {}, finies: [], suivie: null },
     possessions,
-    lieux: { amenagements: Object.fromEntries(Object.keys(donnees.lieux || {}).map((id) => [id, poses])) },
+    lieux: {
+      actuel: donnees.jeu.depart.lieu,
+      debloques: Object.keys(donnees.lieux || {}),
+      amenagements: Object.fromEntries(Object.keys(donnees.lieux || {}).map((id) => [id, poses])),
+    },
   };
   for (let tour = 0; tour <= liste.length + fichier.quetes.length + 1; tour += 1) {
-    mettreAJourQuetes(partie, fichier.quetes, paliers);
+    // On passe dans chaque lieu (étapes « lieu »).
+    for (const id of Object.keys(donnees.lieux || {})) {
+      partie.lieux.actuel = id;
+      mettreAJourQuetes(partie, fichier.quetes, paliers);
+    }
     for (const commande of etatDesCommandes(partie, liste, paliers).offres) {
       partie.reputation += recompensePour('bien', commande, 0, donnees.creation.bareme).reputation;
       partie.commandes.livrees.push({ id: commande.id });
@@ -593,11 +656,21 @@ function verifierPnj(donnees, signaler) {
   const journee = donnees.jeu ? {
     debut: heureEnMinutes(donnees.jeu.temps.debutJournee), fin: heureEnMinutes(donnees.jeu.temps.finJournee),
   } : null;
+  // Un lieu tel qu'il est quand le créneau a lieu : avec la pièce de son
+  // « si » ouverte (s'il y en a une), les autres fermées.
   const grilles = new Map();
-  const grilleDe = (lieu) => {
-    if (!grilles.has(lieu.id)) grilles.set(lieu.id, creerGrille(lieu, catalogue));
-    return grilles.get(lieu.id);
+  const grilleDe = (lieu, si) => {
+    const ouvertes = new Set(si && ouverturesDuLieu(lieu).includes(si) ? [si] : []);
+    const cle = `${lieu.id}|${[...ouvertes].join(',')}`;
+    if (!grilles.has(cle)) grilles.set(cle, creerGrille(lieuSelonOuvertures(lieu, ouvertes), catalogue));
+    return grilles.get(cle);
   };
+  // Ce qu'un « si » peut citer : un lieu qui se loue, une pièce qui s'ouvre.
+  const lieuxALouer = new Set((donnees.boutique?.lieux || []).map((article) => article.id));
+  const ouverturesConnues = new Set([
+    ...lieuxALouer,
+    ...Object.values(donnees.lieux || {}).flatMap((lieu) => ouverturesDuLieu(lieu)),
+  ]);
   for (const pnj of donnees.pnj?.pnj || []) {
     const ou = `pnj › ${pnj.id}`;
     const apparence = pnj.modele === 'ferrus' ? personnages?.ferrus?.apparence : pnj.apparence;
@@ -618,6 +691,13 @@ function verifierPnj(donnees, signaler) {
         signaler(chemin, `${ici} : le lieu « ${creneau.lieu} » n'existe pas`);
         return;
       }
+      if (creneau.si && !ouverturesConnues.has(creneau.si)) {
+        signaler(chemin, `${ici} › si : « ${creneau.si} » n'est ni un lieu à louer, ni une pièce à ouvrir (data/boutique.json)`);
+      }
+      // Un lieu à louer : on n'y vient qu'une fois loué (ou la pièce ouverte).
+      if (lieuxALouer.has(creneau.lieu) && creneau.si !== creneau.lieu && !ouverturesDuLieu(lieu).includes(creneau.si)) {
+        signaler(chemin, `${ici} : « ${creneau.lieu} » se loue ; il faut « si »: « ${creneau.lieu} » (ou une pièce de ce lieu)`);
+      }
       const points = new Map((lieu.points || []).map((p) => [p.id, p]));
       const arrivee = points.get(POINT_D_ARRIVEE);
       const point = points.get(creneau.point);
@@ -627,7 +707,7 @@ function verifierPnj(donnees, signaler) {
         return;
       }
       if (!arrivee) return;
-      const grille = grilleDe(lieu);
+      const grille = grilleDe(lieu, creneau.si);
       if (!grille.caseAccessible(arrivee.x, arrivee.z, profil)
         || !distancesDepuis(grille, arrivee, profil).has(`${point.x},${point.z}`)) {
         signaler(chemin, `${ici} : le point « ${creneau.point} » n'est pas atteignable ${NOMS_PROFILS[profil]} depuis l'entrée`);

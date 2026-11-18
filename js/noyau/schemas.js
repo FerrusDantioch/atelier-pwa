@@ -60,6 +60,8 @@ export const SCHEMA_JEU = {
       type: 'objet',
       champs: {
         vitesse: { type: 'nombre', min: 0.5, max: 6 },
+        // La durée d'un trajet d'un lieu à l'autre, en minutes de jeu (jalon 5).
+        trajet: { type: 'nombre', entier: true, min: 0, max: 120, facultatif: true },
       },
     },
     temps: {
@@ -189,6 +191,8 @@ export const SCHEMA_LIEU = {
     id: texte,
     nom: texte,
     designation: texte,
+    // Comment on y va (jalon 5) : « chez toi », « aux bureaux de l'atelier ».
+    vers: { ...texte, facultatif: true },
     taille: { type: 'liste', element: { type: 'nombre', entier: true, min: 2, max: 200 }, min: 2, max: 2 },
     hauteurMurs: { type: 'nombre', min: 1.5, max: 6 },
     depart: { type: 'objet', champs: { x: coordonnee, z: coordonnee, angle } },
@@ -205,6 +209,9 @@ export const SCHEMA_LIEU = {
           // Des parois sur toute la hauteur (translucides au-dessus du genou),
           // pour une pièce qu'on veut bien séparer (la salle d'eau).
           paroisHautes: { type: 'booleen', facultatif: true },
+          // Une pièce à ouvrir (jalon 5) : l'article de data/boutique.json
+          // (« pieces ») qui l'ouvre. Fermée tant qu'il n'est pas acheté.
+          ouverture: { ...texte, facultatif: true },
           sol: {
             type: 'objet',
             champs: {
@@ -259,6 +266,9 @@ export const SCHEMA_LIEU = {
           // Un lien vers une vraie adresse, prise dans js/config.js (jamais
           // écrite ici) : « Examiner » propose alors de l'ouvrir.
           lien: { type: 'choix', valeurs: LIENS_CONNUS, facultatif: true },
+          // Un point qui n'existe que tant que cette pièce est fermée
+          // (devant sa porte : comment l'ouvrir).
+          fermee: { ...texte, facultatif: true },
           x: coordonnee,
           z: coordonnee,
           angle,
@@ -365,6 +375,9 @@ export const SCHEMA_PNJ = {
                 lieu: texte,
                 point: { ...texte, facultatif: true },
                 activite: { ...texte, facultatif: true },
+                // Seulement si cette ouverture est faite (jalon 5) : un lieu
+                // débloqué (« bureaux ») ou une pièce ouverte (« coin-calme »).
+                si: { ...texte, facultatif: true },
               },
             },
           },
@@ -575,6 +588,8 @@ export const CHAMPS_DES_ETAPES = {
   // « article » précis ou n'importe lequel, dans un « lieu » ou n'importe où).
   acheter: [],
   placer: [],
+  // Se rendre dans un lieu (« lieu ») : faite en y arrivant.
+  lieu: ['lieu'],
 };
 
 const SCHEMA_ETAPE = {
@@ -595,7 +610,7 @@ const SCHEMA_ETAPE = {
     cible: { ...texte, facultatif: true },
     message: { ...texte, facultatif: true },
     article: { ...texte, facultatif: true },
-    sorte: { type: 'choix', valeurs: ['meuble', 'materiel'], facultatif: true },
+    sorte: { type: 'choix', valeurs: ['meuble', 'materiel', 'lieu', 'piece'], facultatif: true },
     lieu: { ...texte, facultatif: true },
   },
 };
@@ -668,6 +683,12 @@ export const SCHEMA_MODELES_COMMANDES = {
   champs: {
     aValider: { ...texte, facultatif: true },
     parJour: { type: 'nombre', entier: true, min: 1, max: 5 },
+    // Des commandes en plus chaque jour, une fois ce lieu loué (jalon 5).
+    enPlus: {
+      type: 'objet',
+      facultatif: true,
+      champs: { lieu: texte, parJour: { type: 'nombre', entier: true, min: 1, max: 3 } },
+    },
     debloquee: SCHEMA_DEBLOQUEE,
     recompense: { type: 'objet', champs: { argent: deuxEntiers, reputation: deuxEntiers, bonus: entierPositif } },
     clients: {
@@ -770,6 +791,40 @@ export const SCHEMA_BOUTIQUE = {
         },
       },
     },
+    // Les lieux à louer (les bureaux) : « id » est celui du lieu.
+    lieux: {
+      type: 'liste',
+      facultatif: true,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: texte,
+          designation: texte,
+          description: texte,
+          prix: { type: 'nombre', entier: true, min: 1, max: 100000 },
+          niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+        },
+      },
+    },
+    // Les pièces à ouvrir dans un lieu loué : « id » est l'« ouverture »
+    // d'une pièce du lieu.
+    pieces: {
+      type: 'liste',
+      facultatif: true,
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          lieu: texte,
+          nom: texte,
+          designation: texte,
+          description: texte,
+          prix: { type: 'nombre', entier: true, min: 1, max: 100000 },
+          niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+        },
+      },
+    },
   },
 };
 
@@ -789,6 +844,12 @@ function verifierBoutiqueEnPlus(fichier) {
   for (const article of fichier?.meubles || []) {
     if (vus.has(article.meuble)) erreurs.push(`meubles › ${article.meuble} : identifiant en double (un article par meuble)`);
     vus.add(article.meuble);
+  }
+  for (const groupe of ['lieux', 'pieces']) {
+    for (const article of fichier?.[groupe] || []) {
+      if (vus.has(article.id)) erreurs.push(`${groupe} › ${article.id} : identifiant déjà utilisé par un autre article`);
+      vus.add(article.id);
+    }
   }
   return erreurs;
 }

@@ -78,9 +78,9 @@ test('les répliques : rencontre la première fois, puis salutations ; toujours 
 test('quand une personne revient-elle ? (pour le dire quand elle n\'est pas là)', async () => {
   const { pnj } = await chargerDonneesDuDisque();
   const theo = pnj.pnj.find((p) => p.id === 'theo');
-  assert.deepEqual(prochainPassage(theo, 'domicile', 10 * 60, null), { minute: 16 * 60, demain: false });
-  assert.deepEqual(prochainPassage(theo, 'domicile', 17 * 60 + 30, null), { minute: 16 * 60, demain: true });
-  assert.equal(prochainPassage(theo, 'bureaux', 10 * 60, null), null, 'il ne va pas ailleurs');
+  assert.deepEqual(prochainPassage(theo, 'domicile', 10 * 60, null), { minute: 16 * 60, lieu: 'domicile', demain: false });
+  assert.deepEqual(prochainPassage(theo, 'domicile', 17 * 60 + 30, null), { minute: 16 * 60, lieu: 'domicile', demain: true });
+  assert.equal(prochainPassage(theo, 'bureaux', 10 * 60, null), null, 'sans coin calme ouvert, il ne va pas aux bureaux');
   const mentor = pnj.pnj.find((p) => p.id === 'ferrus');
   assert.equal(prochainPassage(mentor, 'domicile', 8 * 60, { modele: 'ferrus' }), null, 'pas quand on joue Ferrus');
 });

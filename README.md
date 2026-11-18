@@ -25,7 +25,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | J2 | Personnages, routines, dialogues | ✅ livré (version 0.3.0) |
 | J3 | L'ordinateur : commandes et création d'applications | ✅ livré (version 0.4.1) |
 | J4 | Quêtes et journal (premier livrable jouable) | ✅ livré (version 0.5.1) |
-| J5 | Progression : boutique, aménagement, bureaux, personnages entre les lieux | 🧪 en cours : étape 0.6 (boutique et aménagement) à essayer |
+| J5 | Progression : boutique, aménagement, bureaux, personnages entre les lieux | 🧪 livré, à valider (version 0.6.0) |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
 
 ## Jouer
@@ -65,6 +65,12 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
   passage est refusé, et le jeu dit pourquoi (en fauteuil roulant, il faut
   des passages d'au moins 1 m et un espace de 1,50 m pour faire
   demi-tour). Touche un meuble acheté pour le déplacer ou le ranger.
+- **Les bureaux de l'atelier** (boutique, au niveau 3) : un local de
+  plain-pied en ville. On y va par la porte d'entrée (« Sortir… », ou
+  « Aller à… » › Autres lieux) ; le trajet prend 10 minutes. Ouvre ensuite
+  leurs pièces une à une (salle de pause, coin calme, salle de réunion) :
+  chacune fait venir des clients, qui passent te voir. Les deux ordinateurs
+  marchent ; pour dormir, on rentre chez soi.
 - **L'affiche de l'Omni-système**, près de la porte d'entrée : examine-la
   pour découvrir le site de l'Omni-système (dans un nouvel onglet).
 - **La vue** : glisse un doigt pour la déplacer, pince ou utilise la molette

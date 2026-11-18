@@ -124,5 +124,44 @@
       "prix": 120,
       "niveau": 3
     }
+  ],
+  "lieux": [
+    {
+      "id": "bureaux",
+      "nom": "Les bureaux de l'atelier",
+      "designation": "les bureaux de l'atelier",
+      "description": "Un local de plain-pied en ville : un accueil, un espace de travail avec ton ordinateur, et des toilettes accessibles. Trois pièces restent à ouvrir quand tu voudras t'agrandir. Ta maison reste à toi.",
+      "prix": 300,
+      "niveau": 3
+    }
+  ],
+  "pieces": [
+    {
+      "id": "salle-pause",
+      "lieu": "bureaux",
+      "nom": "Salle de pause",
+      "designation": "la salle de pause",
+      "description": "Une petite cuisine et une table, pour recevoir autour d'un café. Madeleine et Samia y passeront.",
+      "prix": 120,
+      "niveau": 3
+    },
+    {
+      "id": "coin-calme",
+      "lieu": "bureaux",
+      "nom": "Coin calme",
+      "designation": "le coin calme",
+      "description": "Une pièce au calme, à la lumière douce, pour souffler quand tout va trop vite ou trop fort. Théo viendra y réviser.",
+      "prix": 150,
+      "niveau": 3
+    },
+    {
+      "id": "salle-reunion",
+      "lieu": "bureaux",
+      "nom": "Salle de réunion",
+      "designation": "la salle de réunion",
+      "description": "Une grande table et un écran, pour montrer les maquettes et décider ensemble. Karim y étalera ses plans.",
+      "prix": 200,
+      "niveau": 4
+    }
   ]
 }

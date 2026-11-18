@@ -559,6 +559,46 @@
         { "forme": "boite", "taille": [0.05, 0.03, 0.005], "position": [0.04, 1.08, 0.1925], "couleur": "rose" },
         { "forme": "boite", "taille": [0.9, 0.04, 0.42], "position": [0, 1.22, 0], "couleur": "anthracite" }
       ]
+    },
+    {
+      "id": "comptoir-accueil",
+      "nom": "Comptoir d'accueil",
+      "designation": "le comptoir d'accueil",
+      "description": "Le comptoir d'accueil, à deux hauteurs : debout ou assis, tout le monde est accueilli à la bonne hauteur.",
+      "emprise": [4, 2],
+      "formes": [
+        { "forme": "boite", "taille": [1.3, 1.05, 0.45], "position": [-0.35, 0.525, 0.22], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [1.36, 0.04, 0.55], "position": [-0.35, 1.07, 0.22], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.66, 0.04, 0.55], "position": [0.67, 0.76, 0.22], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.04, 0.74, 0.45], "position": [0.98, 0.37, 0.22], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [1.9, 0.04, 0.4], "position": [0, 0.74, -0.27], "couleur": "bois-clair" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.36], "position": [-0.93, 0.36, -0.27], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.04, 0.72, 0.36], "position": [0.93, 0.36, -0.27], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.24, 0.02, 0.17], "position": [0.62, 0.79, 0.24], "couleur": "anthracite", "rotation": [0, -12, 0] },
+        { "forme": "cylindre", "rayon": 0.06, "rayonHaut": 0.07, "hauteur": 0.1, "position": [-0.82, 1.14, 0.22], "couleur": "pot" },
+        { "forme": "sphere", "rayon": 0.09, "position": [-0.82, 1.27, 0.22], "couleur": "feuille-claire" },
+        { "forme": "boite", "taille": [0.3, 0.2, 0.03], "position": [-0.2, 0.86, -0.4], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.26, 0.16, 0.006], "position": [-0.2, 0.86, -0.3815], "couleur": "ecran-allume" }
+      ]
+    },
+    {
+      "id": "table-reunion",
+      "nom": "Table de réunion",
+      "designation": "la table de réunion",
+      "description": "La grande table de réunion : on y étale les maquettes des applications, et on décide ensemble.",
+      "emprise": [4, 2],
+      "formes": [
+        { "forme": "boite", "taille": [1.9, 0.05, 0.9], "position": [0, 0.74, 0], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.06, 0.715, 0.06], "position": [-0.85, 0.3575, -0.36], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.06, 0.715, 0.06], "position": [0.85, 0.3575, -0.36], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.06, 0.715, 0.06], "position": [-0.85, 0.3575, 0.36], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.06, 0.715, 0.06], "position": [0.85, 0.3575, 0.36], "couleur": "anthracite" },
+        { "forme": "boite", "taille": [0.21, 0.006, 0.3], "position": [-0.5, 0.768, 0.12], "couleur": "blanc", "rotation": [0, 10, 0] },
+        { "forme": "boite", "taille": [0.21, 0.006, 0.3], "position": [-0.2, 0.768, -0.14], "couleur": "blanc", "rotation": [0, -6, 0] },
+        { "forme": "boite", "taille": [0.32, 0.02, 0.22], "position": [0.42, 0.775, -0.1], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.3, 0.2, 0.012], "position": [0.42, 0.88, -0.2], "couleur": "gris", "rotation": [-12, 0, 0] },
+        { "forme": "cylindre", "rayon": 0.045, "hauteur": 0.09, "position": [0.05, 0.81, 0.18], "couleur": "moutarde" }
+      ]
     }
   ]
 }

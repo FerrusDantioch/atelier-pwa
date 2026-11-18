@@ -1,0 +1,164 @@
+{
+  "id": "bureaux",
+  "nom": "Les bureaux de l'atelier",
+  "designation": "les bureaux de l'atelier",
+  "vers": "aux bureaux de l'atelier",
+  "taille": [24, 18],
+  "hauteurMurs": 2.6,
+  "depart": { "x": 2, "z": 13, "angle": 90 },
+  "pieces": [
+    {
+      "id": "salle-reunion", "nom": "Salle de réunion", "designation": "la salle de réunion",
+      "zones": [[0, 0, 8, 7]],
+      "ouverture": "salle-reunion",
+      "sol": { "motif": "lames", "couleurs": ["parquet-clair", "parquet-clair-2"] }
+    },
+    {
+      "id": "salle-pause", "nom": "Salle de pause", "designation": "la salle de pause",
+      "zones": [[8, 0, 6, 7]],
+      "ouverture": "salle-pause",
+      "sol": { "motif": "damier", "couleurs": ["tomette", "tomette-2"] }
+    },
+    {
+      "id": "coin-calme", "nom": "Coin calme", "designation": "le coin calme",
+      "zones": [[14, 0, 5, 7]],
+      "ouverture": "coin-calme",
+      "sol": { "motif": "uni", "couleurs": ["moquette"] }
+    },
+    {
+      "id": "toilettes", "nom": "Toilettes", "designation": "les toilettes",
+      "zones": [[19, 0, 5, 7]],
+      "paroisHautes": true,
+      "sol": { "motif": "damier", "couleurs": ["carrelage", "carrelage-2"] }
+    },
+    {
+      "id": "accueil", "nom": "Accueil", "designation": "l'accueil",
+      "zones": [[0, 7, 8, 11]],
+      "sol": { "motif": "damier", "couleurs": ["sol-bureau", "sol-bureau-2"] }
+    },
+    {
+      "id": "espace-travail", "nom": "Espace de travail", "designation": "l'espace de travail",
+      "zones": [[8, 7, 16, 11]],
+      "sol": { "motif": "lames", "couleurs": ["parquet", "parquet-2"] }
+    }
+  ],
+  "murs": [
+    { "de": [0, 0], "a": [24, 0] },
+    { "de": [24, 0], "a": [24, 18] },
+    { "de": [0, 18], "a": [24, 18] },
+    { "de": [0, 0], "a": [0, 18] },
+    { "de": [8, 0], "a": [8, 18] },
+    { "de": [14, 0], "a": [14, 7] },
+    { "de": [19, 0], "a": [19, 7] },
+    { "de": [0, 7], "a": [24, 7] }
+  ],
+  "ouvertures": [
+    { "type": "porte", "de": [4, 7], "a": [6, 7] },
+    { "type": "porte", "de": [10, 7], "a": [12, 7] },
+    { "type": "porte", "de": [15, 7], "a": [17, 7] },
+    { "type": "porte", "de": [20, 7], "a": [22, 7] },
+    { "type": "porte", "de": [8, 11], "a": [8, 15] },
+    { "type": "porte-entree", "de": [0, 13], "a": [0, 15] },
+    { "type": "fenetre", "de": [2, 0], "a": [6, 0] },
+    { "type": "fenetre", "de": [9, 0], "a": [12, 0] },
+    { "type": "fenetre", "de": [15, 0], "a": [17, 0] },
+    { "type": "fenetre", "de": [21, 0], "a": [23, 0] },
+    { "type": "fenetre", "de": [0, 2], "a": [0, 5] },
+    { "type": "fenetre", "de": [0, 9], "a": [0, 11] },
+    { "type": "fenetre", "de": [24, 9], "a": [24, 12] },
+    { "type": "fenetre", "de": [24, 14], "a": [24, 16] },
+    { "type": "fenetre", "de": [2, 18], "a": [6, 18] },
+    { "type": "fenetre", "de": [10, 18], "a": [14, 18] },
+    { "type": "fenetre", "de": [17, 18], "a": [21, 18] }
+  ],
+  "meubles": [
+    {
+      "id": "ecran-reunion", "meuble": "meuble-tv", "x": 0, "z": 1, "rotation": 90,
+      "description": "L'écran de la salle de réunion : on y montre les maquettes des applications, en grand."
+    },
+    { "id": "table-reunion", "meuble": "table-reunion", "x": 2, "z": 2, "rotation": 0 },
+    { "id": "reunion-chaise-1", "meuble": "chaise", "x": 2, "z": 1, "rotation": 0 },
+    { "id": "reunion-chaise-2", "meuble": "chaise", "x": 4, "z": 1, "rotation": 0 },
+    { "id": "reunion-chaise-3", "meuble": "chaise", "x": 2, "z": 4, "rotation": 180 },
+    { "id": "reunion-chaise-4", "meuble": "chaise", "x": 4, "z": 4, "rotation": 180 },
+    { "id": "reunion-plante", "meuble": "plante", "x": 7, "z": 0, "rotation": 0 },
+
+    {
+      "id": "pause-evier", "meuble": "evier", "x": 8, "z": 0, "rotation": 0,
+      "description": "L'évier de la salle de pause, avec de la place dessous pour les genoux. Les tasses sèchent à côté."
+    },
+    { "id": "pause-plan", "meuble": "plan-travail", "x": 10, "z": 0, "rotation": 0 },
+    { "id": "pause-frigo", "meuble": "frigo", "x": 13, "z": 0, "rotation": 270 },
+    { "id": "pause-table", "meuble": "table-repas", "x": 9, "z": 3, "rotation": 0 },
+    { "id": "pause-chaise-1", "meuble": "chaise", "x": 9, "z": 5, "rotation": 180 },
+    { "id": "pause-chaise-2", "meuble": "chaise", "x": 10, "z": 5, "rotation": 180 },
+
+    { "id": "calme-fauteuil", "meuble": "fauteuil", "x": 15, "z": 1, "rotation": 0 },
+    { "id": "calme-lampe", "meuble": "lampe-sol", "x": 14, "z": 0, "rotation": 0 },
+    { "id": "calme-plante", "meuble": "plante-haute", "x": 18, "z": 0, "rotation": 0 },
+    { "id": "calme-tapis", "meuble": "tapis-rond", "x": 15, "z": 3, "rotation": 0 },
+
+    {
+      "id": "toilettes-lavabo", "meuble": "lavabo", "x": 20, "z": 0, "rotation": 0,
+      "description": "Un lavabo suspendu, à bonne hauteur, et un miroir qu'on voit assis comme debout."
+    },
+    {
+      "id": "toilettes-wc", "meuble": "wc", "x": 23, "z": 0, "rotation": 0,
+      "description": "Des toilettes accessibles : de la place sur le côté pour s'installer, et une barre d'appui."
+    },
+
+    { "id": "comptoir", "meuble": "comptoir-accueil", "x": 2, "z": 9, "rotation": 0 },
+    { "id": "accueil-chaise-1", "meuble": "chaise", "x": 4, "z": 17, "rotation": 180 },
+    { "id": "accueil-chaise-2", "meuble": "chaise", "x": 5, "z": 17, "rotation": 180 },
+    { "id": "accueil-plante", "meuble": "plante", "x": 7, "z": 17, "rotation": 0 },
+
+    {
+      "id": "bureau", "meuble": "bureau", "x": 23, "z": 9, "rotation": 270,
+      "description": "Ton bureau, aux bureaux de l'atelier : le même ordinateur, les mêmes commandes, avec la lumière de la rue en plus."
+    },
+    { "id": "chaise-bureau", "meuble": "chaise-bureau", "x": 22, "z": 10, "rotation": 90 },
+    { "id": "espace-bibliotheque", "meuble": "bibliotheque", "x": 13, "z": 17, "rotation": 180 },
+    { "id": "espace-plante-1", "meuble": "plante", "x": 9, "z": 17, "rotation": 0 },
+    { "id": "espace-plante-2", "meuble": "plante", "x": 23, "z": 17, "rotation": 0 },
+    { "id": "espace-lampe", "meuble": "lampe-sol", "x": 23, "z": 7, "rotation": 0 }
+  ],
+  "points": [
+    {
+      "id": "porte-entree",
+      "nom": "Porte d'entrée",
+      "designation": "la porte d'entrée",
+      "description": "La porte d'entrée des bureaux : de plain-pied, large, avec une sonnette lumineuse qu'on voit autant qu'on l'entend.",
+      "x": 0, "z": 13, "angle": 270
+    },
+    {
+      "id": "porte-reunion",
+      "nom": "Porte de la salle de réunion",
+      "designation": "la porte de la salle de réunion",
+      "description": "La salle de réunion n'est pas encore aménagée. Tu peux l'ouvrir dans la boutique, sur l'ordinateur.",
+      "fermee": "salle-reunion",
+      "x": 4, "z": 7, "angle": 180
+    },
+    {
+      "id": "porte-pause",
+      "nom": "Porte de la salle de pause",
+      "designation": "la porte de la salle de pause",
+      "description": "La salle de pause n'est pas encore aménagée. Tu peux l'ouvrir dans la boutique, sur l'ordinateur.",
+      "fermee": "salle-pause",
+      "x": 10, "z": 7, "angle": 180
+    },
+    {
+      "id": "porte-calme",
+      "nom": "Porte du coin calme",
+      "designation": "la porte du coin calme",
+      "description": "Le coin calme n'est pas encore aménagé. Tu peux l'ouvrir dans la boutique, sur l'ordinateur.",
+      "fermee": "coin-calme",
+      "x": 15, "z": 7, "angle": 180
+    },
+    { "id": "accueil-attente", "x": 5, "z": 13, "angle": 0 },
+    { "id": "pres-du-bureau-atelier", "x": 20, "z": 10, "angle": 90 },
+    { "id": "pause-table-est", "x": 12, "z": 4, "angle": 270 },
+    { "id": "pause-plan-devant", "x": 11, "z": 1, "angle": 180 },
+    { "id": "reunion-table-est", "x": 6, "z": 3, "angle": 270 },
+    { "id": "calme-pres-du-fauteuil", "x": 17, "z": 1, "angle": 270 }
+  ]
+}

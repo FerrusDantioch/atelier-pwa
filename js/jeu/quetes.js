@@ -23,7 +23,8 @@
 //   acheter     (jalon 5) avoir acheté un « article », ou n'importe quel
 //               article d'une « sorte » (meuble, materiel) ;
 //   placer      (jalon 5) avoir posé un meuble acheté (un « article »
-//               précis ou n'importe lequel), dans un « lieu » ou ailleurs.
+//               précis ou n'importe lequel), dans un « lieu » ou ailleurs ;
+//   lieu        (jalon 5) être allé dans ce « lieu » (les bureaux).
 // « parler » et « aller » sont des gestes du joueur, retenus au moment où il
 // les fait ; les autres se constatent dans la partie.
 //
@@ -46,10 +47,13 @@ import {
 import { gagner } from './economie.js';
 
 // Les étapes qui se constatent dans la partie (les autres sont des gestes).
-const CONSTATEES = new Set(['demande', 'commande', 'drapeau', 'reputation', 'acheter', 'placer']);
+const CONSTATEES = new Set(['demande', 'commande', 'drapeau', 'reputation', 'acheter', 'placer', 'lieu']);
 
 // La « destination » d'une étape « placer » : le mode Aménager.
 export const DESTINATION_AMENAGER = 'amenager';
+
+// La « destination » d'une étape « lieu » : « lieu:bureaux » (y aller).
+export const PREFIXE_DESTINATION_LIEU = 'lieu:';
 
 // Posé quand on choisit un texte plus grand dans l'atelier (atelier.js).
 export const DRAPEAU_TEXTE_AGRANDI = 'atelier-texte-agrandi';
@@ -81,6 +85,8 @@ function constatee(etape, partie, paliers) {
     case 'acheter':
       return (partie.possessions || []).some((possession) => (!etape.article || possession.article === etape.article)
         && (!etape.sorte || possession.sorte === etape.sorte));
+    case 'lieu':
+      return partie.lieux?.actuel === etape.lieu;
     case 'placer': {
       const possessions = new Map((partie.possessions || []).map((possession) => [possession.id, possession]));
       return Object.entries(partie.lieux?.amenagements || {}).some(([lieu, places]) => (!etape.lieu || lieu === etape.lieu)
@@ -229,6 +235,7 @@ export function destinationDEtape(etape, commandes) {
     case 'reputation':
     case 'acheter': return ID_BUREAU;
     case 'placer': return DESTINATION_AMENAGER;
+    case 'lieu': return `${PREFIXE_DESTINATION_LIEU}${etape.lieu}`;
     case 'drapeau': return etape.destination || null;
     case 'parler': return etape.pnj;
     case 'aller': return etape.cible;
@@ -277,5 +284,6 @@ export function empreinteDesQuetes(partie) {
     partie.quetes.suivie,
     (partie.possessions || []).length,
     Object.values(partie.lieux?.amenagements || {}).map((places) => places.length).join(','),
+    partie.lieux?.actuel,
   ].join('|');
 }

@@ -1,11 +1,13 @@
 // =============================================================================
 // boutique.js — l'écran « Boutique » de l'ordinateur (jalon 5)
 // -----------------------------------------------------------------------------
-// Deux rayons (data/boutique.json) :
+// Quatre rayons (data/boutique.json) :
 //   Matériel pour ton bureau  il s'installe tout seul et rapporte quelques
 //                             pièces de plus à chaque livraison ;
 //   Meubles et décoration     ils t'attendent dans tes affaires, et se posent
-//                             avec « Aménager » (menu Pause).
+//                             avec « Aménager » (menu Pause) ;
+//   Les bureaux de l'atelier  un lieu à louer (on y va par la porte d'entrée) ;
+//   Agrandir les bureaux      des pièces à ouvrir, une à une.
 // Chaque article a sa photo (prise par le moteur 3D), son prix, et dit en
 // toutes lettres s'il est disponible : sinon, le niveau qu'il faut ou
 // l'argent qui manque. Un achat se confirme toujours avant d'être payé.
@@ -41,15 +43,21 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
   // le meuble qui le porte (le bureau, la chaise), déjà équipé.
   function meubleDe(article) {
     if (article.sorte === 'meuble') return meubles.find((meuble) => meuble.id === article.id) || null;
+    if (article.sorte !== 'materiel') return null; // un lieu, une pièce : pas de photo
     const porteur = meubles.find((meuble) => meuble.formes.some((forme) => forme.element === article.element));
     return porteur ? catalogueEquipe(meubles, [article]).get(porteur.id) : null;
   }
 
   // La désignation d'un article dans une phrase (« le cactus »).
   function designation(article) {
-    if (article.sorte === 'materiel') return article.designation;
+    if (article.sorte !== 'meuble') return article.designation;
     return meubles.find((meuble) => meuble.id === article.id)?.designation || article.nom;
   }
+
+  // Le verbe de l'achat : acheter un meuble, louer un lieu, ouvrir une pièce.
+  const verbe = (article) => ({ lieu: 'louer', piece: 'ouvrir' }[article.sorte] || 'acheter');
+  const designationDuLieu = (id) => articles.find((article) => article.sorte === 'lieu' && article.id === id)?.designation
+    || donnees.lieux[id]?.designation || id;
 
   function photoDe(article) {
     const meuble = meubleDe(article);
@@ -65,14 +73,19 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
   function etatDeLaCarte(article, partie) {
     const etat = etatDeLArticle(article, partie, ctx.paliers);
     if (etat.possible) {
+      const texte = t(`boutique.${verbe(article)}`);
       return el('button', {
         class: 'bouton', type: 'button',
-        'aria-label': `${t('boutique.acheter')} : ${article.nom}, ${t('boutique.acheterComplement', { prix: ctx.montant(article.prix) })}`,
+        'aria-label': `${texte} : ${article.nom}, ${t('boutique.acheterComplement', { prix: ctx.montant(article.prix) })}`,
         onClick: () => confirmer(article),
-      }, icone('boutique'), t('boutique.acheter'));
+      }, icone(article.sorte === 'lieu' || article.sorte === 'piece' ? 'cle' : 'boutique'), texte);
     }
     if (etat.raison === 'installe') {
-      return el('p', { class: 'carte-commande-livree' }, icone('coche'), t('boutique.installe'));
+      const cle = { lieu: 'boutique.loue', piece: 'boutique.ouverte' }[article.sorte] || 'boutique.installe';
+      return el('p', { class: 'carte-commande-livree' }, icone('coche'), t(cle));
+    }
+    if (etat.raison === 'lieu') {
+      return el('p', { class: 'carte-article-verrou' }, icone('cadenas'), t('boutique.dAbordLouer', { lieu: designationDuLieu(etat.lieu) }));
     }
     if (etat.raison === 'niveau') {
       const palier = ctx.paliers.find((p) => p.niveau === etat.niveau);
@@ -100,7 +113,7 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
     if (liste.length === 0) return null;
     return el('section', { class: 'groupe-commandes' },
       el('h4', {}, t(`boutique.rayons.${sorte}`)),
-      el('p', { class: 'aide' }, t(sorte === 'materiel' ? 'boutique.materielAide' : 'boutique.meubleAide')),
+      el('p', { class: 'aide' }, t(`boutique.${sorte}Aide`)),
       el('ul', { class: 'liste-commandes-recues liste-articles' }, liste.map((article) => carte(article, partie))));
   }
 
@@ -116,6 +129,8 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
         el('p', { class: 'ligne-compte' }, icone('etoile'), t('boutique.niveauActuel', { niveau: niveau.niveau, nom: niveau.nom })),
         rayon('materiel', partie),
         rayon('meuble', partie),
+        rayon('lieu', partie),
+        rayon('piece', partie),
       ],
       actions: [{ texte: t('ordinateur.retour'), icone: 'retour', surClic: () => ctx.aller.accueil() }],
     });
@@ -125,8 +140,9 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
   function confirmer(article) {
     const partie = partieEnCours();
     const image = photoDe(article);
+    const titres = { lieu: 'boutique.confirmerLouer', piece: 'boutique.confirmerOuvrir' };
     ctx.montrer({
-      titre: t('boutique.confirmerTitre', { article: designation(article) }),
+      titre: t(titres[article.sorte] || 'boutique.confirmerTitre', { article: designation(article) }),
       contenu: [
         image ? el('div', { class: 'carte-article-photo carte-article-photo-grande' }, image) : null,
         el('p', {}, typographier(article.description)),
@@ -138,7 +154,12 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
       ],
       actions: [
         { texte: t('ordinateur.retour'), icone: 'retour', surClic: () => liste() },
-        { texte: t('boutique.confirmerOui'), icone: 'boutique', principal: true, surClic: () => payer(article) },
+        {
+          texte: article.sorte === 'meuble' || article.sorte === 'materiel' ? t('boutique.confirmerOui') : t(`boutique.${verbe(article)}`),
+          icone: article.sorte === 'meuble' || article.sorte === 'materiel' ? 'boutique' : 'cle',
+          principal: true,
+          surClic: () => payer(article),
+        },
       ],
       focus: (boutons) => boutons[boutons.length - 1],
     });
@@ -154,9 +175,13 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
     surAchat?.(possession, article);
     // Les quêtes avancent tout de suite (« achète un meuble ») : on le dit ici.
     const evenements = progresserQuetes({ annoncer: false });
-    const message = article.sorte === 'materiel'
-      ? t('boutique.acheteMateriel', { article: majuscule(designation(article)), bonus: ctx.montant(article.bonus) })
-      : t('boutique.acheteMeuble', { article: majuscule(designation(article)) });
+    const messages = {
+      materiel: () => t('boutique.acheteMateriel', { article: majuscule(designation(article)), bonus: ctx.montant(article.bonus) }),
+      meuble: () => t('boutique.acheteMeuble', { article: majuscule(designation(article)) }),
+      lieu: () => t('boutique.acheteLieu', { article: designation(article), minutes: ctx.jeu.deplacement.trajet ?? 10 }),
+      piece: () => t('boutique.achetePiece', { article: designation(article), lieu: designationDuLieu(article.lieu) }),
+    };
+    const message = messages[article.sorte]();
     const actions = [{ texte: t('boutique.continuer'), icone: 'boutique', surClic: () => liste() }];
     if (article.sorte === 'meuble' && surPlacer) {
       actions.push({

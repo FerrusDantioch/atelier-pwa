@@ -24,12 +24,17 @@ import { TAILLE_CASE, angleVers, profilDeDeplacement } from './grille.js';
 /**
  * Crée les habitants d'un lieu.
  *   scene, lieu, grille, donnees, palette
- *   joueur()   le joueur actuel (Ferrus ou non : le mentor n'est pas là si on joue Ferrus)
+ *   joueur()    le joueur actuel (Ferrus ou non : le mentor n'est pas là si on joue Ferrus)
+ *   ouvertes()  ce qui est ouvert dans la partie (js/jeu/lieux.js) : un
+ *               créneau marqué « si » n'a lieu qu'avec son ouverture
  */
-export function creerHabitants({ scene, lieu, grille: grilleDeDepart, donnees, palette, joueur }) {
-  // La grille change quand un meuble est posé ou rangé (changerGrille).
+export function creerHabitants({
+  scene, lieu, grille: grilleDeDepart, donnees, palette, joueur, ouvertes = () => null,
+}) {
+  // La grille change quand un meuble est posé ou rangé (changerGrille), et
+  // les points quand une pièce s'ouvre (changerLieu).
   let grille = grilleDeDepart;
-  const points = new Map((lieu.points || []).map((point) => [point.id, point]));
+  let points = new Map((lieu.points || []).map((point) => [point.id, point]));
   const vitesse = donnees.jeu.deplacement.vitesse;
   const personnages = donnees.personnages;
 
@@ -132,10 +137,15 @@ export function creerHabitants({ scene, lieu, grille: grilleDeDepart, donnees, p
       grille = nouvelle;
     },
 
+    // Une pièce s'est ouverte : ses points (les places des habitants) existent.
+    changerLieu(nouveau) {
+      points = new Map((nouveau.points || []).map((point) => [point.id, point]));
+    },
+
     // Pose chacun directement à sa place pour cette heure (chargement, réveil).
     placer(minute, caseJoueur) {
       for (const habitant of habitants) {
-        const creneau = presenceDans(habitant.pnj, lieu.id, minute, joueur());
+        const creneau = presenceDans(habitant.pnj, lieu.id, minute, joueur(), ouvertes());
         if (!creneau) {
           disparaitre(habitant);
           continue;
@@ -154,7 +164,7 @@ export function creerHabitants({ scene, lieu, grille: grilleDeDepart, donnees, p
     suivre(minute, caseJoueur) {
       const evenements = [];
       for (const habitant of habitants) {
-        const creneau = presenceDans(habitant.pnj, lieu.id, minute, joueur());
+        const creneau = presenceDans(habitant.pnj, lieu.id, minute, joueur(), ouvertes());
         if (creneau === habitant.creneau) continue;
         if (habitant.parle) continue; // on reprendra après la conversation
         if (!creneau) {
