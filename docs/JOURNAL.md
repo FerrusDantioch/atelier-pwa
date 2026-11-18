@@ -1,12 +1,13 @@
 # Journal du projet — Atelier PWA
 
-## 🧪 Jalon 4 — Les quêtes et le journal (version 0.5.1) — publié, à valider
+## ✅ Jalon 4 — Les quêtes et le journal (version 0.5.1, 18 novembre 2026)
 
-Fusionné dans `main` le 15 novembre 2026 à la demande de Ferrus (version
-0.5.0), pour l'essayer. Version 0.5.1 : les corrections demandées après son
-essai sur téléphone (la barre du haut qui changeait de forme, les fenêtres
-qui scintillaient, les saccades en marchant) et l'affiche de l'Omni-système
-qu'il a demandée. Validation en attente. Les deux quêtes d'Halaé,
+Validé par Ferrus le 18 novembre 2026, textes de la quête du mentor
+compris, puis fusionné dans `main` (version 0.5.1). Publié d'abord en 0.5.0
+le 15 novembre pour l'essayer ; la 0.5.1 apporte les corrections demandées
+après son essai sur téléphone (la barre du haut qui changeait de forme, les
+fenêtres qui scintillaient, les saccades en marchant) et l'affiche de
+l'Omni-système qu'il a demandée. Les deux quêtes d'Halaé,
 et sa nouvelle commande « Mes sous-titres », ont été validées par elle (via
 Ferrus) le 15 novembre 2026, telles que proposées.
 
@@ -141,10 +142,8 @@ Ferrus) le 15 novembre 2026, telles que proposées.
 
 ### En attente
 
-- La validation du jalon 4 par Ferrus.
-- Son avis sur les textes de la quête du mentor (« Bienvenue à
-  l'atelier ») ; ceux de Théo (personnage fictif) sont à relire s'il le
-  souhaite.
+- L'adresse du portfolio de Ferrus, si elle diffère de celle du site de
+  l'Omni-système (l'affiche montre celle-ci).
 
 ## ✅ Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1, 15 novembre 2026)
 

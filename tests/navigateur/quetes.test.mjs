@@ -211,7 +211,8 @@ test('les commandes du jour : au niveau 3, renouvelées chaque matin, gardées u
 
   // On accepte la première : elle est recopiée dans la partie.
   await cartes.first().getByRole('button', { name: /^Lire la commande/ }).click();
-  assert.match(await lireTexte(fenetre), /Commande de /);
+  // La personne est tirée au hasard : « Commande de Lucie » ou « Commande d'Inès ».
+  assert.match(await lireTexte(fenetre), /Commande d(e |')/);
   await fenetre.getByRole('button', { name: 'Accepter la commande' }).click();
   await fenetre.getByRole('heading', { name: /^Atelier :/ }).waitFor();
   const acceptee = Object.keys((await lirePartieEnCours(page)).commandes.aleatoires);

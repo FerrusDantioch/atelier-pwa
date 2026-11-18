@@ -200,7 +200,9 @@ Décidé avec Ferrus (14 novembre 2026) :
 - **Jalon 3** : validé par Ferrus le 15/11 (« Tout est bon »), répliques
   du mentor en visio et commande d'essai comprises.
 - **Jalon 4** : les deux quêtes d'Halaé validées par elle (via Ferrus) le
-  15/11, telles que proposées.
+  15/11, telles que proposées ; jalon validé par Ferrus le 18/11, textes
+  de la quête du mentor compris. Une affiche de l'Omni-système (logo, nom,
+  adresse de `js/config.js`) près de la porte d'entrée, à sa demande.
 
 Recommandations appliquées en attendant une réponse contraire :
 
@@ -218,7 +220,9 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
 2. *(Réglée : fiche d'Halaé validée le 14/11 ; apparence détaillée à
    décrire par elle quand elle le souhaite.)*
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
-   portfolio ? lesquelles en affiche au domicile ? quels statuts ?
+   portfolio ? lesquelles en affiche au domicile ? quels statuts ? Et
+   l'adresse du portfolio, si elle diffère de celle du site de
+   l'Omni-système (déjà dans `js/config.js`).
 4. **Mentions légales** (avant J6) : statut et champs à compléter.
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.

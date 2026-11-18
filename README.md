@@ -24,7 +24,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | J1 | Le domicile en 3D, caméra, déplacements, choix du personnage | ✅ livré (version 0.2.0) |
 | J2 | Personnages, routines, dialogues | ✅ livré (version 0.3.0) |
 | J3 | L'ordinateur : commandes et création d'applications | ✅ livré (version 0.4.1) |
-| J4 | Quêtes et journal (premier livrable jouable) | 🧪 publié, à valider (version 0.5.1) |
+| J4 | Quêtes et journal (premier livrable jouable) | ✅ livré (version 0.5.1) |
 | J5 | Progression, bureaux, nouveaux lieux | à venir |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
 
