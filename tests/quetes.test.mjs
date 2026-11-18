@@ -1,6 +1,7 @@
 // Tests : les quêtes (jalon 4) — déblocage, étapes constatées ou faites par
 // le joueur, étapes facultatives, fin et récompense, quête suivie, objectif
 // affiché en haut, partie d'une ancienne version, et vérification des données.
+// Jalon 5 : les étapes « acheter » et « placer ».
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -40,12 +41,14 @@ function livrer(partie, id) {
 }
 
 test('les quêtes du premier livrable sont chargées : cinq, une par principe', () => {
-  assert.equal(quetes.length, 5);
-  assert.deepEqual(new Set(quetes.map((q) => q.principe)), new Set(Object.keys(donnees.quetes.principes)));
-  assert.deepEqual(quetes.map((q) => q.titre), [
+  const premierLivrable = quetes.slice(0, 5);
+  assert.deepEqual(new Set(premierLivrable.map((q) => q.principe)), new Set(Object.keys(donnees.quetes.principes)));
+  assert.deepEqual(premierLivrable.map((q) => q.titre), [
     'Bienvenue à l\'atelier', 'Le planning de publication', 'Un matin sans surprise',
     'Des sous-titres pour tout le monde', 'Réviser sans se noyer',
   ]);
+  // Jalon 5 : aménager la maison.
+  assert.deepEqual(quetes.slice(5).map((q) => q.titre), ['Un intérieur où tout le monde passe']);
 });
 
 test('les textes validés par Halaé n\'ont pas changé', () => {
@@ -136,7 +139,7 @@ test('les quêtes de Théo : vive voix à 16 h, livraison, puis des nouvelles', 
   livrer(partie, 'halae-planning');
   const evenements = mettreAJourQuetes(partie, quetes, paliers);
   assert.deepEqual(types(evenements).filter((e) => e.startsWith('nouvelle') || e.startsWith('finie')),
-    ['finie:bienvenue', 'finie:planning-publication', 'nouvelle:matin-sans-surprise']);
+    ['finie:bienvenue', 'finie:planning-publication', 'nouvelle:matin-sans-surprise', 'nouvelle:interieur-pour-tous']);
   assert.ok(!partie.quetes.actives['sous-titres'], 'la quête des sous-titres attend la commande de Karim');
   const matin = quete('matin-sans-surprise');
   assert.equal(objectifDeQuete(partie, contexte).destination, 'theo');
@@ -191,7 +194,8 @@ test('une partie d\'une ancienne version : ce qui est fait compte, sans annonce 
   accepterCommande(partie, commande('theo-changements'), creation);
   const argent = partie.argent;
   const evenements = mettreAJourQuetes(partie, quetes, paliers);
-  assert.deepEqual(types(evenements), ['finie:bienvenue', 'finie:planning-publication', 'nouvelle:matin-sans-surprise']);
+  assert.deepEqual(types(evenements), ['finie:bienvenue', 'finie:planning-publication', 'nouvelle:matin-sans-surprise',
+    'nouvelle:interieur-pour-tous']);
   assert.equal(partie.argent, argent + 40, 'les deux récompenses');
   const matin = etapesDeQuete(quete('matin-sans-surprise'), partie, paliers);
   assert.equal(matin[0].faite, true, 'sa commande déjà acceptée vaut la demande');
@@ -241,4 +245,49 @@ test('des données de quêtes fautives sont refusées avec une explication', () 
   assert.match(problemes, /ferrus n'est pas là quand on joue « ferrus »/);
   assert.match(problemes, /la cible « piscine » n'est ni un meuble/);
   assert.match(problemes, /reviser-sans-se-noyer : ne commence ou ne se termine jamais/);
+});
+
+test('jalon 5 : acheter un meuble, le poser chez soi ; le matériel reste facultatif', () => {
+  const partie = partieNeuve();
+  partie.drapeaux[DRAPEAU_VISIO_ACCUEIL] = true;
+  livrer(partie, 'essai-courses');
+  mettreAJourQuetes(partie, quetes, paliers);
+  proposerCommande(partie, commande('halae-planning'));
+  livrer(partie, 'halae-planning');
+  assert.ok(types(mettreAJourQuetes(partie, quetes, paliers)).includes('nouvelle:interieur-pour-tous'));
+  const interieur = quete('interieur-pour-tous');
+  assert.equal(etapeCourante(interieur, partie, paliers).etape.id, 'achat');
+  assert.equal(objectifDeQuete(partie, contexte, 'interieur-pour-tous').destination, 'bureau', 'on achète sur l\'ordinateur');
+
+  // Du matériel ne suffit pas : il faut un meuble.
+  partie.possessions.push({ id: 'achat-1', article: 'grand-ecran', sorte: 'materiel', jour: 1, prix: 90 });
+  assert.deepEqual(types(mettreAJourQuetes(partie, quetes, paliers)), ['etape:interieur-pour-tous/materiel'],
+    'l\'étape facultative du matériel est faite');
+  partie.possessions.push({ id: 'achat-2', article: 'cactus', sorte: 'meuble', jour: 1, prix: 10 });
+  assert.deepEqual(types(mettreAJourQuetes(partie, quetes, paliers)), ['etape:interieur-pour-tous/achat']);
+  assert.equal(objectifDeQuete(partie, contexte, 'interieur-pour-tous').destination, 'amenager', 'poser : le mode Aménager');
+
+  // Posé ailleurs qu'au domicile, ça ne compte pas.
+  partie.lieux.amenagements.bureaux = [{ id: 'achat-2', x: 1, z: 1, rotation: 0 }];
+  assert.deepEqual(types(mettreAJourQuetes(partie, quetes, paliers)), []);
+  partie.lieux.amenagements = { domicile: [{ id: 'achat-2', x: 9, z: 10, rotation: 0 }] };
+  const argent = partie.argent;
+  assert.deepEqual(types(mettreAJourQuetes(partie, quetes, paliers)), ['etape:interieur-pour-tous/pose', 'finie:interieur-pour-tous']);
+  assert.equal(partie.argent, argent + interieur.recompense.argent);
+  assert.deepEqual(verifierPartie(partie), []);
+});
+
+test('les étapes « acheter » et « placer » fautives sont refusées', () => {
+  const copie = JSON.parse(JSON.stringify(donnees));
+  const fautives = copie.quetes.quetes;
+  fautives[5].etapes.push(
+    { id: 'licorne', type: 'acheter', article: 'licorne', texte: 'achète une licorne', facultative: true },
+    { id: 'ecran', type: 'placer', article: 'grand-ecran', texte: 'pose l\'écran', facultative: true },
+    { id: 'lune', type: 'placer', lieu: 'lune', texte: 'pose un meuble sur la Lune', facultative: true },
+    { id: 'rien', type: 'acheter', texte: 'achète', facultative: true },
+  );
+  const problemes = verifierCoherence(copie).join('\n');
+  assert.match(problemes, /l'article « licorne » n'est pas vendu/);
+  assert.match(problemes, /seuls les meubles se placent/);
+  assert.match(problemes, /lieu : « lune » n'existe pas/);
 });

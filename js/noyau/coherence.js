@@ -31,8 +31,10 @@ import { DRAPEAUX_D_ETAPES, mettreAJourQuetes } from '../jeu/quetes.js';
 import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personnage.js';
 import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
 import { heureEnMinutes } from './format-sauvegarde.js';
-import { casesPourAtteindre, distancesDepuis } from '../monde/chemin.js';
-import { PROFILS, TAILLE_CASE, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
+import { problemesDAcces } from '../jeu/amenagement.js';
+import { articlesDeLaBoutique } from '../jeu/boutique.js';
+import { distancesDepuis } from '../monde/chemin.js';
+import { TAILLE_CASE, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
 
 const NOMS_PROFILS = { pieton: 'à pied', fauteuil: 'en fauteuil roulant (passages d\'au moins 1 m)' };
 
@@ -46,6 +48,13 @@ function verifierCouleurs(donnees, signaler) {
       }
     });
   });
+  for (const article of donnees.boutique?.materiel || []) {
+    article.formes.forEach((forme, n) => {
+      if (!existe(forme.couleur)) {
+        signaler('data/boutique.json', `materiel › ${article.id} › formes › n°${n + 1} : la couleur « ${forme.couleur} » n'existe pas dans data/palette.json`);
+      }
+    });
+  }
   for (const [champ, options] of Object.entries(donnees.personnages?.options || {})) {
     for (const option of options) {
       if (option.couleur && !existe(option.couleur)) {
@@ -242,37 +251,16 @@ function verifierLieu(lieu, donnees, signaler) {
     }
   }
 
-  // L'accessibilité ne se vérifie que si le lieu tient debout.
+  // L'accessibilité ne se vérifie que si le lieu tient debout (les mêmes
+  // règles que pour les meubles posés par le joueur : amenagement.js).
   if (problemesDeStructure > 0) return;
   const grille = creerGrille(lieu, catalogue);
-  const depart = { x: lieu.depart.x, z: lieu.depart.z };
-  for (const profil of PROFILS) {
-    const facon = NOMS_PROFILS[profil];
-    if (!grille.caseAccessible(depart.x, depart.z, profil)) {
-      signaler(chemin, `depart : la case ${depart.x},${depart.z} n'est pas libre ${facon}`);
-      continue;
-    }
-    const distances = distancesDepuis(grille, depart, profil);
-    for (const piece of lieu.pieces) {
-      const atteinte = [...distances.keys()].some((cle) => {
-        const [x, z] = cle.split(',').map(Number);
-        return grille.piece(x, z) === piece.id;
-      });
-      if (!atteinte) signaler(chemin, `pieces › ${piece.id} : impossible d'y entrer ${facon}`);
-    }
-    for (const place of lieu.meubles) {
-      const meuble = catalogue.get(place.meuble);
-      if (!(place.description || meuble.description)) continue;
-      const emprise = grille.emprises.get(place.id);
-      if (casesPourAtteindre(grille, emprise, depart, profil, distances).length === 0) {
-        signaler(chemin, `meubles › ${place.id} : impossible de s'en approcher ${facon}`);
-      }
-    }
-    for (const point of (lieu.points || []).filter((p) => p.description)) {
-      if (!distances.has(`${point.x},${point.z}`)) {
-        signaler(chemin, `points › ${point.id} : la case ${point.x},${point.z} n'est pas atteignable ${facon}`);
-      }
-    }
+  for (const probleme of problemesDAcces(lieu, grille, catalogue)) {
+    const facon = NOMS_PROFILS[probleme.profil];
+    if (probleme.type === 'depart') signaler(chemin, `depart : la case ${lieu.depart.x},${lieu.depart.z} n'est pas libre ${facon}`);
+    else if (probleme.type === 'piece') signaler(chemin, `pieces › ${probleme.id} : impossible d'y entrer ${facon}`);
+    else if (probleme.type === 'meuble') signaler(chemin, `meubles › ${probleme.id} : impossible de s'en approcher ${facon}`);
+    else signaler(chemin, `points › ${probleme.id} : la case ${probleme.x},${probleme.z} n'est pas atteignable ${facon}`);
   }
 }
 
@@ -304,8 +292,37 @@ export function verifierCoherence(donnees) {
   verifierPnj(donnees, signaler);
   verifierCommandes(donnees, signaler);
   verifierModelesCommandes(donnees, signaler);
+  verifierBoutique(donnees, signaler);
   verifierQuetes(donnees, signaler);
   return problemes;
+}
+
+// La boutique (jalon 5) : chaque meuble vendu existe, chaque matériel
+// remplace un élément qui existe sur un meuble, rien n'est hors d'atteinte.
+function verifierBoutique(donnees, signaler) {
+  const chemin = 'data/boutique.json';
+  const boutique = donnees.boutique;
+  if (!boutique) return;
+  const meubles = donnees.meubles?.meubles || [];
+  const catalogue = new Map(meubles.map((meuble) => [meuble.id, meuble]));
+  const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
+  const elements = new Set(meubles.flatMap((meuble) => meuble.formes.map((forme) => forme.element)).filter(Boolean));
+  for (const article of boutique.materiel) {
+    const ou = `materiel › ${article.id}`;
+    if (catalogue.has(article.id)) signaler(chemin, `${ou} : cet identifiant est déjà celui d'un meuble de data/meubles.json`);
+    if (!elements.has(article.element)) {
+      signaler(chemin, `${ou} › element : aucun meuble de data/meubles.json n'a de formes « ${article.element} » à remplacer`);
+    }
+    if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+  }
+  for (const article of boutique.meubles) {
+    const ou = `meubles › ${article.meuble}`;
+    const meuble = catalogue.get(article.meuble);
+    if (!meuble) signaler(chemin, `${ou} : le meuble « ${article.meuble} » n'existe pas dans data/meubles.json`);
+    else if (!meuble.designation) signaler(chemin, `${ou} : le meuble doit avoir une « designation » dans data/meubles.json (« le cactus »)`);
+    if (meuble?.actions?.length) signaler(chemin, `${ou} : un meuble avec des actions (dormir, ordinateur) ne se vend pas`);
+    if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
+  }
 }
 
 // Ce que les pièces du mini-jeu savent apporter, et les réglages de confort.
@@ -387,6 +404,10 @@ function verifierQuetes(donnees, signaler) {
   const commandes = new Map((donnees.commandes?.commandes || []).map((commande) => [commande.id, commande]));
   const ids = new Set(fichier.quetes.map((quete) => quete.id));
   const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
+  // Ce que vend la boutique (jalon 5).
+  const articles = new Map(donnees.boutique && donnees.meubles
+    ? articlesDeLaBoutique(donnees.boutique, donnees.meubles.meubles).map((article) => [article.id, article])
+    : []);
   // Ce qu'on peut viser dans les lieux : meubles, points et pièces.
   const endroits = new Set();
   for (const lieu of Object.values(donnees.lieux || {})) {
@@ -430,6 +451,16 @@ function verifierQuetes(donnees, signaler) {
         }
       } else if (etape.type === 'aller' && !endroits.has(etape.cible)) {
         signaler(chemin, `${ici} : la cible « ${etape.cible} » n'est ni un meuble, ni un point, ni une pièce d'un lieu`);
+      } else if (etape.type === 'acheter' || etape.type === 'placer') {
+        const article = etape.article ? articles.get(etape.article) : null;
+        if (etape.article && !article) signaler(chemin, `${ici} : l'article « ${etape.article} » n'est pas vendu dans data/boutique.json`);
+        if (article && etape.sorte && article.sorte !== etape.sorte) {
+          signaler(chemin, `${ici} : l'article « ${etape.article} » n'est pas de la sorte « ${etape.sorte} »`);
+        }
+        if (etape.type === 'placer' && ((article && article.sorte !== 'meuble') || etape.sorte === 'materiel')) {
+          signaler(chemin, `${ici} : seuls les meubles se placent (le matériel s'installe tout seul)`);
+        }
+        if (etape.lieu && !donnees.lieux?.[etape.lieu]) signaler(chemin, `${ici} › lieu : « ${etape.lieu} » n'existe pas`);
       }
       if (etape.destination && !endroits.has(etape.destination) && !pnjParId.has(etape.destination)) {
         signaler(chemin, `${ici} › destination : « ${etape.destination} » n'est ni un endroit d'un lieu, ni une personne`);
@@ -442,6 +473,11 @@ function verifierQuetes(donnees, signaler) {
   if (!donnees.jeu || !donnees.commandes || !donnees.creation) return;
   const paliers = donnees.jeu.reputation.paliers;
   const liste = donnees.commandes.commandes;
+  // Tout ce qui se vend est acheté, et chaque meuble posé dans chaque lieu.
+  const possessions = [...articles.values()].map((article, n) => ({
+    id: `achat-${n + 1}`, article: article.id, sorte: article.sorte, jour: 1, prix: article.prix,
+  }));
+  const poses = possessions.filter((p) => p.sorte === 'meuble').map((p) => ({ id: p.id, x: 0, z: 0, rotation: 0 }));
   const partie = {
     drapeaux: new Proxy({}, { get: () => true }), // tous les gestes faits
     argent: 0,
@@ -449,6 +485,8 @@ function verifierQuetes(donnees, signaler) {
     temps: { jour: 1, minute: 0 },
     commandes: { enCours: {}, livrees: [], aleatoires: {} },
     quetes: { actives: {}, finies: [], suivie: null },
+    possessions,
+    lieux: { amenagements: Object.fromEntries(Object.keys(donnees.lieux || {}).map((id) => [id, poses])) },
   };
   for (let tour = 0; tour <= liste.length + fichier.quetes.length + 1; tour += 1) {
     mettreAJourQuetes(partie, fichier.quetes, paliers);

@@ -18,7 +18,7 @@ import { SCHEMA_COMMANDE } from './schemas.js';
 import { verifier } from './verification.js';
 
 export const FORMAT = 'atelier-pwa-partie';
-export const VERSION_FORMAT = 3;
+export const VERSION_FORMAT = 4;
 
 // Taille maximale d'un fichier importé (une partie fait quelques kilo-octets).
 export const TAILLE_MAXIMALE_IMPORT = 5 * 1024 * 1024;
@@ -47,6 +47,8 @@ export function nouvellePartie({ graine, depart, versionJeu, joueur = null, main
     quetes: { actives: {}, finies: [], suivie: null },
     // aleatoires : les commandes du jour acceptées, recopiées (jalon 4).
     commandes: { enCours: {}, livrees: [], aleatoires: {} },
+    // Les achats (jalon 5, voir js/jeu/boutique.js) et les meubles posés
+    // dans chaque lieu (js/jeu/amenagement.js).
     possessions: [],
     lieux: { actuel: depart.lieu, debloques: [depart.lieu], amenagements: {} },
     drapeaux: {},
@@ -104,6 +106,35 @@ function commandeDuJourValide(id, commande) {
     && verifier(commande, SCHEMA_COMMANDE).length === 0;
 }
 
+// Un achat (jalon 5) : { id: 'achat-3', article, sorte, jour, prix }. Un
+// article inconnu (retiré des données) est ignoré à l'usage.
+const ID_ACHAT = /^achat-\d+$/;
+function possessionValide(possession) {
+  return estObjet(possession) && typeof possession.id === 'string' && ID_ACHAT.test(possession.id)
+    && typeof possession.article === 'string' && ['meuble', 'materiel'].includes(possession.sorte)
+    && estEntier(possession.jour, 1) && estEntier(possession.prix);
+}
+
+function possessionsValides(possessions) {
+  if (!Array.isArray(possessions) || !possessions.every(possessionValide)) return false;
+  return new Set(possessions.map((possession) => possession.id)).size === possessions.length;
+}
+
+// Les meubles posés : { lieu: [{ id, x, z, rotation }] }. Chacun est un
+// meuble acheté, posé une seule fois.
+function amenagementsValides(amenagements, possessions) {
+  if (!estObjet(amenagements)) return false;
+  const meubles = new Set((Array.isArray(possessions) ? possessions : [])
+    .filter((possession) => possession?.sorte === 'meuble').map((possession) => possession.id));
+  const poses = new Set();
+  return Object.values(amenagements).every((places) => Array.isArray(places) && places.every((place) => {
+    const valide = estObjet(place) && meubles.has(place.id) && !poses.has(place.id)
+      && estEntier(place.x) && estEntier(place.z) && [0, 90, 180, 270].includes(place.rotation);
+    if (valide) poses.add(place.id);
+    return valide;
+  }));
+}
+
 // Une quête en cours : depuis quand.
 function queteActiveValide(quete) {
   return estObjet(quete) && estObjet(quete.debut) && estEntier(quete.debut.jour, 1) && estEntier(quete.debut.minute);
@@ -134,9 +165,10 @@ export function verifierPartie(partie) {
     && Array.isArray(partie.commandes.livrees) && partie.commandes.livrees.every(livraisonValide)
     && estObjet(partie.commandes.aleatoires)
     && Object.entries(partie.commandes.aleatoires).every(([id, commande]) => commandeDuJourValide(id, commande)), 'commandes invalides');
-  exiger(estListeDeTextes(partie.possessions), 'possessions invalides');
+  exiger(possessionsValides(partie.possessions), 'possessions invalides');
   exiger(estObjet(partie.lieux) && typeof partie.lieux.actuel === 'string'
-    && estListeDeTextes(partie.lieux.debloques) && estObjet(partie.lieux.amenagements), 'lieux invalides');
+    && estListeDeTextes(partie.lieux.debloques)
+    && amenagementsValides(partie.lieux.amenagements, partie.possessions), 'lieux invalides');
   exiger(estObjet(partie.drapeaux), 'drapeaux invalides');
   exiger(estObjet(partie.vue) && estEntier(partie.vue.rotation) && partie.vue.rotation <= 3
     && (partie.vue.zoom === null || (estNombre(partie.vue.zoom) && partie.vue.zoom > 0)), 'vue invalide');
@@ -155,6 +187,14 @@ const MIGRATIONS = {
   2: (partie) => ({
     ...partie,
     commandes: estObjet(partie.commandes) ? { ...partie.commandes, aleatoires: {} } : partie.commandes,
+  }),
+  // Format 3 → 4 (jalon 5) : les achats deviennent des fiches (article,
+  // sorte, jour, prix), et les meubles posés sont rangés par lieu. Rien ne
+  // pouvait s'acheter avant : les listes repartent vides.
+  3: (partie) => ({
+    ...partie,
+    possessions: [],
+    lieux: estObjet(partie.lieux) ? { ...partie.lieux, amenagements: {} } : partie.lieux,
   }),
 };
 

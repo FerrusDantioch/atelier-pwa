@@ -19,9 +19,13 @@
 //   parler      lui poser une question dans le dialogue (« question »),
 //               elle répond (« replique ») ;
 //   aller       s'approcher d'un meuble ou d'un endroit (« cible ») ; un
-//               petit « message » dit ce qu'on y voit.
-// Les quatre premiers se constatent dans la partie ; « parler » et « aller »
-// sont des gestes du joueur, retenus au moment où il les fait.
+//               petit « message » dit ce qu'on y voit ;
+//   acheter     (jalon 5) avoir acheté un « article », ou n'importe quel
+//               article d'une « sorte » (meuble, materiel) ;
+//   placer      (jalon 5) avoir posé un meuble acheté (un « article »
+//               précis ou n'importe lequel), dans un « lieu » ou ailleurs.
+// « parler » et « aller » sont des gestes du joueur, retenus au moment où il
+// les fait ; les autres se constatent dans la partie.
 //
 // Une étape faite est retenue dans les drapeaux de la partie :
 // « etape-<quête>-<étape> ». ⚠️ Ne jamais changer l'identifiant d'une quête
@@ -42,7 +46,10 @@ import {
 import { gagner } from './economie.js';
 
 // Les étapes qui se constatent dans la partie (les autres sont des gestes).
-const CONSTATEES = new Set(['demande', 'commande', 'drapeau', 'reputation']);
+const CONSTATEES = new Set(['demande', 'commande', 'drapeau', 'reputation', 'acheter', 'placer']);
+
+// La « destination » d'une étape « placer » : le mode Aménager.
+export const DESTINATION_AMENAGER = 'amenager';
 
 // Posé quand on choisit un texte plus grand dans l'atelier (atelier.js).
 export const DRAPEAU_TEXTE_AGRANDI = 'atelier-texte-agrandi';
@@ -71,6 +78,17 @@ function constatee(etape, partie, paliers) {
       return Boolean(partie.drapeaux[etape.drapeau]);
     case 'reputation':
       return niveauDeReputation(partie.reputation, paliers).niveau >= etape.niveau;
+    case 'acheter':
+      return (partie.possessions || []).some((possession) => (!etape.article || possession.article === etape.article)
+        && (!etape.sorte || possession.sorte === etape.sorte));
+    case 'placer': {
+      const possessions = new Map((partie.possessions || []).map((possession) => [possession.id, possession]));
+      return Object.entries(partie.lieux?.amenagements || {}).some(([lieu, places]) => (!etape.lieu || lieu === etape.lieu)
+        && places.some((place) => {
+          const possession = possessions.get(place.id);
+          return Boolean(possession) && (!etape.article || possession.article === etape.article);
+        }));
+    }
     default:
       return false;
   }
@@ -208,7 +226,9 @@ export function destinationDEtape(etape, commandes) {
   switch (etape.type) {
     case 'demande': return commandes.find((commande) => commande.id === etape.commande)?.client || null;
     case 'commande':
-    case 'reputation': return ID_BUREAU;
+    case 'reputation':
+    case 'acheter': return ID_BUREAU;
+    case 'placer': return DESTINATION_AMENAGER;
     case 'drapeau': return etape.destination || null;
     case 'parler': return etape.pnj;
     case 'aller': return etape.cible;
@@ -255,5 +275,7 @@ export function empreinteDesQuetes(partie) {
     partie.quetes.finies.length,
     Object.keys(partie.quetes.actives).join(','),
     partie.quetes.suivie,
+    (partie.possessions || []).length,
+    Object.values(partie.lieux?.amenagements || {}).map((places) => places.length).join(','),
   ].join('|');
 }

@@ -1,5 +1,5 @@
 {
-  "aValider": "Quêtes du premier livrable, proposées par Claude : une par principe. « Le planning de publication » et « Des sous-titres pour tout le monde » concernent Halaé : textes validés par elle (via Ferrus) le 15/11/2026, ne rien y changer sans son accord. « Bienvenue à l'atelier » (le mentor) et les quêtes de Théo (personnage fictif) validées par Ferrus le 18/11/2026. ⚠️ Ne jamais changer l'identifiant d'une quête ou d'une étape publiée : les étapes faites sont retenues par ces identifiants dans les parties.",
+  "aValider": "Quêtes du premier livrable, proposées par Claude : une par principe. « Le planning de publication » et « Des sous-titres pour tout le monde » concernent Halaé : textes validés par elle (via Ferrus) le 15/11/2026, ne rien y changer sans son accord. « Bienvenue à l'atelier » (le mentor) et les quêtes de Théo (personnage fictif) validées par Ferrus le 18/11/2026. « Un intérieur où tout le monde passe » (jalon 5, le mentor) : à valider par Ferrus. ⚠️ Ne jamais changer l'identifiant d'une quête ou d'une étape publiée : les étapes faites sont retenues par ces identifiants dans les parties.",
   "principes": {
     "lisibilite": {
       "nom": "Lisibilité",
@@ -187,6 +187,40 @@
       ],
       "fin": "Théo révise une chose à la fois, sans badges ni graphiques. Il lui reste de l'énergie pour l'essentiel.",
       "recompense": { "argent": 30, "reputation": 8 }
+    },
+    {
+      "id": "interieur-pour-tous",
+      "titre": "Un intérieur où tout le monde passe",
+      "principe": "soutien",
+      "donneur": "ferrus",
+      "resume": "Tes premières pièces peuvent servir à aménager ta maison. Une seule règle : que tout le monde puisse toujours y circuler, à pied comme en fauteuil roulant.",
+      "debloquee": { "quetes": ["planning-publication"] },
+      "etapes": [
+        {
+          "id": "achat",
+          "type": "acheter",
+          "sorte": "meuble",
+          "texte": "achète un meuble, dans la boutique de l'ordinateur",
+          "detail": "Une plante, un pouf, un tapis… ce qui te fait plaisir."
+        },
+        {
+          "id": "pose",
+          "type": "placer",
+          "lieu": "domicile",
+          "texte": "place-le chez toi : Pause › Aménager",
+          "detail": "Le jeu refuse un meuble qui couperait un passage : en fauteuil roulant, il faut au moins 1 m pour passer, et un espace libre de 1,50 m pour faire demi-tour."
+        },
+        {
+          "id": "materiel",
+          "type": "acheter",
+          "sorte": "materiel",
+          "facultative": true,
+          "texte": "équipe ton bureau : grand écran, clavier ou siège",
+          "detail": "Le matériel s'installe tout seul sur ton bureau, et chaque livraison te rapporte alors quelques pièces de plus."
+        }
+      ],
+      "fin": "Ta maison te ressemble un peu plus, et tout le monde y circule librement. De larges passages servent à toutes et tous : fauteuil roulant, poussette ou bras chargés.",
+      "recompense": { "argent": 20, "reputation": 5 }
     }
   ]
 }

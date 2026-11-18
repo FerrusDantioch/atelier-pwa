@@ -187,6 +187,7 @@ async function afficherJeu() {
     jeu: donnees.jeu,
     donnees,
     portrait: (apparence, taille) => outils.portraits.photographier(apparence, taille),
+    photo: (meuble, taille) => outils.portraits.photographierMeuble(meuble, taille),
     creerMonde: (rappels) => outils.creerMonde({
       moteur: outils.moteur,
       donnees,

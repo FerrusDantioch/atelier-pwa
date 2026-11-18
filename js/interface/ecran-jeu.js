@@ -6,6 +6,8 @@
 //               l'heure, le bouton Pause ;
 //   en bas    : le journal des quêtes (J), « Aller à… », l'action du
 //               moment (« Examiner le lit »), la pièce où l'on se trouve ;
+//               pendant l'aménagement (jalon 5), le panneau « Aménager »
+//               prend sa place (amenagement.js) ;
 //   à droite  : la caméra (tourner, zoomer, recentrer).
 // Entre les barres : la scène 3D. On y touche le sol pour se déplacer, ou
 // un meuble pour s'en approcher. Tout ce que montre la 3D a un équivalent
@@ -17,9 +19,10 @@
 // de l'écran.
 // =============================================================================
 
+import { rangerCeQuiNeTientPlus } from '../jeu/amenagement.js';
 import { commandesAProposer, objectifDuMoment, proposerCommande } from '../jeu/commandes.js';
 import { commandesConnues, commandesDuJourOuvertes } from '../jeu/generateur.js';
-import { etapesVers, objectifDeQuete, sujetsPour } from '../jeu/quetes.js';
+import { DESTINATION_AMENAGER, etapesVers, objectifDeQuete, sujetsPour } from '../jeu/quetes.js';
 import { prochainPassage } from '../jeu/routines.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
@@ -29,6 +32,7 @@ import { obtenirReglages } from '../noyau/reglages.js';
 import { creerCopieDeSecours } from '../noyau/sauvegarde.js';
 import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
 import { lienExterne } from './a-propos.js';
+import { creerAmenagement } from './amenagement.js';
 import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
 import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
@@ -68,11 +72,12 @@ function boutonCamera(nomIcone, libelle, raccourci, surClic) {
  *   jeu           data/jeu.json
  *   donnees       toutes les données (commandes, personnages…)
  *   portrait      (apparence, taille) → toile 2D : les portraits de la visio
+ *   photo         (meuble, taille) → toile 2D : les photos de la boutique
  *   creerMonde    fabrique le monde 3D : creerMonde(rappels) → monde
  *   menu          { surReglages, surSauvegarde, surAPropos, surAccueil, surPersonnage }
  * Renvoie { element, monde, detruire() }.
  */
-export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerMonde, menu }) {
+export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo = null, creerMonde, menu }) {
   const paliers = jeu.reputation.paliers;
   const quetes = donnees?.quetes?.quetes || [];
   // Les personnes qu'on peut nommer : habitants, visiteurs, clientes et
@@ -83,8 +88,8 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const personne = personnes.get(id);
     return personne?.modele === 'ferrus' ? donnees.personnages.ferrus.nom : personne?.nom || '';
   };
-  // Le menu Pause, avec le journal en plus.
-  const menuComplet = { ...menu, surJournal: () => ouvrirLeJournal() };
+  // Le menu Pause, avec le journal et l'aménagement en plus.
+  const menuComplet = { ...menu, surJournal: () => ouvrirLeJournal(), surAmenager: () => amenagement.ouvrir() };
 
   // --- Barre du haut ---------------------------------------------------------------
   const argent = indicateur('piece', t('hud.argent'));
@@ -189,12 +194,29 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     boutonCamera('zoomPlus', t('jeu.camera.rapprocher'), '+', () => mondeActuel?.zoomer(1.25)),
     boutonCamera('recentrer', t('jeu.camera.recentrer'), t('jeu.camera.toucheRecentrer'), () => mondeActuel?.recentrer()));
 
+  // Le mode « Aménager » (jalon 5) : son panneau remplace la barre du bas,
+  // et le temps s'arrête.
+  const amenagement = creerAmenagement({
+    donnees,
+    monde: () => mondeActuel,
+    surDebut: () => {
+      fermerBulle();
+      barreBas.hidden = true;
+      adapterBarres();
+    },
+    surFin: () => {
+      barreBas.hidden = false;
+      adapterBarres();
+    },
+  });
+
   const element = el('div', { class: 'ecran-jeu' },
     el('h1', { class: 'visuellement-cache' }, self.CONFIG_JEU.nom),
     barre,
     el('main', { class: 'zone-monde', 'aria-label': t('jeu.zoneMonde') }, bulle),
     camera,
-    barreBas);
+    barreBas,
+    amenagement.element);
 
   // --- Le monde 3D -------------------------------------------------------------------
   let objetProche = null;
@@ -274,10 +296,20 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     else examiner();
   }
 
-  // L'ordinateur du bureau : commandes, atelier de création, visio, comptes.
+  // L'ordinateur du bureau : commandes, atelier de création, visio,
+  // boutique, comptes. Le matériel acheté s'installe tout de suite sur le
+  // bureau ; « Placer maintenant » commence à poser le meuble acheté.
   function utiliserOrdinateur() {
     fermerBulle();
-    ouvrirOrdinateur({ donnees, portrait });
+    ouvrirOrdinateur({
+      donnees,
+      portrait,
+      photo,
+      surAchat: (possession) => {
+        if (possession.sorte === 'materiel') mondeActuel?.actualiserLieu();
+      },
+      surPlacer: (id) => amenagement.ouvrir({ achat: id }),
+    });
   }
 
   // Toucher l'objectif : on part vers l'endroit où il se joue.
@@ -289,6 +321,14 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // un meuble, un endroit ou une personne. Une personne absente : on dit
   // quand elle revient (rien n'est caché, tout est prévisible).
   function allerVers(id) {
+    // Une étape « placer un meuble » : le mode Aménager.
+    if (id === DESTINATION_AMENAGER) {
+      amenagement.ouvrir();
+      return;
+    }
+    // Pour aller ailleurs, l'aménagement se termine d'abord (un meuble en
+    // cours de déplacement reprend sa place).
+    if (amenagement.actif) amenagement.fermer();
     const destination = id ? mondeActuel?.destinations().find((d) => d.id === id) : null;
     if (destination) {
       fermerBulle();
@@ -388,6 +428,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   };
 
   parent.append(element);
+  // Un meuble posé qui ne tient plus à sa place (données changées d'une
+  // version à l'autre) retourne dans les affaires : rien n'est perdu.
+  if (donnees?.boutique && partieEnCours()) {
+    let ranges = 0;
+    modifierPartie((partie) => { ranges = rangerCeQuiNeTientPlus(partie, { ...donnees, meubles: donnees.meubles.meubles, pnj: donnees.pnj.pnj }); });
+    if (ranges > 0) notifier(tPluriel('amenagement.retires', ranges), { type: 'attention' });
+  }
   mondeActuel = creerMonde(rappels);
   const piece = mondeActuel.piece;
   texteLieu.textContent = piece ? piece.nom : '';
@@ -442,7 +489,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const secondes = Math.min(1, (maintenant - horloge.derniereMesure) / 1000);
     horloge.derniereMesure = maintenant;
     const partie = partieEnCours();
-    if (!partie || !ecranActif || fenetreOuverte() || document.hidden) return;
+    if (!partie || !ecranActif || fenetreOuverte() || document.hidden || amenagement.actif) return;
     const vitesse = (VITESSES[obtenirReglages().vitesseTemps] ?? 1) * jeu.temps.minutesParSeconde;
     const resultat = avancerHorloge({ minute: partie.temps.minute, reste: horloge.reste, secondes, vitesse, fin });
     horloge.reste = resultat.reste;
@@ -542,6 +589,11 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // temps de la mesure, ils sont mis hors de la barre, sans être cachés, pour
   // ne pas perdre le focus du clavier). Ainsi la vue 3D ne bouge pas quand
   // un de ces boutons arrive.
+  // Ce qui occupe le bas de l'écran : la barre, ou le panneau « Aménager ».
+  function basDeLEcran() {
+    return amenagement.actif ? amenagement.element : barreBas;
+  }
+
   function adapterBarres() {
     boutonsDuMoment.forEach((bouton) => { bouton.style.position = 'absolute'; });
     barre.classList.remove('compacte');
@@ -549,7 +601,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const hauteurLigne = boutonPause.offsetHeight || 48;
     if (barre.offsetHeight > hauteurLigne * 1.9) barre.classList.add('compacte');
     if (barreBas.offsetHeight > (boutonAllerA.offsetHeight || 48) * 1.9) barreBas.classList.add('compacte');
-    const marges = { haut: barre.offsetHeight, bas: barreBas.offsetHeight, gauche: 0, droite: 0 };
+    // Le panneau « Aménager » passe en version compacte s'il prend plus
+    // d'un quart de l'écran (téléphone, très grand texte).
+    if (amenagement.actif) {
+      amenagement.element.classList.remove('compacte');
+      if (amenagement.element.offsetHeight > window.innerHeight * 0.25) amenagement.element.classList.add('compacte');
+    }
+    const marges = { haut: barre.offsetHeight, bas: basDeLEcran().offsetHeight, gauche: 0, droite: 0 };
     boutonsDuMoment.forEach((bouton) => { bouton.style.position = ''; });
     document.documentElement.style.setProperty('--hauteur-barre-haut', `${marges.haut}px`);
     mondeActuel?.definirMarges(marges);
@@ -559,7 +617,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // Les boutons de la caméra se placent au-dessus de la barre du bas, telle
   // qu'elle est vraiment (avec ou sans bouton d'action).
   function placerAuDessusDeLaBarre() {
-    const hauteur = barreBas.offsetHeight;
+    const hauteur = basDeLEcran().offsetHeight;
     if (hauteur === hauteurBarreBas) return;
     hauteurBarreBas = hauteur;
     document.documentElement.style.setProperty('--hauteur-barre-bas', `${hauteur}px`);
@@ -576,11 +634,18 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   }
   const observateur = new ResizeObserver(() => adapterBarres());
   observateur.observe(element);
+  observateur.observe(amenagement.element);
 
   // Échap : ferme d'abord la bulle, sinon ouvre le menu Pause.
   // J (même place sur un clavier AZERTY ou QWERTY) : le journal.
   function surTouche(evenement) {
     if (fenetreOuverte() || !ecranActif) return;
+    // Pendant l'aménagement : R tourne le meuble, Suppr le range, Échap
+    // annule ou termine.
+    if (amenagement.surTouche(evenement)) {
+      evenement.preventDefault();
+      return;
+    }
     if (evenement.code === 'KeyJ' && !evenement.ctrlKey && !evenement.metaKey && !evenement.altKey) {
       evenement.preventDefault();
       ouvrirLeJournal();
@@ -613,13 +678,17 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     get monde() { return mondeActuel; },
     // Cache l'écran (pendant l'écran « Ton personnage ») ou le remontre.
     suspendre(oui) {
+      if (oui) amenagement.fermer({ silencieux: true });
       ecranActif = !oui;
       element.hidden = oui;
       document.body.classList.toggle('en-jeu', !oui);
       mondeActuel?.activer(!oui);
       if (!oui) requestAnimationFrame(adapterBarres);
     },
+    // Le mode « Aménager » (pour les tests).
+    get amenagement() { return amenagement; },
     detruire() {
+      amenagement.fermer({ silencieux: true });
       arreterProgression();
       clearInterval(horloge.minuteur);
       arrets.forEach((arreter) => arreter());
@@ -650,6 +719,10 @@ export function ouvrirMenuPause(menu) {
         menu.surJournal ? ligne('journal', t('pause.journal'), () => {
           fenetre.fermer();
           menu.surJournal();
+        }) : null,
+        menu.surAmenager ? ligne('amenager', t('pause.amenager'), () => {
+          fenetre.fermer();
+          menu.surAmenager();
         }) : null,
         ligne('personnage', t('pause.personnage'), () => {
           fenetre.fermer();

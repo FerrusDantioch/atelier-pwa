@@ -25,7 +25,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | J2 | Personnages, routines, dialogues | ✅ livré (version 0.3.0) |
 | J3 | L'ordinateur : commandes et création d'applications | ✅ livré (version 0.4.1) |
 | J4 | Quêtes et journal (premier livrable jouable) | ✅ livré (version 0.5.1) |
-| J5 | Progression, bureaux, nouveaux lieux | à venir |
+| J5 | Progression : boutique, aménagement, bureaux, personnages entre les lieux | 🧪 en cours : étape 0.6 (boutique et aménagement) à essayer |
 | J6 | Vitrine des vraies applications, À propos, finitions | à venir |
 
 ## Jouer
@@ -40,7 +40,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
   habitants suivent chacun leur journée, toujours la même.
 - **Le temps** : une minute de jeu par seconde (réglable, ou arrêté) ; il
   s'arrête dès qu'une fenêtre est ouverte. Le soir, « Dormir » près du lit.
-- **Les quêtes** : cinq petites histoires, une par principe
+- **Les quêtes** : de petites histoires, chacune autour d'un principe
   d'accessibilité (lisibilité, simplicité, routine, soutien au quotidien,
   charge cognitive). L'étape en cours de la quête suivie s'affiche en haut
   de l'écran : la toucher t'emmène là où elle se joue. Le **journal**
@@ -55,6 +55,16 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
   (pas trop : chaque fonction pèse dans la « charge »), règle le confort,
   teste comme la personne, puis livre. Parfait, Bien ou À retravailler :
   rien n'est jamais perdu, et il n'y a pas de chronomètre.
+- **La boutique** (sur l'ordinateur) : des meubles et de la décoration, et
+  du matériel pour ton bureau (grand écran, clavier, siège) qui s'installe
+  tout seul et te rapporte quelques pièces de plus à chaque livraison.
+  Certains articles demandent un niveau de réputation.
+- **Aménager** (menu Pause, ou « Placer maintenant » après un achat) : le
+  temps s'arrête ; choisis un meuble dans tes affaires, touche le sol pour
+  le placer, tourne-le, puis « Poser ici ». Un meuble qui couperait un
+  passage est refusé, et le jeu dit pourquoi (en fauteuil roulant, il faut
+  des passages d'au moins 1 m et un espace de 1,50 m pour faire
+  demi-tour). Touche un meuble acheté pour le déplacer ou le ranger.
 - **L'affiche de l'Omni-système**, près de la porte d'entrée : examine-la
   pour découvrir le site de l'Omni-système (dans un nouvel onglet).
 - **La vue** : glisse un doigt pour la déplacer, pince ou utilise la molette
@@ -69,6 +79,7 @@ Le détail est dans [`docs/JOURNAL.md`](docs/JOURNAL.md), le plan complet dans
 | Entrée ou Espace | examiner l'objet proche |
 | J | ouvrir le journal des quêtes |
 | Échap | pause, ou fermer une fenêtre |
+| Pendant l'aménagement : Z Q S D ou flèches, R, Entrée, Suppr, Échap | déplacer le meuble, le tourner, le poser, le ranger, annuler |
 
 ## Confort et accessibilité
 

@@ -47,7 +47,7 @@ data/     jeu.json · textes.json (J0)
           personnages.json · palette.json · meubles.json (J1)
           pnj.json · dialogues.json (J2)
           commandes.json · creation.json (J3) · quetes.json · modeles-commandes.json (J4)
-          prix et déblocages des meubles (J5) · apps.json · mentions.json (J6)
+          boutique.json (J5 : prix, niveaux, matériel) · apps.json · mentions.json (J6)
           lieux/index.json + un fichier par lieu (J1+)
 lib/three/    three.module.js · three.core.js · LICENSE
 assets/       icônes · logo de l'Omni-système · polices + licences
@@ -84,8 +84,11 @@ Chaque fichier de `data/` est décrit par un schéma dans
   bonus, à éviter, confort) et pièces du mini-jeu (modèles d'appli,
   fonctionnalités avec ce qu'elles « apportent » et leur « charge », barème).
 - **meubles.json** : nom, description (à examiner), emprise au sol,
-  « recette » 3D (liste de formes simples) ; prix, déblocage et effets au
-  jalon 5.
+  « recette » 3D (liste de formes simples). Une forme peut appartenir à un
+  « élément » (`ecran`, `clavier`, `siege`) que le matériel remplace.
+- **boutique.json** (jalon 5) : ce qui se vend, son prix et le niveau de
+  réputation qui le débloque ; le matériel du poste de travail (ses formes
+  et son bonus à chaque livraison).
 - **lieux/*.json** : taille de la grille, pièces (zones et sol), murs,
   ouvertures (portes, porte d'entrée, fenêtres), meubles posés, points
   d'intérêt, point de départ ; plus tard, emplacements de la vitrine. Au
@@ -102,7 +105,10 @@ forme) : `format`, `versionFormat`, `versionJeu`, dates, `graine`, `joueur`,
 `temps { jour, minute }`, `argent`, `reputation`, `quetes`, `commandes`,
 `possessions`, `lieux { actuel, debloques, amenagements }`, `drapeaux`,
 `vue { rotation, zoom }` (format 2, jalon 1), `commandes.aleatoires` (les
-commandes du jour acceptées, recopiées : format 3, jalon 4). Le joueur :
+commandes du jour acceptées, recopiées : format 3, jalon 4), les achats
+(`possessions : [{ id, article, sorte, jour, prix }]`) et les meubles
+posés (`lieux.amenagements : { lieu: [{ id, x, z, rotation }] }`) :
+format 4, jalon 5. Le joueur :
 `{ modele: 'ferrus' | 'perso', nom, apparence, position { x, z, angle } }`
 (l'apparence de Ferrus n'est jamais copiée : elle vient des données).
 Toute évolution de forme passe par `versionFormat` + une étape de migration.
@@ -183,6 +189,31 @@ Les **réglages** sont à part (localStorage `atelier-pwa.reglages`).
 les instructions de test sur tablette, puis **arrêt et validation** avant
 le jalon suivant.
 
+### Jalon 5, par étapes
+
+Le jalon 5 est livré en plusieurs versions, chacune publiée pour être
+essayée sur tablette ; Ferrus valide le jalon à la fin.
+
+| Version | Contenu |
+|---|---|
+| 0.6 | **Boutique** sur l'ordinateur (meubles, matériel) et **aménagement** de la maison : poser, déplacer, tourner, ranger ; un meuble qui couperait un passage est refusé, avec la raison |
+| 0.7 | **Les bureaux** : un deuxième lieu, débloqué par la réputation et loué avec des pièces ; on y va par la porte d'entrée |
+| 0.8 | **Agrandir les bureaux** (salle de pause, salle de réunion, coin calme…) ; les **clients viennent en personne** aux bureaux, et des personnages passent d'un lieu à l'autre |
+| 0.9 | Quêtes du jalon, équilibrage, finitions |
+
+Décisions (18 novembre 2026) :
+
+- **Les deux ordinateurs marchent** (choix de Ferrus) : une fois les bureaux
+  loués, on peut toujours travailler à la maison ; aucun trajet obligé.
+  Les bureaux apportent les clients en personne, plus de commandes et des
+  pièces à aménager.
+- **Le matériel** (grand écran, clavier, siège) rapporte un petit bonus :
+  quelques pièces de plus à chaque livraison, écrites sur sa fiche et dans
+  le détail du paiement. Les meubles de décoration sont pour le plaisir.
+  *(Recommandation appliquée : Ferrus n'avait pas de préférence.)*
+- **Par étapes** plutôt qu'en une fois *(recommandation appliquée : pas
+  de préférence)*.
+
 ## 7. Décisions et questions
 
 Décidé avec Ferrus (14 novembre 2026) :
@@ -220,9 +251,9 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
 2. *(Réglée : fiche d'Halaé validée le 14/11 ; apparence détaillée à
    décrire par elle quand elle le souhaite.)*
 3. **Vraies applications** (avant J6) : pré-remplir `apps.json` depuis le
-   portfolio ? lesquelles en affiche au domicile ? quels statuts ? Et
-   l'adresse du portfolio, si elle diffère de celle du site de
-   l'Omni-système (déjà dans `js/config.js`).
+   portfolio ? lesquelles en affiche au domicile ? quels statuts ?
+   *(Réglé le 18/11 : le portfolio est le site de l'Omni-système, dont
+   l'adresse est déjà dans `js/config.js`.)*
 4. **Mentions légales** (avant J6) : statut et champs à compléter.
 5. **Règles communes** : recopier une version adaptée du socle commun dans
    `CLAUDE.md` (dépôt public) ? En attente d'accord.

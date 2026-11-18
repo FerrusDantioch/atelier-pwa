@@ -24,6 +24,7 @@
     {
       "id": "table-chevet",
       "nom": "Table de chevet",
+      "designation": "la table de chevet",
       "emprise": [1, 1],
       "formes": [
         { "forme": "boite", "taille": [0.42, 0.48, 0.4], "position": [0, 0.24, -0.02], "couleur": "bois-clair" },
@@ -135,6 +136,7 @@
     {
       "id": "plan-travail",
       "nom": "Plan de travail",
+      "designation": "le plan de travail",
       "emprise": [2, 1],
       "formes": [
         { "forme": "boite", "taille": [0.98, 0.8, 0.48], "position": [0, 0.4, 0], "couleur": "blanc" },
@@ -183,6 +185,7 @@
     {
       "id": "chaise",
       "nom": "Chaise",
+      "designation": "la chaise",
       "emprise": [1, 1],
       "formes": [
         { "forme": "boite", "taille": [0.4, 0.05, 0.4], "position": [0, 0.46, 0.02], "couleur": "bois" },
@@ -216,6 +219,7 @@
     {
       "id": "table-basse",
       "nom": "Table basse",
+      "designation": "la table basse",
       "emprise": [2, 1],
       "formes": [
         { "forme": "boite", "taille": [0.92, 0.05, 0.44], "position": [0, 0.4, 0], "couleur": "bois-clair" },
@@ -261,16 +265,16 @@
         { "forme": "boite", "taille": [0.04, 0.72, 0.44], "position": [-0.69, 0.36, 0], "couleur": "blanc" },
         { "forme": "boite", "taille": [0.04, 0.72, 0.44], "position": [0.69, 0.36, 0], "couleur": "blanc" },
         { "forme": "boite", "taille": [1.34, 0.3, 0.02], "position": [0, 0.55, -0.21], "couleur": "blanc" },
-        { "forme": "boite", "taille": [0.2, 0.02, 0.14], "position": [0, 0.77, -0.12], "couleur": "anthracite" },
-        { "forme": "boite", "taille": [0.05, 0.22, 0.03], "position": [0, 0.87, -0.15], "couleur": "anthracite" },
-        { "forme": "boite", "taille": [0.66, 0.4, 0.03], "position": [0, 1.13, -0.13], "couleur": "ecran" },
-        { "forme": "boite", "taille": [0.6, 0.34, 0.006], "position": [0, 1.13, -0.114], "couleur": "ecran-allume" },
-        { "forme": "boite", "taille": [0.3, 0.025, 0.004], "position": [-0.1, 1.24, -0.109], "couleur": "ecran" },
-        { "forme": "boite", "taille": [0.4, 0.025, 0.004], "position": [-0.05, 1.18, -0.109], "couleur": "ecran" },
-        { "forme": "boite", "taille": [0.24, 0.025, 0.004], "position": [-0.13, 1.12, -0.109], "couleur": "ecran" },
-        { "forme": "boite", "taille": [0.34, 0.025, 0.004], "position": [-0.08, 1.06, -0.109], "couleur": "ecran" },
-        { "forme": "boite", "taille": [0.42, 0.02, 0.14], "position": [-0.02, 0.77, 0.1], "couleur": "gris-clair" },
-        { "forme": "boite", "taille": [0.06, 0.025, 0.09], "position": [0.32, 0.772, 0.1], "couleur": "gris-clair" },
+        { "forme": "boite", "taille": [0.2, 0.02, 0.14], "position": [0, 0.77, -0.12], "couleur": "anthracite", "element": "ecran" },
+        { "forme": "boite", "taille": [0.05, 0.22, 0.03], "position": [0, 0.87, -0.15], "couleur": "anthracite", "element": "ecran" },
+        { "forme": "boite", "taille": [0.66, 0.4, 0.03], "position": [0, 1.13, -0.13], "couleur": "ecran", "element": "ecran" },
+        { "forme": "boite", "taille": [0.6, 0.34, 0.006], "position": [0, 1.13, -0.114], "couleur": "ecran-allume", "element": "ecran" },
+        { "forme": "boite", "taille": [0.3, 0.025, 0.004], "position": [-0.1, 1.24, -0.109], "couleur": "ecran", "element": "ecran" },
+        { "forme": "boite", "taille": [0.4, 0.025, 0.004], "position": [-0.05, 1.18, -0.109], "couleur": "ecran", "element": "ecran" },
+        { "forme": "boite", "taille": [0.24, 0.025, 0.004], "position": [-0.13, 1.12, -0.109], "couleur": "ecran", "element": "ecran" },
+        { "forme": "boite", "taille": [0.34, 0.025, 0.004], "position": [-0.08, 1.06, -0.109], "couleur": "ecran", "element": "ecran" },
+        { "forme": "boite", "taille": [0.42, 0.02, 0.14], "position": [-0.02, 0.77, 0.1], "couleur": "gris-clair", "element": "clavier" },
+        { "forme": "boite", "taille": [0.06, 0.025, 0.09], "position": [0.32, 0.772, 0.1], "couleur": "gris-clair", "element": "clavier" },
         { "forme": "cylindre", "rayon": 0.04, "hauteur": 0.1, "position": [0.55, 0.81, -0.05], "couleur": "moutarde" },
         { "forme": "cylindre", "rayon": 0.05, "rayonHaut": 0.06, "hauteur": 0.09, "position": [-0.58, 0.805, -0.1], "couleur": "pot" },
         { "forme": "sphere", "rayon": 0.09, "position": [-0.58, 0.92, -0.1], "couleur": "feuille-claire" }
@@ -279,13 +283,14 @@
     {
       "id": "chaise-bureau",
       "nom": "Chaise de bureau",
+      "designation": "la chaise de bureau",
       "emprise": [1, 1],
       "formes": [
-        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir" },
-        { "forme": "boite", "taille": [0.06, 0.04, 0.5], "position": [0, 0.05, 0], "couleur": "noir" },
-        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.36, "position": [0, 0.25, 0], "couleur": "metal" },
-        { "forme": "boite", "taille": [0.44, 0.08, 0.42], "position": [0, 0.46, 0.01], "couleur": "anthracite" },
-        { "forme": "boite", "taille": [0.42, 0.46, 0.07], "position": [0, 0.77, -0.19], "couleur": "anthracite", "rotation": [-8, 0, 0] }
+        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir", "element": "siege" },
+        { "forme": "boite", "taille": [0.06, 0.04, 0.5], "position": [0, 0.05, 0], "couleur": "noir", "element": "siege" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.36, "position": [0, 0.25, 0], "couleur": "metal", "element": "siege" },
+        { "forme": "boite", "taille": [0.44, 0.08, 0.42], "position": [0, 0.46, 0.01], "couleur": "anthracite", "element": "siege" },
+        { "forme": "boite", "taille": [0.42, 0.46, 0.07], "position": [0, 0.77, -0.19], "couleur": "anthracite", "rotation": [-8, 0, 0], "element": "siege" }
       ]
     },
     {
@@ -354,6 +359,7 @@
     {
       "id": "plante",
       "nom": "Plante",
+      "designation": "la plante",
       "emprise": [1, 1],
       "formes": [
         { "forme": "cylindre", "rayon": 0.13, "rayonHaut": 0.17, "hauteur": 0.32, "position": [0, 0.16, 0], "couleur": "pot" },
@@ -366,6 +372,7 @@
     {
       "id": "lampe-sol",
       "nom": "Lampadaire",
+      "designation": "le lampadaire",
       "emprise": [1, 1],
       "formes": [
         { "forme": "cylindre", "rayon": 0.16, "hauteur": 0.03, "position": [0, 0.015, 0], "couleur": "anthracite" },
@@ -376,6 +383,7 @@
     {
       "id": "tapis",
       "nom": "Tapis",
+      "designation": "le tapis",
       "emprise": [4, 3],
       "bloque": false,
       "formes": [
@@ -387,6 +395,7 @@
     {
       "id": "tapis-petit",
       "nom": "Petit tapis",
+      "designation": "le petit tapis",
       "emprise": [3, 2],
       "bloque": false,
       "formes": [
@@ -397,6 +406,7 @@
     {
       "id": "porte-manteau",
       "nom": "Porte-manteau",
+      "designation": "le porte-manteau",
       "emprise": [1, 1],
       "formes": [
         { "forme": "cylindre", "rayon": 0.14, "hauteur": 0.03, "position": [0, 0.015, 0], "couleur": "bois-sombre" },
@@ -405,6 +415,149 @@
         { "forme": "boite", "taille": [0.03, 0.03, 0.34], "position": [0, 1.58, 0], "couleur": "bois" },
         { "forme": "boite", "taille": [0.3, 0.6, 0.12], "position": [0.08, 1.25, 0.08], "couleur": "bordeaux", "rotation": [0, 30, 0] },
         { "forme": "boite", "taille": [0.2, 0.2, 0.2], "position": [-0.1, 1.5, -0.08], "couleur": "moutarde", "rotation": [0, 20, 0] }
+      ]
+    },
+    {
+      "id": "plante-haute",
+      "nom": "Grande plante",
+      "designation": "la grande plante",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.15, "rayonHaut": 0.18, "hauteur": 0.38, "position": [0, 0.19, 0], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.165, "hauteur": 0.02, "position": [0, 0.36, 0], "couleur": "terreau" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.7, "position": [0, 0.72, 0], "couleur": "bois-sombre" },
+        { "forme": "sphere", "rayon": 0.22, "position": [0, 1.05, 0], "couleur": "feuille" },
+        { "forme": "sphere", "rayon": 0.18, "position": [0.12, 1.28, 0.05], "couleur": "feuille-claire" },
+        { "forme": "sphere", "rayon": 0.16, "position": [-0.11, 1.24, -0.08], "couleur": "feuille" },
+        { "forme": "sphere", "rayon": 0.13, "position": [0.02, 1.47, -0.02], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "cactus",
+      "nom": "Cactus",
+      "designation": "le cactus",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.11, "rayonHaut": 0.13, "hauteur": 0.22, "position": [0, 0.11, 0], "couleur": "pot" },
+        { "forme": "cylindre", "rayon": 0.12, "hauteur": 0.02, "position": [0, 0.2, 0], "couleur": "terreau" },
+        { "forme": "cylindre", "rayon": 0.07, "hauteur": 0.42, "position": [0, 0.42, 0], "couleur": "vert" },
+        { "forme": "sphere", "rayon": 0.07, "position": [0, 0.63, 0], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.08, 0.06, 0.06], "position": [0.08, 0.44, 0], "couleur": "vert" },
+        { "forme": "cylindre", "rayon": 0.04, "hauteur": 0.18, "position": [0.12, 0.52, 0], "couleur": "vert" },
+        { "forme": "sphere", "rayon": 0.04, "position": [0.12, 0.61, 0], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.07, 0.05, 0.05], "position": [-0.075, 0.39, 0.01], "couleur": "vert" },
+        { "forme": "cylindre", "rayon": 0.035, "hauteur": 0.14, "position": [-0.11, 0.45, 0.01], "couleur": "vert" },
+        { "forme": "sphere", "rayon": 0.035, "position": [-0.11, 0.52, 0.01], "couleur": "vert" },
+        { "forme": "sphere", "rayon": 0.03, "position": [0, 0.71, 0], "couleur": "rose" }
+      ]
+    },
+    {
+      "id": "pouf",
+      "nom": "Pouf",
+      "designation": "le pouf",
+      "emprise": [1, 1],
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.2, "hauteur": 0.38, "cotes": 10, "position": [0, 0.19, 0], "couleur": "moutarde" },
+        { "forme": "cylindre", "rayon": 0.205, "hauteur": 0.06, "cotes": 10, "position": [0, 0.2, 0], "couleur": "orange" }
+      ]
+    },
+    {
+      "id": "tapis-rond",
+      "nom": "Tapis rond",
+      "designation": "le tapis rond",
+      "emprise": [3, 3],
+      "bloque": false,
+      "formes": [
+        { "forme": "cylindre", "rayon": 0.7, "hauteur": 0.012, "cotes": 24, "position": [0, 0.006, 0], "couleur": "turquoise" },
+        { "forme": "cylindre", "rayon": 0.5, "hauteur": 0.014, "cotes": 24, "position": [0, 0.007, 0], "couleur": "creme" },
+        { "forme": "cylindre", "rayon": 0.25, "hauteur": 0.016, "cotes": 24, "position": [0, 0.008, 0], "couleur": "turquoise" }
+      ]
+    },
+    {
+      "id": "fauteuil",
+      "nom": "Fauteuil",
+      "designation": "le fauteuil",
+      "description": "Un fauteuil profond, avec un coussin moutarde. Idéal pour lire, ou pour réfléchir les yeux fermés.",
+      "emprise": [2, 2],
+      "formes": [
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [-0.33, 0.04, -0.3], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [0.33, 0.04, -0.3], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [-0.33, 0.04, 0.33], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.05, 0.08, 0.05], "position": [0.33, 0.04, 0.33], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.8, 0.28, 0.75], "position": [0, 0.22, 0.02], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.54, 0.12, 0.55], "position": [0, 0.42, 0.08], "couleur": "bleu-clair" },
+        { "forme": "boite", "taille": [0.8, 0.5, 0.16], "position": [0, 0.61, -0.28], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.13, 0.26, 0.6], "position": [-0.335, 0.49, 0.07], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.13, 0.26, 0.6], "position": [0.335, 0.49, 0.07], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.3, 0.26, 0.09], "position": [0.1, 0.62, -0.15], "couleur": "moutarde", "rotation": [-10, 0, 6] }
+      ]
+    },
+    {
+      "id": "etagere-basse",
+      "nom": "Étagère basse",
+      "designation": "l'étagère basse",
+      "description": "Une étagère à hauteur de main : des livres, un panier, une petite plante. Tout se voit, tout s'attrape.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.03, 0.8, 0.36], "position": [-0.46, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.03, 0.8, 0.36], "position": [0.46, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.89, 0.03, 0.36], "position": [0, 0.015, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.89, 0.03, 0.36], "position": [0, 0.4, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.89, 0.03, 0.36], "position": [0, 0.785, 0], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.9, 0.78, 0.02], "position": [0, 0.39, -0.17], "couleur": "gris-clair" },
+        { "forme": "boite", "taille": [0.08, 0.26, 0.24], "position": [-0.3, 0.165, 0], "couleur": "rouge" },
+        { "forme": "boite", "taille": [0.06, 0.24, 0.24], "position": [-0.22, 0.155, 0], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.05, 0.28, 0.24], "position": [-0.155, 0.175, 0], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [0.3, 0.2, 0.26], "position": [0.2, 0.135, 0], "couleur": "beige" },
+        { "forme": "boite", "taille": [0.28, 0.22, 0.26], "position": [-0.2, 0.525, 0], "couleur": "lilas" },
+        { "forme": "sphere", "rayon": 0.06, "position": [0.22, 0.48, 0], "couleur": "turquoise" },
+        { "forme": "cylindre", "rayon": 0.07, "rayonHaut": 0.08, "hauteur": 0.12, "position": [0.25, 0.86, 0], "couleur": "pot" },
+        { "forme": "sphere", "rayon": 0.12, "position": [0.25, 1.0, 0], "couleur": "feuille-claire" }
+      ]
+    },
+    {
+      "id": "tableau-blanc",
+      "nom": "Tableau blanc",
+      "designation": "le tableau blanc",
+      "description": "Un tableau blanc sur roulettes, couvert de petits papiers : les idées des prochaines applications.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.06, 0.04, 0.46], "position": [-0.42, 0.02, 0], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.06, 0.04, 0.46], "position": [0.42, 0.02, 0], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.02, "hauteur": 1.58, "position": [-0.42, 0.83, 0], "couleur": "metal" },
+        { "forme": "cylindre", "rayon": 0.02, "hauteur": 1.58, "position": [0.42, 0.83, 0], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.92, 0.66, 0.04], "position": [0, 1.25, 0], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.86, 0.6, 0.01], "position": [0, 1.25, 0.022], "couleur": "blanc" },
+        { "forme": "boite", "taille": [0.3, 0.02, 0.004], "position": [-0.18, 1.42, 0.0295], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.22, 0.02, 0.004], "position": [-0.22, 1.36, 0.0295], "couleur": "rouge" },
+        { "forme": "boite", "taille": [0.26, 0.02, 0.004], "position": [-0.2, 1.3, 0.0295], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.08, 0.08, 0.004], "position": [0.12, 1.42, 0.0295], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [0.08, 0.08, 0.004], "position": [0.23, 1.42, 0.0295], "couleur": "rose" },
+        { "forme": "boite", "taille": [0.08, 0.08, 0.004], "position": [0.12, 1.31, 0.0295], "couleur": "turquoise" },
+        { "forme": "boite", "taille": [0.5, 0.03, 0.06], "position": [0, 0.93, 0.03], "couleur": "gris" },
+        { "forme": "boite", "taille": [0.1, 0.02, 0.02], "position": [-0.1, 0.955, 0.03], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.1, 0.02, 0.02], "position": [0.05, 0.955, 0.03], "couleur": "rouge" }
+      ]
+    },
+    {
+      "id": "aquarium",
+      "nom": "Aquarium",
+      "designation": "l'aquarium",
+      "description": "Trois poissons qui nagent tranquillement entre les plantes. Les regarder un moment, ça apaise.",
+      "emprise": [2, 1],
+      "formes": [
+        { "forme": "boite", "taille": [0.9, 0.7, 0.42], "position": [0, 0.35, 0], "couleur": "bois-sombre" },
+        { "forme": "boite", "taille": [0.02, 0.5, 0.005], "position": [0, 0.35, 0.2125], "couleur": "bois" },
+        { "forme": "boite", "taille": [0.86, 0.5, 0.38], "position": [0, 0.95, 0], "couleur": "eau" },
+        { "forme": "boite", "taille": [0.86, 0.06, 0.005], "position": [0, 0.73, 0.1925], "couleur": "beige" },
+        { "forme": "boite", "taille": [0.04, 0.2, 0.005], "position": [-0.33, 0.82, 0.195], "couleur": "vert" },
+        { "forme": "boite", "taille": [0.03, 0.15, 0.005], "position": [0.32, 0.8, 0.195], "couleur": "feuille-claire" },
+        { "forme": "boite", "taille": [0.08, 0.04, 0.005], "position": [-0.2, 1.0, 0.1925], "couleur": "orange" },
+        { "forme": "boite", "taille": [0.03, 0.04, 0.005], "position": [-0.255, 1.0, 0.1925], "couleur": "orange", "rotation": [0, 0, 45] },
+        { "forme": "boite", "taille": [0.07, 0.035, 0.005], "position": [0.15, 0.9, 0.1925], "couleur": "moutarde" },
+        { "forme": "boite", "taille": [0.03, 0.035, 0.005], "position": [0.2, 0.9, 0.1925], "couleur": "moutarde", "rotation": [0, 0, 45] },
+        { "forme": "boite", "taille": [0.05, 0.03, 0.005], "position": [0.04, 1.08, 0.1925], "couleur": "rose" },
+        { "forme": "boite", "taille": [0.9, 0.04, 0.42], "position": [0, 1.22, 0], "couleur": "anthracite" }
       ]
     }
   ]

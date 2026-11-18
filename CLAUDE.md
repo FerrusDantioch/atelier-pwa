@@ -127,9 +127,23 @@ la version change le nom de la réserve hors ligne, ce qui déclenche la mise
   (`commandes.aleatoires`) ; seules les associations réussissables
   « parfaitement » sont tirées. Les listes de commandes de l'interface
   passent par `commandesConnues()`.
-- **Portraits** (visio, commandes) : `moteur.photographier()` dessine une
-  autre scène dans un coin de la toile et la recopie dans la même tâche
-  (`js/monde/portrait.js`) : pas de second moteur 3D.
+- **Portraits** (visio, commandes) et **photos de la boutique** :
+  `moteur.photographier()` dessine une autre scène dans un coin de la toile
+  et la recopie dans la même tâche (`js/monde/portrait.js`) : pas de second
+  moteur 3D.
+- **Boutique et aménagement** (jalon 5) : règles pures dans
+  `js/jeu/boutique.js` (acheter, niveau, matériel et son bonus,
+  `catalogueEquipe()` qui remplace les formes d'un `element`) et
+  `js/jeu/amenagement.js` (`verifierPlacement()` : mêmes règles
+  d'accessibilité que `coherence.js`, via `problemesDAcces()`, plus
+  l'espace de demi-tour de 1,50 m et le personnage jamais enfermé ; la
+  raison de chaque refus est dite en toutes lettres). Achats dans
+  `partie.possessions` (identifiants `achat-<n>`, jamais réutilisés),
+  meubles posés dans `partie.lieux.amenagements` (format 4). Le monde
+  reconstruit le lieu avec `actualiserLieu()` ; pendant l'aménagement, le
+  temps est arrêté et le doigt et le clavier déplacent le meuble
+  (`js/monde/fantome.js`, `js/interface/amenagement.js`). Au chargement,
+  un meuble qui ne tient plus à sa place retourne dans les affaires.
 - **Tests navigateur** : pour attendre une condition qui importe des modules
   du jeu, utiliser `attendre()` (aides-navigateur.mjs), pas
   `page.waitForFunction` (qui n'attend pas les fonctions async).
@@ -174,8 +188,10 @@ contrastes, et (jalon 1) la scène 3D, le toucher, le clavier, « Aller à… »
 « Examiner », la caméra, le choix du personnage, le petit écran,
 (jalon 2) l'horloge, le sommeil, les habitants et les dialogues,
 (jalon 3) l'ordinateur, la visio, l'atelier, la livraison et les comptes,
-et (jalon 4) le journal, la quête suivie, parler à Théo à 16 h, les étapes
-facultatives et les commandes du jour.
+(jalon 4) le journal, la quête suivie, parler à Théo à 16 h, les étapes
+facultatives et les commandes du jour, et (jalon 5) la boutique, le
+matériel et son bonus, l'aménagement (refus expliqués, tourner, reprendre,
+ranger, rechargement) et le panneau compact sur téléphone.
 Dans les textes affichés, la typographie met des espaces fines insécables
 avant « : ! ? » : normaliser les espaces (`\s+`) avant de comparer.
 Petit serveur local : `node outils/serveur.mjs`.

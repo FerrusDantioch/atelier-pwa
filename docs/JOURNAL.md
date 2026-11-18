@@ -1,5 +1,101 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 5, étape 0.6 — La boutique et l'aménagement (version 0.6.0, 18 novembre 2026)
+
+Première étape du jalon 5, à essayer sur tablette (le jalon sera validé à
+la fin, après les bureaux). Ferrus a choisi le 18 novembre que les deux
+ordinateurs (maison et bureaux) restent utilisables ; sans préférence de
+sa part, le jalon est livré par étapes et le matériel donne un petit bonus
+(recommandations appliquées, voir `docs/PLAN.md`).
+
+### Ce qui est fait
+
+- **La boutique**, sur l'ordinateur (`data/boutique.json`) : chaque article
+  a sa photo (prise par le moteur 3D), son prix, et dit en toutes lettres
+  s'il est disponible, sinon le niveau qu'il faut ou les pièces qui
+  manquent. Un achat se confirme toujours (« Il te restera… »).
+  - **Matériel pour ton bureau** : grand écran (90 pièces), clavier
+    confortable (60), siège réglable (120, niveau 2). Il s'installe tout
+    seul sur le bureau (on le voit en 3D), ne s'achète qu'une fois, et
+    rapporte **5 pièces de plus à chaque livraison** (« Dont 5 pièces
+    grâce à ton matériel » dans le détail du paiement).
+  - **Meubles et décoration** : cactus, plante verte, pouf, grande plante,
+    lampadaire, tapis rond (niveau 1), étagère basse, tableau blanc,
+    fauteuil (niveau 2), aquarium (niveau 3). Sept nouveaux meubles
+    dessinés par code ; certains s'examinent une fois posés.
+- **Aménager** (menu Pause › Aménager ce lieu, « Placer maintenant » après
+  un achat, ou l'objectif d'une quête) : le temps s'arrête, un panneau
+  remplace la barre du bas. On choisit un meuble dans ses affaires, on
+  touche le sol pour le placer (ou les flèches), « Tourner », puis « Poser
+  ici ». Toucher un meuble acheté le reprend : « Ranger » le remet dans
+  les affaires, « Annuler » le remet à sa place. Au clavier : flèches,
+  R (tourner), Entrée (poser), Suppr (ranger), Échap (annuler, terminer).
+- **Un meuble qui gêne est refusé, avec la raison** : le meuble devient
+  transparent, une croix barre sa place, et le panneau dit pourquoi :
+  « En fauteuil roulant, on ne pourrait plus atteindre la chambre : il
+  faut des passages d'au moins 1 m », « La place est prise par le
+  canapé », « Halaé ne pourrait plus aller à sa place habituelle »,
+  « … faire demi-tour dans la salle d'eau : il faut un espace libre de
+  1,50 m », « Tu ne pourrais plus sortir de là où tu es »… Ce sont les
+  mêmes règles que celles vérifiées au démarrage pour la maison : elle
+  reste accessible, quoi qu'on y pose.
+- **Une nouvelle quête du mentor**, « Un intérieur où tout le monde
+  passe » (soutien au quotidien), après celle du planning d'Halaé :
+  acheter un meuble, le poser chez soi ; en facultatif, équiper son
+  bureau. Deux nouveaux types d'étapes : « acheter » et « placer ».
+- **Tes comptes** listent maintenant les achats.
+- Sauvegarde au **format 4** (les achats et les meubles posés) ; une
+  partie de la 0.5 est mise à niveau sans rien perdre. Si une version
+  future change la maison, un meuble qui ne tient plus à sa place
+  retourne dans les affaires (rien n'est perdu).
+- Sur un petit écran ou avec un très grand texte, le panneau
+  « Aménager » passe en version compacte : flèches et boutons
+  secondaires en icônes de 48 px (leur nom reste lu par les lecteurs
+  d'écran), « Poser ici » garde son nom.
+
+### Vérifications faites
+
+- 139 tests sans navigateur, dont 22 nouveaux : la boutique (niveau,
+  argent manquant, matériel acheté une seule fois, bonus compté dans le
+  paiement, formes remplacées sans toucher aux données), l'aménagement
+  (place libre, mur, place prise, quelqu'un là, passage coupé à pied ou
+  seulement en fauteuil, place d'un habitant, demi-tour, personnage
+  enfermé, place la plus proche trouvée en quelques millisecondes,
+  meubles qui ne tiennent plus rangés au chargement), le format 4 et la
+  mise à niveau du format 3, la quête et ses étapes « acheter » et
+  « placer », les données fautives refusées.
+- 58 tests dans Chromium, dont 5 nouveaux : la boutique (photos, niveau,
+  argent manquant, confirmation, « Placer maintenant », temps arrêté,
+  rechargement), le matériel et son bonus à la livraison, l'aménagement
+  (refus expliqués, R, Entrée, reprendre, Annuler, Ranger, Échap), la
+  quête (objectif → boutique → aménagement), le téléphone avec le texte
+  « Énorme » (panneau compact, boutons de 48 px, rien ne déborde).
+
+### Comment tester sur tablette
+
+1. Reprends ta partie (ou commence-en une) : l'argent gagné sert enfin.
+   Va à l'ordinateur › **Boutique**. Regarde les photos, les prix, les
+   articles encore verrouillés.
+2. Achète un petit meuble (le cactus, 10 pièces), puis « Placer
+   maintenant ». Touche le sol à plusieurs endroits : le panneau dit si
+   c'est possible, et sinon pourquoi. Essaie devant une porte, sur le
+   canapé, dans un coin étroit de la salle d'eau.
+3. « Tourner », puis « Poser ici ». Touche ensuite ton meuble pour le
+   déplacer ou le ranger. « Terminer » pour reprendre le jeu.
+4. Achète du matériel (le clavier, 60 pièces) : regarde ton bureau
+   changer, puis livre une commande : le détail du paiement compte le
+   bonus.
+5. Ferme le jeu et rouvre-le : tes meubles sont toujours là.
+6. Sur téléphone avec un grand texte : le panneau reste compact.
+
+### Limites connues
+
+- On ne peut déplacer que les meubles achetés (ceux de la maison restent
+  à leur place).
+- Le matériel apparaît sur le bureau de la maison ; les bureaux de
+  l'atelier arrivent à l'étape suivante (0.7).
+- Les textes de la nouvelle quête du mentor sont à valider par Ferrus.
+
 ## ✅ Jalon 4 — Les quêtes et le journal (version 0.5.1, 18 novembre 2026)
 
 Validé par Ferrus le 18 novembre 2026, textes de la quête du mentor
@@ -142,8 +238,8 @@ Ferrus) le 15 novembre 2026, telles que proposées.
 
 ### En attente
 
-- L'adresse du portfolio de Ferrus, si elle diffère de celle du site de
-  l'Omni-système (l'affiche montre celle-ci).
+- *(Réglé le 18 novembre : l'adresse du portfolio de Ferrus est celle du
+  site de l'Omni-système, que montre l'affiche.)*
 
 ## ✅ Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1, 15 novembre 2026)
 

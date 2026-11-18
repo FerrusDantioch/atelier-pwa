@@ -26,7 +26,9 @@ import { TAILLE_CASE, angleVers, profilDeDeplacement } from './grille.js';
  *   scene, lieu, grille, donnees, palette
  *   joueur()   le joueur actuel (Ferrus ou non : le mentor n'est pas là si on joue Ferrus)
  */
-export function creerHabitants({ scene, lieu, grille, donnees, palette, joueur }) {
+export function creerHabitants({ scene, lieu, grille: grilleDeDepart, donnees, palette, joueur }) {
+  // La grille change quand un meuble est posé ou rangé (changerGrille).
+  let grille = grilleDeDepart;
   const points = new Map((lieu.points || []).map((point) => [point.id, point]));
   const vitesse = donnees.jeu.deplacement.vitesse;
   const personnages = donnees.personnages;
@@ -123,6 +125,12 @@ export function creerHabitants({ scene, lieu, grille, donnees, palette, joueur }
 
   return {
     get liste() { return habitants; },
+
+    // Un meuble a été posé ou rangé : les chemins se cherchent sur la
+    // nouvelle grille.
+    changerGrille(nouvelle) {
+      grille = nouvelle;
+    },
 
     // Pose chacun directement à sa place pour cette heure (chargement, réveil).
     placer(minute, caseJoueur) {

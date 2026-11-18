@@ -1,0 +1,128 @@
+{
+  "aValider": "Catalogue proposé par Claude pour le jalon 5 (prix, niveaux, bonus et textes) : modifiable librement. Le matériel remplace les formes marquées « element » dans data/meubles.json.",
+  "materiel": [
+    {
+      "id": "grand-ecran",
+      "nom": "Grand écran",
+      "designation": "le grand écran",
+      "description": "Un grand écran sur un bras réglable : l'application tient tout entière sous tes yeux, et tu ne te penches plus.",
+      "prix": 90,
+      "niveau": 1,
+      "bonus": 5,
+      "element": "ecran",
+      "formes": [
+        { "forme": "boite", "taille": [0.08, 0.05, 0.08], "position": [0, 0.785, -0.2], "couleur": "anthracite" },
+        { "forme": "cylindre", "rayon": 0.02, "hauteur": 0.3, "position": [0, 0.96, -0.2], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.98, 0.52, 0.03], "position": [0, 1.2, -0.17], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.92, 0.46, 0.006], "position": [0, 1.2, -0.154], "couleur": "ecran-allume" },
+        { "forme": "boite", "taille": [0.4, 0.03, 0.004], "position": [-0.2, 1.36, -0.149], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.56, 0.03, 0.004], "position": [-0.12, 1.29, -0.149], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.3, 0.03, 0.004], "position": [-0.25, 1.22, -0.149], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.48, 0.03, 0.004], "position": [-0.16, 1.15, -0.149], "couleur": "ecran" },
+        { "forme": "boite", "taille": [0.22, 0.3, 0.004], "position": [0.28, 1.2, -0.149], "couleur": "lilas" }
+      ]
+    },
+    {
+      "id": "clavier-confort",
+      "nom": "Clavier confortable",
+      "designation": "le clavier confortable",
+      "description": "Un clavier en deux moitiés, aux touches douces et bien lisibles, avec un repose-poignets : tes mains te disent merci.",
+      "prix": 60,
+      "niveau": 1,
+      "bonus": 5,
+      "element": "clavier",
+      "formes": [
+        { "forme": "boite", "taille": [0.22, 0.025, 0.15], "position": [-0.15, 0.7725, 0.09], "couleur": "anthracite", "rotation": [0, 8, 0] },
+        { "forme": "boite", "taille": [0.22, 0.025, 0.15], "position": [0.11, 0.7725, 0.09], "couleur": "anthracite", "rotation": [0, -8, 0] },
+        { "forme": "boite", "taille": [0.18, 0.006, 0.11], "position": [-0.15, 0.788, 0.09], "couleur": "gris-clair", "rotation": [0, 8, 0] },
+        { "forme": "boite", "taille": [0.18, 0.006, 0.11], "position": [0.11, 0.788, 0.09], "couleur": "gris-clair", "rotation": [0, -8, 0] },
+        { "forme": "boite", "taille": [0.5, 0.02, 0.05], "position": [-0.02, 0.77, 0.205], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.06, 0.05, 0.08], "position": [0.37, 0.785, 0.09], "couleur": "anthracite", "rotation": [0, 0, -20] }
+      ]
+    },
+    {
+      "id": "siege-reglable",
+      "nom": "Siège réglable",
+      "designation": "le siège réglable",
+      "description": "Un siège qui se règle en hauteur, avec un vrai dossier, un appui-tête et des accoudoirs : tu travailles longtemps sans mal de dos.",
+      "prix": 120,
+      "niveau": 2,
+      "bonus": 5,
+      "element": "siege",
+      "formes": [
+        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir", "rotation": [0, 30, 0] },
+        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir", "rotation": [0, 90, 0] },
+        { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir", "rotation": [0, 150, 0] },
+        { "forme": "cylindre", "rayon": 0.05, "hauteur": 0.06, "position": [0, 0.07, 0], "couleur": "noir" },
+        { "forme": "cylindre", "rayon": 0.025, "hauteur": 0.34, "position": [0, 0.27, 0], "couleur": "metal" },
+        { "forme": "boite", "taille": [0.46, 0.08, 0.44], "position": [0, 0.48, 0.01], "couleur": "bleu" },
+        { "forme": "boite", "taille": [0.44, 0.52, 0.06], "position": [0, 0.82, -0.2], "couleur": "bleu", "rotation": [-6, 0, 0] },
+        { "forme": "boite", "taille": [0.3, 0.1, 0.03], "position": [0, 0.7, -0.165], "couleur": "bleu-clair", "rotation": [-6, 0, 0] },
+        { "forme": "boite", "taille": [0.04, 0.08, 0.03], "position": [0, 1.11, -0.235], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.26, 0.12, 0.05], "position": [0, 1.2, -0.24], "couleur": "bleu", "rotation": [-6, 0, 0] },
+        { "forme": "boite", "taille": [0.03, 0.16, 0.03], "position": [-0.24, 0.59, -0.04], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.03, 0.16, 0.03], "position": [0.24, 0.59, -0.04], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.05, 0.03, 0.26], "position": [-0.24, 0.68, 0], "couleur": "noir" },
+        { "forme": "boite", "taille": [0.05, 0.03, 0.26], "position": [0.24, 0.68, 0], "couleur": "noir" }
+      ]
+    }
+  ],
+  "meubles": [
+    {
+      "meuble": "cactus",
+      "description": "Un petit cactus en fleur : la plante idéale pour qui oublie d'arroser.",
+      "prix": 10,
+      "niveau": 1
+    },
+    {
+      "meuble": "plante",
+      "description": "Une plante verte bien touffue, dans un pot en terre cuite.",
+      "prix": 15,
+      "niveau": 1
+    },
+    {
+      "meuble": "pouf",
+      "description": "Un pouf moelleux : un siège en plus pour les visites, ou un repose-pieds.",
+      "prix": 20,
+      "niveau": 1
+    },
+    {
+      "meuble": "plante-haute",
+      "description": "Une grande plante qui monte presque au plafond. Elle donne tout de suite un air de jungle.",
+      "prix": 30,
+      "niveau": 1
+    },
+    {
+      "meuble": "lampe-sol",
+      "description": "Un lampadaire à la lumière douce, pour les soirées tranquilles.",
+      "prix": 35,
+      "niveau": 1
+    },
+    {
+      "meuble": "tapis-rond",
+      "description": "Un grand tapis rond et plat : on passe dessus sans rien accrocher, à pied comme en fauteuil roulant.",
+      "prix": 40,
+      "niveau": 1
+    },
+    {
+      "meuble": "etagere-basse",
+      "prix": 45,
+      "niveau": 2
+    },
+    {
+      "meuble": "tableau-blanc",
+      "prix": 60,
+      "niveau": 2
+    },
+    {
+      "meuble": "fauteuil",
+      "prix": 70,
+      "niveau": 2
+    },
+    {
+      "meuble": "aquarium",
+      "prix": 120,
+      "niveau": 3
+    }
+  ]
+}

@@ -13,6 +13,7 @@
 // =============================================================================
 
 import { commandesAProposer, idsDesOffres, livrerProjet, nouvellesOffres } from '../jeu/commandes.js';
+import { bonusDuMateriel } from '../jeu/boutique.js';
 import { capaciteDuProjet, chargeDuProjet, evaluerProjet, nettoyerProjet } from '../jeu/creation.js';
 import { DRAPEAU_TEXTE_AGRANDI } from '../jeu/quetes.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
@@ -251,11 +252,23 @@ export function ecranAtelier(ctx, commande) {
       el('p', {}, el('strong', {}, t('test.verdict', { note }))),
       evaluation.note === 'aRetravailler' ? null : el('p', {}, t('test.gains', {
         argent: ctx.montant(evaluation.recompense.argent), reputation: ctx.points(evaluation.recompense.reputation),
-      })));
+      }), partMateriel(evaluation)));
+  }
+
+  // « Dont 10 pièces grâce à ton matériel. » (jalon 5), ou rien.
+  function partMateriel(evaluation) {
+    const materiel = evaluation.recompense.materiel || 0;
+    return materiel > 0 ? ` ${t('boutique.dontMateriel', { argent: ctx.montant(materiel) })}` : '';
+  }
+
+  // L'évaluation, avec les pièces en plus du matériel installé (jalon 5).
+  function evaluer() {
+    const bonusMateriel = ctx.donnees.boutique ? bonusDuMateriel(partieEnCours(), ctx.donnees.boutique) : 0;
+    return evaluerProjet(lireProjet(), commande, creation, { bonusMateriel });
   }
 
   function tester() {
-    const evaluation = evaluerProjet(lireProjet(), commande, creation);
+    const evaluation = evaluer();
     ouvrirFenetre({
       titre: t('test.titre', { client }),
       contenu: el('div', { class: 'resultat-livraison' }, verdict(evaluation), listeDesAvis(ctx, commande, evaluation)),
@@ -265,7 +278,7 @@ export function ecranAtelier(ctx, commande) {
   }
 
   function livrer() {
-    const evaluation = evaluerProjet(lireProjet(), commande, creation);
+    const evaluation = evaluer();
     const avant = idsDesOffres(partieEnCours(), ctx.listeCommandes, ctx.paliers);
     const aProposerAvant = new Set(commandesAProposer(partieEnCours(), ctx.listeCommandes, ctx.paliers).map((c) => c.id));
     let resultat = null;
@@ -278,7 +291,7 @@ export function ecranAtelier(ctx, commande) {
     if (resultat.livree) {
       contenu.push(ctx.encadre('piece', 'succes', t('livraison.gains', {
         argent: ctx.montant(evaluation.recompense.argent), reputation: ctx.points(evaluation.recompense.reputation),
-      })));
+      }) + partMateriel(evaluation)));
       if (resultat.niveauApres > resultat.niveauAvant) {
         contenu.push(ctx.encadre('etoile', 'succes', t('livraison.niveau', { niveau: resultat.niveauApres, nom: resultat.nomNiveau })));
       }

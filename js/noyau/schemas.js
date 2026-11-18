@@ -99,6 +99,9 @@ const SCHEMA_FORME = {
     cotes: { type: 'nombre', entier: true, min: 3, max: 32, facultatif: true },
     details: { type: 'nombre', entier: true, min: 0, max: 2, facultatif: true },
     rotation: { ...troisNombres, facultatif: true },
+    // La partie du meuble que le matériel peut remplacer (data/boutique.json) :
+    // « ecran », « clavier », « siege ».
+    element: { ...texte, facultatif: true },
   },
 };
 
@@ -285,6 +288,18 @@ export const SCHEMA_LIEU = {
   },
 };
 
+// Chaque forme a les mesures qu'il lui faut (une boîte, sa taille…).
+function verifierFormes(formes, ou) {
+  const erreurs = [];
+  (formes || []).forEach((forme, n) => {
+    const besoin = { boite: ['taille'], cylindre: ['rayon', 'hauteur'], sphere: ['rayon'], anneau: ['rayon', 'epaisseur'] }[forme.forme] || [];
+    for (const champ of besoin) {
+      if (forme[champ] === undefined) erreurs.push(`${ou} › formes › n°${n + 1} : « ${champ} » manque pour une forme « ${forme.forme} »`);
+    }
+  });
+  return erreurs;
+}
+
 // Vérifications qu'un schéma ne sait pas faire pour les meubles : chaque
 // forme a les mesures qu'il lui faut, et un meuble qu'on peut examiner a une
 // désignation (« le lit ») pour les phrases du jeu.
@@ -298,12 +313,7 @@ function verifierMeublesEnPlus(fichier) {
     if (meuble.description && !meuble.designation) {
       erreurs.push(`${ou} : un meuble avec une description doit avoir une « designation » (ex. « le lit »)`);
     }
-    (meuble.formes || []).forEach((forme, n) => {
-      const besoin = { boite: ['taille'], cylindre: ['rayon', 'hauteur'], sphere: ['rayon'], anneau: ['rayon', 'epaisseur'] }[forme.forme] || [];
-      for (const champ of besoin) {
-        if (forme[champ] === undefined) erreurs.push(`${ou} › formes › n°${n + 1} : « ${champ} » manque pour une forme « ${forme.forme} »`);
-      }
-    });
+    erreurs.push(...verifierFormes(meuble.formes, ou));
   });
   return erreurs;
 }
@@ -560,6 +570,11 @@ export const CHAMPS_DES_ETAPES = {
   reputation: ['niveau'],
   parler: ['pnj', 'question', 'replique'],
   aller: ['cible'],
+  // Jalon 5 : acheter (un « article » précis, ou n'importe quel article
+  // d'une « sorte » : meuble ou materiel) et placer un meuble acheté (un
+  // « article » précis ou n'importe lequel, dans un « lieu » ou n'importe où).
+  acheter: [],
+  placer: [],
 };
 
 const SCHEMA_ETAPE = {
@@ -579,6 +594,9 @@ const SCHEMA_ETAPE = {
     replique: { ...texte, facultatif: true },
     cible: { ...texte, facultatif: true },
     message: { ...texte, facultatif: true },
+    article: { ...texte, facultatif: true },
+    sorte: { type: 'choix', valeurs: ['meuble', 'materiel'], facultatif: true },
+    lieu: { ...texte, facultatif: true },
   },
 };
 
@@ -631,6 +649,9 @@ function verifierQuetesEnPlus(fichier) {
       etapesVues.add(etape.id);
       for (const champ of CHAMPS_DES_ETAPES[etape.type] || []) {
         if (!(champ in etape)) erreurs.push(`${ici} : une étape « ${etape.type} » a besoin du champ « ${champ} »`);
+      }
+      if (etape.type === 'acheter' && !etape.article && !etape.sorte) {
+        erreurs.push(`${ici} : une étape « acheter » a besoin d'un « article » ou d'une « sorte » (meuble, materiel)`);
       }
     });
     if ((quete.etapes || []).every((etape) => etape.facultative)) {
@@ -712,6 +733,66 @@ function verifierModelesCommandesEnPlus(fichier) {
   return erreurs;
 }
 
+// --- data/boutique.json : ce qui se vend (jalon 5) ------------------------------
+export const SCHEMA_BOUTIQUE = {
+  type: 'objet',
+  champs: {
+    aValider: { ...texte, facultatif: true },
+    materiel: {
+      type: 'liste',
+      element: {
+        type: 'objet',
+        champs: {
+          id: texte,
+          nom: texte,
+          designation: texte,
+          description: texte,
+          prix: { type: 'nombre', entier: true, min: 1, max: 100000 },
+          niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+          // Les pièces en plus à chaque livraison.
+          bonus: { type: 'nombre', entier: true, min: 0, max: 1000 },
+          // L'élément remplacé sur le poste de travail, et ses nouvelles formes.
+          element: texte,
+          formes: { type: 'liste', min: 1, element: SCHEMA_FORME },
+        },
+      },
+    },
+    meubles: {
+      type: 'liste',
+      element: {
+        type: 'objet',
+        champs: {
+          meuble: texte,
+          // Le texte de la boutique (sinon : la description du meuble).
+          description: { ...texte, facultatif: true },
+          prix: { type: 'nombre', entier: true, min: 1, max: 100000 },
+          niveau: { type: 'nombre', entier: true, min: 1, facultatif: true },
+        },
+      },
+    },
+  },
+};
+
+function verifierBoutiqueEnPlus(fichier) {
+  const erreurs = [];
+  const vus = new Set();
+  for (const article of fichier?.materiel || []) {
+    if (vus.has(article.id)) erreurs.push(`materiel › ${article.id} : identifiant en double`);
+    vus.add(article.id);
+    erreurs.push(...verifierFormes(article.formes, `materiel › ${article.id}`));
+  }
+  const elements = new Set();
+  for (const article of fichier?.materiel || []) {
+    if (elements.has(article.element)) erreurs.push(`materiel › ${article.id} : un autre matériel remplace déjà l'élément « ${article.element} »`);
+    elements.add(article.element);
+  }
+  for (const article of fichier?.meubles || []) {
+    if (vus.has(article.meuble)) erreurs.push(`meubles › ${article.meuble} : identifiant en double (un article par meuble)`);
+    vus.add(article.meuble);
+  }
+  return erreurs;
+}
+
 // La liste des fichiers de données chargés au démarrage. Les fichiers des
 // lieux (data/lieux/*.json) sont ensuite chargés d'après data/lieux/index.json.
 export const FICHIERS_DONNEES = [
@@ -730,5 +811,6 @@ export const FICHIERS_DONNEES = [
     schema: SCHEMA_MODELES_COMMANDES,
     enPlus: verifierModelesCommandesEnPlus,
   },
+  { nom: 'boutique', chemin: 'data/boutique.json', schema: SCHEMA_BOUTIQUE, enPlus: verifierBoutiqueEnPlus },
   { nom: 'indexLieux', chemin: 'data/lieux/index.json', schema: SCHEMA_INDEX_LIEUX },
 ];
