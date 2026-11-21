@@ -108,8 +108,11 @@ export function recompensePour(note, commande, bonusObtenus, bareme) {
  * est { sorte, etat, … } :
  *   sorte  modele | besoin | eviter | confort | inutile | charge | bonus
  *   etat   ok | mineur | bloquant (et « absent » pour un bonus non obtenu)
+ * bonusMateriel : les pièces en plus grâce au matériel installé (jalon 5,
+ * voir boutique.js), gagnées à chaque livraison (sauf « À retravailler ») ;
+ * recompense.materiel dit combien (absent s'il n'y en a pas).
  */
-export function evaluerProjet(projetBrut, commande, creation) {
+export function evaluerProjet(projetBrut, commande, creation, { bonusMateriel = 0 } = {}) {
   const projet = nettoyerProjet(projetBrut, creation);
   const criteres = [];
   const presents = apports(projet, creation);
@@ -178,13 +181,19 @@ export function evaluerProjet(projetBrut, commande, creation) {
   if (criteres.some((critere) => critere.etat === 'bloquant')) note = 'aRetravailler';
   else if (criteres.some((critere) => critere.etat === 'mineur')) note = 'bien';
 
+  const recompense = recompensePour(note, commande, bonusObtenus, creation.bareme);
+  const materiel = note === 'aRetravailler' ? 0 : Math.max(0, Math.round(bonusMateriel));
+  if (materiel > 0) {
+    recompense.materiel = materiel;
+    recompense.argent += materiel;
+  }
   return {
     note,
     charge,
     capacite,
     criteres,
     bonusObtenus,
-    recompense: recompensePour(note, commande, bonusObtenus, creation.bareme),
+    recompense,
   };
 }
 

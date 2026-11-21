@@ -6,9 +6,12 @@
 // prend une « photo » (moteur.photographier) : une image fixe, rien ne bouge,
 // et la scène du jeu n'est jamais interrompue.
 // Les photos sont gardées : un même personnage n'est photographié qu'une fois.
+//
+// Même principe pour les photos des meubles de la boutique (jalon 5) : le
+// meuble seul, vu de trois quarts comme dans le jeu, sur un fond clair.
 // =============================================================================
 
-import { Box3, Color, Matrix4, Mesh, OrthographicCamera, Scene } from '../../lib/three/three.module.js';
+import { Box3, Color, Matrix4, Mesh, OrthographicCamera, Scene, Vector3 } from '../../lib/three/three.module.js';
 import { ajouterRecette, creerConstructeur, matiereDecor } from '../modeles/formes.js';
 import { construirePersonnage } from '../modeles/personnage.js';
 import { creerLumieres } from './lumieres.js';
@@ -36,6 +39,72 @@ export function creerPortraits({ moteur, donnees, palette, luminosite = () => 'n
 
   const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 30);
   const photos = new Map();
+
+  // --- Les meubles (boutique) ---------------------------------------------------
+  const sceneMeubles = new Scene();
+  sceneMeubles.background = new Color(palette.couleur('creme'));
+  const lumieresMeubles = creerLumieres();
+  sceneMeubles.add(lumieresMeubles.groupe);
+  const cameraMeubles = new OrthographicCamera(-1, 1, 1, -1, 0.1, 40);
+  // Vu de trois quarts, d'en haut, comme dans le jeu (un peu plus de face).
+  const direction = new Vector3(0.75, 0.9, 1.2).normalize();
+
+  function photographierMeuble(meuble, { largeur, hauteur }) {
+    const cle = `meuble|${meuble.id}|${JSON.stringify(meuble.formes).length}|${largeur}x${hauteur}`;
+    if (photos.has(cle)) return photos.get(cle);
+    const constructeur = creerConstructeur();
+    ajouterRecette(constructeur, meuble.formes, palette);
+    const forme = new Mesh(constructeur.construire(), matiereDecor());
+    sceneMeubles.add(forme);
+    // Le cadrage : les huit coins de la boîte, vus par la caméra.
+    const boite = new Box3().setFromObject(forme);
+    const centre = boite.getCenter(new Vector3());
+    cameraMeubles.position.copy(centre).addScaledVector(direction, 10);
+    cameraMeubles.lookAt(centre);
+    cameraMeubles.updateMatrixWorld(true);
+    let gauche = Infinity; let droite = -Infinity; let bas = Infinity; let haut = -Infinity;
+    for (const x of [boite.min.x, boite.max.x]) {
+      for (const y of [boite.min.y, boite.max.y]) {
+        for (const z of [boite.min.z, boite.max.z]) {
+          const point = new Vector3(x, y, z).applyMatrix4(cameraMeubles.matrixWorldInverse);
+          gauche = Math.min(gauche, point.x); droite = Math.max(droite, point.x);
+          bas = Math.min(bas, point.y); haut = Math.max(haut, point.y);
+        }
+      }
+    }
+    const marge = 1.12;
+    const rapport = largeur / hauteur;
+    let demiLargeur = ((droite - gauche) / 2) * marge;
+    let demiHauteur = ((haut - bas) / 2) * marge;
+    if (demiLargeur / demiHauteur > rapport) demiHauteur = demiLargeur / rapport;
+    else demiLargeur = demiHauteur * rapport;
+    const milieuX = (gauche + droite) / 2;
+    const milieuY = (bas + haut) / 2;
+    cameraMeubles.left = milieuX - demiLargeur;
+    cameraMeubles.right = milieuX + demiLargeur;
+    cameraMeubles.top = milieuY + demiHauteur;
+    cameraMeubles.bottom = milieuY - demiHauteur;
+    lumieresMeubles.regler({ luminosite: luminosite(), azimut: Math.atan2(direction.x, direction.z) });
+    let photo = null;
+    try {
+      photo = moteur.photographier(sceneMeubles, cameraMeubles, largeur, hauteur);
+    } catch (erreur) {
+      console.error(erreur);
+    }
+    sceneMeubles.remove(forme);
+    forme.geometry.dispose();
+    if (photo) photos.set(cle, photo);
+    return photo;
+  }
+
+  const copier = (photo) => {
+    if (!photo) return null;
+    const copie = document.createElement('canvas');
+    copie.width = photo.width;
+    copie.height = photo.height;
+    copie.getContext('2d').drawImage(photo, 0, 0);
+    return copie;
+  };
 
   function photographier(apparence, { largeur, hauteur }) {
     const cle = `${JSON.stringify(apparence)}|${largeur}x${hauteur}`;
@@ -71,13 +140,11 @@ export function creerPortraits({ moteur, donnees, palette, luminosite = () => 'n
     // Une même toile ne peut être affichée qu'à un endroit : on en renvoie
     // une copie à chaque fois.
     photographier(apparence, taille) {
-      const photo = photographier(apparence, taille);
-      if (!photo) return null;
-      const copie = document.createElement('canvas');
-      copie.width = photo.width;
-      copie.height = photo.height;
-      copie.getContext('2d').drawImage(photo, 0, 0);
-      return copie;
+      return copier(photographier(apparence, taille));
+    },
+    // La photo d'un meuble (une recette de data/meubles.json), pour la boutique.
+    photographierMeuble(meuble, taille) {
+      return copier(photographierMeuble(meuble, taille));
     },
     // Après un changement de luminosité, les photos sont refaites.
     oublier() {

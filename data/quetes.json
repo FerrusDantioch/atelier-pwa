@@ -1,5 +1,5 @@
 {
-  "aValider": "Quêtes du premier livrable, proposées par Claude : une par principe. « Le planning de publication » et « Des sous-titres pour tout le monde » concernent Halaé : textes validés par elle (via Ferrus) le 15/11/2026, ne rien y changer sans son accord. « Bienvenue à l'atelier » (le mentor) et les quêtes de Théo (personnage fictif) validées par Ferrus le 18/11/2026. ⚠️ Ne jamais changer l'identifiant d'une quête ou d'une étape publiée : les étapes faites sont retenues par ces identifiants dans les parties.",
+  "aValider": "Quêtes du premier livrable, proposées par Claude : une par principe. « Le planning de publication » et « Des sous-titres pour tout le monde » concernent Halaé : textes validés par elle (via Ferrus) le 15/11/2026, ne rien y changer sans son accord. « Bienvenue à l'atelier » (le mentor) et les quêtes de Théo (personnage fictif) validées par Ferrus le 18/11/2026. Jalon 5 : « Un intérieur où tout le monde passe » et « Un vrai local » (le mentor), « Un coin pour souffler » (Théo) : à valider par Ferrus. ⚠️ Ne jamais changer l'identifiant d'une quête ou d'une étape publiée : les étapes faites sont retenues par ces identifiants dans les parties.",
   "principes": {
     "lisibilite": {
       "nom": "Lisibilité",
@@ -186,6 +186,110 @@
         }
       ],
       "fin": "Théo révise une chose à la fois, sans badges ni graphiques. Il lui reste de l'énergie pour l'essentiel.",
+      "recompense": { "argent": 30, "reputation": 8 }
+    },
+    {
+      "id": "interieur-pour-tous",
+      "titre": "Un intérieur où tout le monde passe",
+      "principe": "soutien",
+      "donneur": "ferrus",
+      "resume": "Tes premières pièces peuvent servir à aménager ta maison. Une seule règle : que tout le monde puisse toujours y circuler, à pied comme en fauteuil roulant.",
+      "debloquee": { "quetes": ["planning-publication"] },
+      "etapes": [
+        {
+          "id": "achat",
+          "type": "acheter",
+          "sorte": "meuble",
+          "texte": "achète un meuble, dans la boutique de l'ordinateur",
+          "detail": "Une plante, un pouf, un tapis… ce qui te fait plaisir."
+        },
+        {
+          "id": "pose",
+          "type": "placer",
+          "lieu": "domicile",
+          "texte": "place-le chez toi : Pause › Aménager",
+          "detail": "Le jeu refuse un meuble qui couperait un passage : en fauteuil roulant, il faut au moins 1 m pour passer, et un espace libre de 1,50 m pour faire demi-tour."
+        },
+        {
+          "id": "materiel",
+          "type": "acheter",
+          "sorte": "materiel",
+          "facultative": true,
+          "texte": "équipe ton bureau : grand écran, clavier ou siège",
+          "detail": "Le matériel s'installe tout seul sur ton bureau, et chaque livraison te rapporte alors quelques pièces de plus."
+        }
+      ],
+      "fin": "Ta maison te ressemble un peu plus, et tout le monde y circule librement. De larges passages servent à toutes et tous : fauteuil roulant, poussette ou bras chargés.",
+      "recompense": { "argent": 20, "reputation": 5 }
+    },
+    {
+      "id": "un-vrai-local",
+      "titre": "Un vrai local",
+      "principe": "soutien",
+      "donneur": "ferrus",
+      "resume": "L'atelier est reconnu : il est temps d'avoir un local où les gens peuvent venir te voir. Un local accessible à tout le monde, dès la porte d'entrée.",
+      "debloquee": { "niveau": 3, "quetes": ["interieur-pour-tous"] },
+      "etapes": [
+        {
+          "id": "louer",
+          "type": "acheter",
+          "article": "bureaux",
+          "texte": "loue les bureaux de l'atelier, dans la boutique",
+          "detail": "Ta maison et son ordinateur restent à toi : tu pourras travailler aux deux endroits."
+        },
+        {
+          "id": "visite",
+          "type": "lieu",
+          "lieu": "bureaux",
+          "texte": "rends-toi aux bureaux : sors par la porte d'entrée",
+          "detail": "Le trajet prend quelques minutes."
+        },
+        {
+          "id": "piece",
+          "type": "acheter",
+          "sorte": "piece",
+          "facultative": true,
+          "texte": "ouvre une nouvelle pièce aux bureaux",
+          "detail": "Salle de pause, coin calme, salle de réunion : chaque pièce ouverte fait venir de nouvelles personnes."
+        }
+      ],
+      "fin": "L'atelier a pignon sur rue : de plain-pied, une porte large, un comptoir à deux hauteurs et une sonnette lumineuse. Tout le monde peut entrer, et tout le monde est attendu.",
+      "recompense": { "argent": 30, "reputation": 8 }
+    },
+    {
+      "id": "coin-pour-souffler",
+      "titre": "Un coin pour souffler",
+      "principe": "charge",
+      "donneur": "theo",
+      "resume": "Chez Théo, c'est bruyant : les voisins, la télévision, la rue. Réviser y devient épuisant. Aux bureaux, une pièce au calme changerait tout.",
+      "debloquee": { "quetes": ["reviser-sans-se-noyer", "un-vrai-local"] },
+      "etapes": [
+        {
+          "id": "ecouter",
+          "type": "parler",
+          "pnj": "theo",
+          "texte": "parle à Théo, vers 16 h",
+          "question": "Tu as l'air fatigué ?",
+          "replique": "Chez moi, impossible de réviser : les voisins, la télé, la rue… Le soir, j'ai la tête comme une ruche. Il me faudrait un endroit calme."
+        },
+        {
+          "id": "ouvrir",
+          "type": "acheter",
+          "article": "coin-calme",
+          "texte": "ouvre le coin calme, aux bureaux",
+          "detail": "Dans la boutique de l'ordinateur."
+        },
+        {
+          "id": "visite",
+          "type": "parler",
+          "pnj": "theo",
+          "texte": "rends visite à Théo dans le coin calme, vers 14 h",
+          "detail": "Il y révise de 13 h 30 à 15 h 30.",
+          "question": "Alors, ce coin calme ?",
+          "replique": "Lumière douce, pas de bruit, personne qui me parle sans prévenir : j'ai révisé deux heures d'affilée. Un record !"
+        }
+      ],
+      "fin": "Le coin calme ne sert pas qu'à Théo : quand tout devient trop bruyant ou trop lumineux, n'importe qui peut venir y souffler.",
       "recompense": { "argent": 30, "reputation": 8 }
     }
   ]

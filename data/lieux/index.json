@@ -1,5 +1,6 @@
 {
   "lieux": [
-    { "id": "domicile", "fichier": "data/lieux/domicile.json" }
+    { "id": "domicile", "fichier": "data/lieux/domicile.json" },
+    { "id": "bureaux", "fichier": "data/lieux/bureaux.json" }
   ]
 }

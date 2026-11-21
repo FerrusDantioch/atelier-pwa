@@ -623,3 +623,41 @@
     white-space: nowrap;
   }
 }
+
+/* --- La boutique (jalon 5) --- */
+.carte-article-photo {
+  display: flex;
+  justify-content: center;
+  margin: -0.2rem 0 0.2rem;
+}
+
+.photo-article {
+  width: 160px;
+  max-width: 100%;
+  height: auto;
+  border: var(--epaisseur-bordure) solid var(--bordure);
+  border-radius: var(--rayon);
+}
+
+.carte-article-photo-grande .photo-article {
+  width: 240px;
+}
+
+.carte-article-prix,
+.carte-article-verrou {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-weight: 700;
+}
+
+.carte-article-verrou {
+  color: var(--texte-doux);
+}
+
+.carte-article > .bouton,
+.carte-article > .carte-article-verrou,
+.carte-article > .carte-commande-livree {
+  align-self: flex-start;
+  margin-top: auto;
+}

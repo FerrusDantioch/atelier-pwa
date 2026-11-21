@@ -74,6 +74,8 @@
     "rienAProximite": "Rien à examiner ici : approche-toi d'un meuble.",
     "inaccessible": "Impossible de t'approcher de {objet} pour l'instant.",
     "personnes": "Personnes présentes",
+    "autresLieux": "Autres lieux",
+    "allerVers": "Aller {vers}",
     "personneOu": "{nom} · {piece}",
     "camera": {
       "titre": "Caméra",
@@ -101,10 +103,12 @@
   },
   "actions": {
     "dormir": "Dormir",
-    "ordinateur": "Utiliser l'ordinateur"
+    "ordinateur": "Utiliser l'ordinateur",
+    "sortir": "Sortir…"
   },
   "temps": {
     "tard": "La journée est finie : l'horloge s'arrête. Va dormir quand tu veux (le lit, dans la chambre).",
+    "tardAilleurs": "La journée est finie : l'horloge s'arrête. Rentre chez toi pour dormir, quand tu veux (porte d'entrée).",
     "dormirTitre": "Dormir jusqu'à demain ?",
     "dormirMessage": "Tu te réveilleras demain à {heure}.",
     "dormirCopie": "Une copie de secours de ta partie est faite au passage.",
@@ -168,7 +172,8 @@
       "aller": { "geste": "Toucher le sol", "effet": "aller à cet endroit" },
       "objet": { "geste": "Toucher un meuble", "effet": "s'en approcher, puis « Examiner »" },
       "glisser": { "geste": "Glisser un doigt", "effet": "déplacer la vue" },
-      "pincer": { "geste": "Pincer à deux doigts", "effet": "rapprocher ou éloigner la vue" }
+      "pincer": { "geste": "Pincer à deux doigts", "effet": "rapprocher ou éloigner la vue" },
+      "amenager": { "geste": "Pendant l'aménagement, toucher le sol", "effet": "y mettre le meuble choisi" }
     },
     "sourisTitre": "À la souris",
     "souris": {
@@ -185,6 +190,10 @@
       "recentrer": { "geste": "C", "effet": "recentrer la vue" },
       "agir": { "geste": "Entrée ou Espace", "effet": "examiner l'objet proche" },
       "journal": { "geste": "J", "effet": "ouvrir le journal des quêtes" },
+      "meubleDeplacer": { "geste": "Pendant l'aménagement : Z Q S D ou flèches", "effet": "déplacer le meuble" },
+      "meubleTourner": { "geste": "Pendant l'aménagement : R", "effet": "tourner le meuble" },
+      "meublePoser": { "geste": "Pendant l'aménagement : Entrée", "effet": "poser le meuble" },
+      "meubleRanger": { "geste": "Pendant l'aménagement : Suppr", "effet": "ranger le meuble dans tes affaires" },
       "naviguer": { "geste": "Tab", "effet": "passer d'un bouton à l'autre" },
       "pause": { "geste": "Échap", "effet": "pause, ou fermer une fenêtre" }
     }
@@ -201,6 +210,7 @@
     "explication": "Le jeu est en pause : rien ne se passe tant que ce menu est ouvert.",
     "reprendre": "Reprendre",
     "journal": "Journal des quêtes",
+    "amenager": "Aménager ce lieu",
     "personnage": "Ton personnage",
     "commandes": "Commandes",
     "reglages": "Réglages",
@@ -440,6 +450,8 @@
       "visioDetail": "Des explications et des conseils",
       "comptes": "Tes comptes",
       "comptesDetail": "Ton argent et ta réputation",
+      "boutique": "Boutique",
+      "boutiqueDetail": "Des meubles, et du matériel pour ton bureau",
       "nouvelles": {
         "un": "{n} nouvelle commande",
         "plusieurs": "{n} nouvelles commandes"
@@ -577,7 +589,9 @@
     "progression": "Progression vers le niveau suivant",
     "historique": "Commandes livrées",
     "aucune": "Aucune commande livrée pour l'instant.",
-    "depenses": "Bientôt, tu pourras dépenser tes pièces pour aménager l'atelier."
+    "achats": "Tes achats",
+    "aucunAchat": "Aucun achat pour l'instant : la boutique est sur cet ordinateur.",
+    "achat": "{article} · jour {jour} · {prix}"
   },
   "quetes": {
     "nouvelle": "Nouvelle quête : « {titre} ». Elle est dans ton journal.",
@@ -588,6 +602,9 @@
     "absent": "{nom} n'est pas là pour l'instant : retour prévu à {heure}.",
     "absentDemain": "{nom} n'est pas là pour l'instant : retour prévu demain, à {heure}.",
     "absentJamais": "{nom} n'est pas là.",
+    "ailleurs": "{nom} est {vers} en ce moment : en route !",
+    "prochainAilleurs": "{nom} n'est pas là pour l'instant : prochain passage {vers}, à {heure}.",
+    "prochainAilleursDemain": "{nom} n'est pas là pour l'instant : prochain passage {vers}, demain à {heure}.",
     "sansEndroit": "Cette étape ne se joue pas à un endroit précis : relis-la dans ton journal (touche J)."
   },
   "journal": {
@@ -619,7 +636,105 @@
     "nouvelleSuivie": "Tu suis maintenant « {titre} ».",
     "yAller": "Y aller",
     "recompense": "Récompense : {argent} et {reputation} de réputation.",
-    "obtenue": "Gagné : {argent} et {reputation} de réputation."
+    "obtenue": "Gagné : {argent} et {reputation} de réputation.",
+    "amenager": "Aménager"
+  },
+  "boutique": {
+    "titre": "Boutique",
+    "intro": "Ce que tu achètes arrive tout de suite : le matériel s'installe sur ton bureau, les meubles t'attendent dans tes affaires.",
+    "argent": "Ton argent : {argent}",
+    "niveauActuel": "Ta réputation : niveau {niveau}, {nom}",
+    "photo": "Photo : {article}",
+    "rayons": {
+      "materiel": "Matériel pour ton bureau",
+      "meuble": "Meubles et décoration",
+      "lieu": "Les bureaux de l'atelier",
+      "piece": "Agrandir les bureaux"
+    },
+    "lieuAide": "Un local en ville, où les gens viennent te voir. Ta maison reste à toi : tu pourras travailler aux deux endroits.",
+    "pieceAide": "Chaque pièce ouverte fait venir de nouvelles personnes aux bureaux.",
+    "louer": "Louer",
+    "ouvrir": "Ouvrir",
+    "loue": "Loué : c'est à toi",
+    "ouverte": "Ouverte",
+    "dAbordLouer": "D'abord, loue {lieu}.",
+    "confirmerLouer": "Louer {article} ?",
+    "confirmerOuvrir": "Ouvrir {article} ?",
+    "acheteLieu": "C'est loué : {article}. Pour t'y rendre, sors par la porte d'entrée ; le trajet prend {minutes} minutes.",
+    "achetePiece": "C'est ouvert : {article}, dans {lieu}.",
+    "materielAide": "Chaque matériel s'installe une fois pour toutes, et te rapporte quelques pièces de plus à chaque livraison.",
+    "meubleAide": "Tu poses tes meubles où tu veux avec « Aménager » (menu Pause) : le jeu veille à ce que tout le monde puisse toujours passer.",
+    "prix": "Prix : {prix}",
+    "bonus": "+{argent} à chaque livraison",
+    "acheter": "Acheter",
+    "acheterComplement": "pour {prix}",
+    "niveau": "À partir du niveau {niveau} ({nom})",
+    "manque": "Il te manque {argent}.",
+    "installe": "Installé sur ton bureau",
+    "possedes": "Tu en as {n}",
+    "confirmerTitre": "Acheter {article} ?",
+    "confirmer": "Prix : {prix}. Il te restera {reste}.",
+    "confirmerOui": "Acheter",
+    "acheteTitre": "C'est acheté !",
+    "acheteMeuble": "{article} t'attend dans tes affaires. Pour le poser chez toi : « Placer maintenant », ou plus tard, Pause › Aménager.",
+    "acheteMateriel": "{article} est installé sur ton bureau. Chaque livraison te rapporte maintenant {bonus} de plus.",
+    "placerMaintenant": "Placer maintenant",
+    "continuer": "Continuer mes achats",
+    "dontMateriel": "Dont {argent} grâce à ton matériel."
+  },
+  "amenagement": {
+    "titre": "Aménager {lieu}",
+    "aide": "Le temps est arrêté. Touche le sol pour y mettre le meuble, puis « Poser ici ».",
+    "affaires": "Tes affaires",
+    "aucun": "Tu n'as aucun meuble à poser. Achète-en dans la boutique, sur l'ordinateur.",
+    "choisir": "Choisis un meuble dans tes affaires, ou touche un meuble que tu as acheté pour le déplacer.",
+    "fixe": "{meuble} fait partie de la maison : il reste à sa place.",
+    "possible": "{meuble}, dans {piece} : ici, c'est possible.",
+    "impossible": "{meuble} : impossible ici. {raison}",
+    "nombre": "{nom} × {n}",
+    "boutons": {
+      "deplacer": "Déplacer le meuble",
+      "haut": "Vers le haut de l'écran",
+      "bas": "Vers le bas de l'écran",
+      "gauche": "Vers la gauche",
+      "droite": "Vers la droite",
+      "tourner": "Tourner",
+      "poser": "Poser ici",
+      "ranger": "Ranger",
+      "annuler": "Annuler",
+      "terminer": "Terminer"
+    },
+    "pose": "Tu as posé {meuble}.",
+    "deplace": "Tu as déplacé {meuble}.",
+    "range": "Tu as rangé {meuble} dans tes affaires.",
+    "remis": "{meuble} reprend sa place.",
+    "fini": "Aménagement terminé.",
+    "retires": {
+      "un": "{n} meuble ne tenait plus à sa place : il t'attend dans tes affaires.",
+      "plusieurs": "{n} meubles ne tenaient plus à leur place : ils t'attendent dans tes affaires."
+    },
+    "raisons": {
+      "dehors": "Il faut le poser à l'intérieur, sur le sol d'une pièce.",
+      "mur": "Un mur passerait au milieu.",
+      "chevauche": "La place est prise par {objet}.",
+      "personne": "{nom} se tient là.",
+      "joueur": "Tu te tiens là.",
+      "accesPieton": "Plus personne ne pourrait atteindre {objet}.",
+      "accesFauteuil": "En fauteuil roulant, on ne pourrait plus atteindre {objet} : il faut des passages d'au moins 1 m.",
+      "arrivee": "Il bloquerait l'arrivée dans {objet}.",
+      "place": "{nom} ne pourrait plus aller à sa place habituelle.",
+      "demiTour": "En fauteuil roulant, on ne pourrait plus faire demi-tour dans {objet} : il faut un espace libre de 1,50 m.",
+      "coince": "Tu ne pourrais plus sortir de là où tu es.",
+      "inconnu": "Ce meuble n'existe plus dans le jeu."
+    }
+  },
+  "voyage": {
+    "titre": "Où aller ?",
+    "aide": "Le trajet prend {minutes} minutes : le temps passe pendant le trajet.",
+    "aucun": "Il n'y a pas d'autre lieu où aller pour l'instant. Avec le temps, tu pourras louer des bureaux (boutique de l'ordinateur).",
+    "enRoute": "Direction la porte d'entrée, pour aller {vers}.",
+    "arrivee": "Te voici {vers}.",
+    "depuis": "Tu sors de {lieu}."
   },
   "decor": {
     "afficheOmni": {

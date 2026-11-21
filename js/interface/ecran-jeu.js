@@ -6,6 +6,8 @@
 //               l'heure, le bouton Pause ;
 //   en bas    : le journal des quêtes (J), « Aller à… », l'action du
 //               moment (« Examiner le lit »), la pièce où l'on se trouve ;
+//               pendant l'aménagement (jalon 5), le panneau « Aménager »
+//               prend sa place (amenagement.js) ;
 //   à droite  : la caméra (tourner, zoomer, recentrer).
 // Entre les barres : la scène 3D. On y touche le sol pour se déplacer, ou
 // un meuble pour s'en approcher. Tout ce que montre la 3D a un équivalent
@@ -17,10 +19,14 @@
 // de l'écran.
 // =============================================================================
 
+import { rangerCeQuiNeTientPlus } from '../jeu/amenagement.js';
+import { arriveeDans, heureApresTrajet, lieuSelonOuvertures, lieuxOuOnPeutAller, ouvertures } from '../jeu/lieux.js';
 import { commandesAProposer, objectifDuMoment, proposerCommande } from '../jeu/commandes.js';
 import { commandesConnues, commandesDuJourOuvertes } from '../jeu/generateur.js';
-import { etapesVers, objectifDeQuete, sujetsPour } from '../jeu/quetes.js';
-import { prochainPassage } from '../jeu/routines.js';
+import {
+  DESTINATION_AMENAGER, PREFIXE_DESTINATION_LIEU, etapesVers, objectifDeQuete, sujetsPour,
+} from '../jeu/quetes.js';
+import { POINT_D_ARRIVEE, ouEst, prochainPassage } from '../jeu/routines.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
 import { ecouter } from '../noyau/evenements.js';
 import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
@@ -29,6 +35,7 @@ import { obtenirReglages } from '../noyau/reglages.js';
 import { creerCopieDeSecours } from '../noyau/sauvegarde.js';
 import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
 import { lienExterne } from './a-propos.js';
+import { creerAmenagement } from './amenagement.js';
 import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
 import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
@@ -68,11 +75,12 @@ function boutonCamera(nomIcone, libelle, raccourci, surClic) {
  *   jeu           data/jeu.json
  *   donnees       toutes les données (commandes, personnages…)
  *   portrait      (apparence, taille) → toile 2D : les portraits de la visio
+ *   photo         (meuble, taille) → toile 2D : les photos de la boutique
  *   creerMonde    fabrique le monde 3D : creerMonde(rappels) → monde
  *   menu          { surReglages, surSauvegarde, surAPropos, surAccueil, surPersonnage }
  * Renvoie { element, monde, detruire() }.
  */
-export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerMonde, menu }) {
+export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo = null, creerMonde, menu }) {
   const paliers = jeu.reputation.paliers;
   const quetes = donnees?.quetes?.quetes || [];
   // Les personnes qu'on peut nommer : habitants, visiteurs, clientes et
@@ -83,8 +91,8 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const personne = personnes.get(id);
     return personne?.modele === 'ferrus' ? donnees.personnages.ferrus.nom : personne?.nom || '';
   };
-  // Le menu Pause, avec le journal en plus.
-  const menuComplet = { ...menu, surJournal: () => ouvrirLeJournal() };
+  // Le menu Pause, avec le journal et l'aménagement en plus.
+  const menuComplet = { ...menu, surJournal: () => ouvrirLeJournal(), surAmenager: () => amenagement.ouvrir() };
 
   // --- Barre du haut ---------------------------------------------------------------
   const argent = indicateur('piece', t('hud.argent'));
@@ -167,6 +175,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     hidden: true,
     onClick: () => utiliserOrdinateur(),
   }, icone('ordinateur'), t('actions.ordinateur'));
+  // Devant la porte d'entrée, quand un autre lieu est débloqué (jalon 5).
+  const boutonSortir = el('button', {
+    class: 'bouton',
+    type: 'button',
+    hidden: true,
+    onClick: () => ouvrirVoyage(),
+  }, icone('allerA'), t('actions.sortir'));
 
   const texteLieu = el('span', {});
   const lieuActuel = el('p', { class: 'lieu-actuel' },
@@ -174,12 +189,12 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
 
   // Les boutons qui vont et viennent selon l'endroit (voir adapterBarres), la
   // dernière hauteur connue de la barre du bas, et les textes déjà mesurés.
-  const boutonsDuMoment = [boutonAction, boutonDormir, boutonOrdinateur];
+  const boutonsDuMoment = [boutonAction, boutonDormir, boutonOrdinateur, boutonSortir];
   let hauteurBarreBas = null;
   let miseEnPage = null;
 
   const barreBas = el('footer', { class: 'barre-bas' },
-    el('div', { class: 'barre-zone' }, boutonJournal, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur),
+    el('div', { class: 'barre-zone' }, boutonJournal, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur, boutonSortir),
     lieuActuel);
 
   const camera = el('div', { class: 'commandes-camera', role: 'group', 'aria-label': t('jeu.camera.titre') },
@@ -189,12 +204,29 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     boutonCamera('zoomPlus', t('jeu.camera.rapprocher'), '+', () => mondeActuel?.zoomer(1.25)),
     boutonCamera('recentrer', t('jeu.camera.recentrer'), t('jeu.camera.toucheRecentrer'), () => mondeActuel?.recentrer()));
 
+  // Le mode « Aménager » (jalon 5) : son panneau remplace la barre du bas,
+  // et le temps s'arrête.
+  const amenagement = creerAmenagement({
+    donnees,
+    monde: () => mondeActuel,
+    surDebut: () => {
+      fermerBulle();
+      barreBas.hidden = true;
+      adapterBarres();
+    },
+    surFin: () => {
+      barreBas.hidden = false;
+      adapterBarres();
+    },
+  });
+
   const element = el('div', { class: 'ecran-jeu' },
     el('h1', { class: 'visuellement-cache' }, self.CONFIG_JEU.nom),
     barre,
     el('main', { class: 'zone-monde', 'aria-label': t('jeu.zoneMonde') }, bulle),
     camera,
-    barreBas);
+    barreBas,
+    amenagement.element);
 
   // --- Le monde 3D -------------------------------------------------------------------
   let objetProche = null;
@@ -274,10 +306,21 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     else examiner();
   }
 
-  // L'ordinateur du bureau : commandes, atelier de création, visio, comptes.
+  // L'ordinateur du bureau : commandes, atelier de création, visio,
+  // boutique, comptes. Le matériel acheté s'installe tout de suite sur le
+  // bureau ; « Placer maintenant » commence à poser le meuble acheté.
   function utiliserOrdinateur() {
     fermerBulle();
-    ouvrirOrdinateur({ donnees, portrait });
+    ouvrirOrdinateur({
+      donnees,
+      portrait,
+      photo,
+      // Le matériel s'installe, une pièce s'ouvre : le lieu change tout de suite.
+      surAchat: (possession) => {
+        if (possession.sorte === 'materiel' || possession.sorte === 'piece') mondeActuel?.actualiserLieu();
+      },
+      surPlacer: (id) => amenagement.ouvrir({ achat: id }),
+    });
   }
 
   // Toucher l'objectif : on part vers l'endroit où il se joue.
@@ -286,25 +329,159 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   }
 
   // Aller là où se joue une étape (objectif du haut, « Y aller » du journal) :
-  // un meuble, un endroit ou une personne. Une personne absente : on dit
-  // quand elle revient (rien n'est caché, tout est prévisible).
+  // un meuble, un endroit ou une personne, ici ou dans un autre lieu (on y
+  // va par la porte d'entrée). Une personne absente : on dit quand et où
+  // elle passera (rien n'est caché, tout est prévisible).
   function allerVers(id) {
+    // Une étape « placer un meuble » : le mode Aménager.
+    if (id === DESTINATION_AMENAGER) {
+      amenagement.ouvrir();
+      return;
+    }
+    // Pour aller ailleurs, l'aménagement se termine d'abord (un meuble en
+    // cours de déplacement reprend sa place).
+    if (amenagement.actif) amenagement.fermer();
+    voyagePrevu = null;
+    // Une étape « va aux bureaux ».
+    if (id?.startsWith(PREFIXE_DESTINATION_LIEU)) {
+      partirVers(id.slice(PREFIXE_DESTINATION_LIEU.length));
+      return;
+    }
     const destination = id ? mondeActuel?.destinations().find((d) => d.id === id) : null;
     if (destination) {
       fermerBulle();
       if (mondeActuel.allerVers(destination)) direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
       return;
     }
-    const pnj = id ? donnees?.pnj.pnj.find((p) => p.id === id) : null;
     const partie = partieEnCours();
-    if (!pnj || !partie) {
+    const pnj = id ? donnees?.pnj.pnj.find((p) => p.id === id) : null;
+    if (pnj && partie) {
+      const nom = nomDe(id);
+      const ouvertes = ouvertures(partie);
+      // Elle est dans un autre lieu, en ce moment : on y va.
+      const maintenant = ouEst(pnj, partie.temps.minute, partie.joueur, ouvertes);
+      if (maintenant && maintenant.lieu !== partie.lieux.actuel && partie.lieux.debloques.includes(maintenant.lieu)) {
+        notifier(t('quetes.ailleurs', { nom, vers: versDe(maintenant.lieu) }), { type: 'info' });
+        partirVers(maintenant.lieu, id);
+        return;
+      }
+      const retour = prochainPassage(pnj, null, partie.temps.minute, partie.joueur, ouvertes);
+      const heure = retour ? formaterHeure(retour.minute) : '';
+      if (!retour) notifier(t('quetes.absentJamais', { nom }), { type: 'info' });
+      else if (retour.lieu === partie.lieux.actuel) {
+        notifier(t(retour.demain ? 'quetes.absentDemain' : 'quetes.absent', { nom, heure }), { type: 'info' });
+      } else {
+        notifier(t(retour.demain ? 'quetes.prochainAilleursDemain' : 'quetes.prochainAilleurs', {
+          nom, heure, vers: versDe(retour.lieu),
+        }), { type: 'info' });
+      }
+      return;
+    }
+    // Un meuble, un endroit ou une pièce d'un autre lieu débloqué.
+    const autreLieu = partie && id ? lieuQuiContient(id, partie) : null;
+    if (autreLieu) {
+      partirVers(autreLieu, id);
+      return;
+    }
+    notifier(t('quetes.sansEndroit'), { type: 'info' });
+  }
+
+  // --- Les trajets d'un lieu à l'autre (jalon 5) --------------------------------------
+  // Comment on dit qu'on y va : « aux bureaux de l'atelier », « chez toi ».
+  const versDe = (idLieu) => donnees?.lieux[idLieu]?.vers || donnees?.lieux[idLieu]?.designation || idLieu;
+  // Un trajet prévu : on marche jusqu'à la porte d'entrée, puis on part.
+  let voyagePrevu = null; // { lieu, ensuite }
+
+  // Le lieu débloqué (autre que celui-ci) où se trouve cet endroit.
+  function lieuQuiContient(id, partie) {
+    const ouvertes = ouvertures(partie);
+    for (const idLieu of partie.lieux.debloques) {
+      if (idLieu === partie.lieux.actuel || !donnees.lieux[idLieu]) continue;
+      const lieu = lieuSelonOuvertures(donnees.lieux[idLieu], ouvertes);
+      const ici = [...lieu.meubles, ...(lieu.points || []), ...lieu.pieces.filter((piece) => !piece.verrouillee)];
+      if (ici.some((element) => element.id === id)) return idLieu;
+    }
+    return null;
+  }
+
+  // Partir vers un autre lieu : d'abord jusqu'à la porte d'entrée.
+  // « ensuite » : là où aller une fois arrivé (une personne, un meuble…).
+  function partirVers(idLieu, ensuite = null) {
+    const partie = partieEnCours();
+    if (!partie || !mondeActuel || !donnees?.lieux[idLieu]) return;
+    if (partie.lieux.actuel === idLieu) {
+      if (ensuite) allerVers(ensuite);
+      return;
+    }
+    if (!partie.lieux.debloques.includes(idLieu)) {
       notifier(t('quetes.sansEndroit'), { type: 'info' });
       return;
     }
-    const retour = prochainPassage(pnj, partie.lieux.actuel, partie.temps.minute, partie.joueur);
-    const nom = nomDe(id);
-    if (!retour) notifier(t('quetes.absentJamais', { nom }), { type: 'info' });
-    else notifier(t(retour.demain ? 'quetes.absentDemain' : 'quetes.absent', { nom, heure: formaterHeure(retour.minute) }), { type: 'info' });
+    fermerBulle();
+    voyagePrevu = { lieu: idLieu, ensuite };
+    const porte = mondeActuel.destinations().find((destination) => destination.id === POINT_D_ARRIVEE);
+    if (porte && mondeActuel.allerVers(porte)) {
+      direAuxLecteurs(t('voyage.enRoute', { vers: versDe(idLieu) }));
+      // Déjà devant la porte : on part tout de suite.
+      if (!mondeActuel.enRoute) voyager();
+      return;
+    }
+    voyager();
+  }
+
+  // Le trajet : le temps passe, on arrive devant la porte de l'autre lieu.
+  function voyager(idLieu = voyagePrevu?.lieu, ensuite = voyagePrevu?.ensuite ?? null) {
+    voyagePrevu = null;
+    const partie = partieEnCours();
+    const lieu = donnees?.lieux[idLieu];
+    if (!partie || !lieu || partie.lieux.actuel === idLieu) return;
+    fermerBulle();
+    modifierPartie((p) => {
+      p.temps.minute = heureApresTrajet(p.temps.minute, jeu.deplacement.trajet ?? 10, fin);
+      p.lieux.actuel = idLieu;
+      if (p.joueur) p.joueur.position = arriveeDans(lieu);
+    }, { important: true });
+    horloge.reste = 0;
+    reconstruireMonde();
+    // Un seul message : l'arrivée, et les quêtes qui avancent (« rends-toi
+    // aux bureaux »).
+    const message = [t('voyage.arrivee', { vers: versDe(idLieu) }), messageDesQuetes(progresserQuetes({ annoncer: false }))]
+      .filter(Boolean).join(' ');
+    notifier(message, { type: 'succes' });
+    if (ensuite) allerVers(ensuite);
+  }
+
+  // Le monde 3D d'un autre lieu remplace celui-ci.
+  function reconstruireMonde() {
+    amenagement.fermer({ silencieux: true });
+    mondeActuel?.liberer();
+    objetProche = null;
+    mondeActuel = creerMonde(rappels);
+    texteLieu.textContent = mondeActuel.piece?.nom || '';
+    miseEnPage = null;
+    adapterBarres();
+    rafraichir();
+  }
+
+  // « Sortir… » (à la porte d'entrée) : où aller ?
+  function ouvrirVoyage() {
+    const partie = partieEnCours();
+    if (!partie) return;
+    const autres = lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux);
+    const minutes = jeu.deplacement.trajet ?? 10;
+    let fenetre = null;
+    const contenu = autres.length === 0
+      ? [el('p', {}, t('voyage.aucun'))]
+      : [el('p', { class: 'aide' }, t('voyage.aide', { minutes })),
+        el('ul', { class: 'menu-liste' }, autres.map((id) => el('li', {}, el('button', {
+          class: 'bouton bouton-menu',
+          type: 'button',
+          onClick: () => {
+            fenetre.fermer();
+            voyager(id);
+          },
+        }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))];
+    fenetre = ouvrirFenetre({ titre: t('voyage.titre'), contenu });
   }
 
   // Le journal des quêtes (bouton, touche J, Pause › Journal).
@@ -353,10 +530,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
         boutonAction.hidden = false;
         boutonDormir.hidden = !infos.actions?.includes('dormir');
         boutonOrdinateur.hidden = !infos.actions?.includes('ordinateur');
+        const partie = partieEnCours();
+        boutonSortir.hidden = !infos.actions?.includes('sortir') || !partie || !donnees?.indexLieux
+          || lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux).length === 0;
         placerAuDessusDeLaBarre();
         approcher(infos);
       } else {
-        for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur]) {
+        for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur, boutonSortir]) {
           if (bouton === document.activeElement) bouton.blur();
           bouton.hidden = true;
         }
@@ -368,6 +548,15 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
       direAuxLecteurs(t(evenement.type === 'arrive' ? 'pnj.arrive' : 'pnj.part', { nom: evenement.nom }));
     },
     surArrivee(infos) {
+      // Un trajet prévu : arrivé à la porte d'entrée, on part (juste après :
+      // le monde de ce lieu finit d'abord ce qu'il est en train de faire).
+      if (voyagePrevu) {
+        if (infos?.id === POINT_D_ARRIVEE) {
+          setTimeout(() => voyager(), 0);
+          return;
+        }
+        voyagePrevu = null;
+      }
       if (infos) direAuxLecteurs(t('jeu.arriveDevant', { objet: infos.designation }));
     },
     surPosition(position) {
@@ -388,6 +577,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   };
 
   parent.append(element);
+  // Un meuble posé qui ne tient plus à sa place (données changées d'une
+  // version à l'autre) retourne dans les affaires : rien n'est perdu.
+  if (donnees?.boutique && partieEnCours()) {
+    let ranges = 0;
+    modifierPartie((partie) => { ranges = rangerCeQuiNeTientPlus(partie, { ...donnees, meubles: donnees.meubles.meubles, pnj: donnees.pnj.pnj }); });
+    if (ranges > 0) notifier(tPluriel('amenagement.retires', ranges), { type: 'attention' });
+  }
   mondeActuel = creerMonde(rappels);
   const piece = mondeActuel.piece;
   texteLieu.textContent = piece ? piece.nom : '';
@@ -424,6 +620,21 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
           el('button', { class: 'bouton', type: 'button', onClick: () => aller(personne) },
             icone('personnage'), t('jeu.personneOu', { nom: personne.nom, piece: nomDePiece(personne.piece) })))))));
     }
+    // Les autres lieux débloqués : on y va par la porte d'entrée.
+    const partie = partieEnCours();
+    const autres = partie && donnees?.indexLieux ? lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux) : [];
+    if (autres.length > 0) {
+      contenu.push(el('section', { class: 'groupe-destinations' },
+        el('h3', {}, t('jeu.autresLieux')),
+        el('ul', { class: 'liste-destinations' }, autres.map((id) => el('li', {}, el('button', {
+          class: 'bouton',
+          type: 'button',
+          onClick: () => {
+            fenetre.fermer();
+            partirVers(id);
+          },
+        }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))));
+    }
     fenetre = ouvrirFenetre({
       titre: t('jeu.allerATitre'),
       contenu: [el('p', { class: 'aide' }, t('jeu.allerAAide')), ...contenu],
@@ -442,7 +653,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const secondes = Math.min(1, (maintenant - horloge.derniereMesure) / 1000);
     horloge.derniereMesure = maintenant;
     const partie = partieEnCours();
-    if (!partie || !ecranActif || fenetreOuverte() || document.hidden) return;
+    if (!partie || !ecranActif || fenetreOuverte() || document.hidden || amenagement.actif) return;
     const vitesse = (VITESSES[obtenirReglages().vitesseTemps] ?? 1) * jeu.temps.minutesParSeconde;
     const resultat = avancerHorloge({ minute: partie.temps.minute, reste: horloge.reste, secondes, vitesse, fin });
     horloge.reste = resultat.reste;
@@ -452,7 +663,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     }
     if (resultat.finAtteinte && !horloge.tardAnnonce) {
       horloge.tardAnnonce = true;
-      notifier(t('temps.tard'), { type: 'info' });
+      notifier(t(partie.lieux.actuel === jeu.depart.lieu ? 'temps.tard' : 'temps.tardAilleurs'), { type: 'info' });
     }
   }
   horloge.minuteur = setInterval(tic, 250);
@@ -542,6 +753,11 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // temps de la mesure, ils sont mis hors de la barre, sans être cachés, pour
   // ne pas perdre le focus du clavier). Ainsi la vue 3D ne bouge pas quand
   // un de ces boutons arrive.
+  // Ce qui occupe le bas de l'écran : la barre, ou le panneau « Aménager ».
+  function basDeLEcran() {
+    return amenagement.actif ? amenagement.element : barreBas;
+  }
+
   function adapterBarres() {
     boutonsDuMoment.forEach((bouton) => { bouton.style.position = 'absolute'; });
     barre.classList.remove('compacte');
@@ -549,7 +765,13 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     const hauteurLigne = boutonPause.offsetHeight || 48;
     if (barre.offsetHeight > hauteurLigne * 1.9) barre.classList.add('compacte');
     if (barreBas.offsetHeight > (boutonAllerA.offsetHeight || 48) * 1.9) barreBas.classList.add('compacte');
-    const marges = { haut: barre.offsetHeight, bas: barreBas.offsetHeight, gauche: 0, droite: 0 };
+    // Le panneau « Aménager » passe en version compacte s'il prend plus
+    // d'un quart de l'écran (téléphone, très grand texte).
+    if (amenagement.actif) {
+      amenagement.element.classList.remove('compacte');
+      if (amenagement.element.offsetHeight > window.innerHeight * 0.25) amenagement.element.classList.add('compacte');
+    }
+    const marges = { haut: barre.offsetHeight, bas: basDeLEcran().offsetHeight, gauche: 0, droite: 0 };
     boutonsDuMoment.forEach((bouton) => { bouton.style.position = ''; });
     document.documentElement.style.setProperty('--hauteur-barre-haut', `${marges.haut}px`);
     mondeActuel?.definirMarges(marges);
@@ -559,7 +781,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   // Les boutons de la caméra se placent au-dessus de la barre du bas, telle
   // qu'elle est vraiment (avec ou sans bouton d'action).
   function placerAuDessusDeLaBarre() {
-    const hauteur = barreBas.offsetHeight;
+    const hauteur = basDeLEcran().offsetHeight;
     if (hauteur === hauteurBarreBas) return;
     hauteurBarreBas = hauteur;
     document.documentElement.style.setProperty('--hauteur-barre-bas', `${hauteur}px`);
@@ -576,11 +798,18 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
   }
   const observateur = new ResizeObserver(() => adapterBarres());
   observateur.observe(element);
+  observateur.observe(amenagement.element);
 
   // Échap : ferme d'abord la bulle, sinon ouvre le menu Pause.
   // J (même place sur un clavier AZERTY ou QWERTY) : le journal.
   function surTouche(evenement) {
     if (fenetreOuverte() || !ecranActif) return;
+    // Pendant l'aménagement : R tourne le meuble, Suppr le range, Échap
+    // annule ou termine.
+    if (amenagement.surTouche(evenement)) {
+      evenement.preventDefault();
+      return;
+    }
     if (evenement.code === 'KeyJ' && !evenement.ctrlKey && !evenement.metaKey && !evenement.altKey) {
       evenement.preventDefault();
       ouvrirLeJournal();
@@ -613,13 +842,17 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, creerM
     get monde() { return mondeActuel; },
     // Cache l'écran (pendant l'écran « Ton personnage ») ou le remontre.
     suspendre(oui) {
+      if (oui) amenagement.fermer({ silencieux: true });
       ecranActif = !oui;
       element.hidden = oui;
       document.body.classList.toggle('en-jeu', !oui);
       mondeActuel?.activer(!oui);
       if (!oui) requestAnimationFrame(adapterBarres);
     },
+    // Le mode « Aménager » (pour les tests).
+    get amenagement() { return amenagement; },
     detruire() {
+      amenagement.fermer({ silencieux: true });
       arreterProgression();
       clearInterval(horloge.minuteur);
       arrets.forEach((arreter) => arreter());
@@ -650,6 +883,10 @@ export function ouvrirMenuPause(menu) {
         menu.surJournal ? ligne('journal', t('pause.journal'), () => {
           fenetre.fermer();
           menu.surJournal();
+        }) : null,
+        menu.surAmenager ? ligne('amenager', t('pause.amenager'), () => {
+          fenetre.fermer();
+          menu.surAmenager();
         }) : null,
         ligne('personnage', t('pause.personnage'), () => {
           fenetre.fermer();

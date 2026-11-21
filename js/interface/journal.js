@@ -12,7 +12,7 @@
 // Comme toute fenêtre, le journal arrête le temps tant qu'il est ouvert.
 // =============================================================================
 
-import { destinationDEtape, etapesDeQuete, objectifDeQuete } from '../jeu/quetes.js';
+import { DESTINATION_AMENAGER, destinationDEtape, etapesDeQuete, objectifDeQuete } from '../jeu/quetes.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, tPluriel, typographier } from '../noyau/textes.js';
 import { ajouter, el, identifiant, vider } from './dom.js';
@@ -73,14 +73,17 @@ export function ouvrirJournal({ donnees, nomDe, surAller }) {
       const precision = objectif?.etape === ligne.etape && objectif.cle
         ? t(`objectifs.${objectif.cle}`, { client: nomDe(objectif.commande.client) })
         : null;
+      // « Y aller », ou « Aménager » pour une étape où l'on pose un meuble.
+      const amenager = destination === DESTINATION_AMENAGER;
+      const libelle = t(amenager ? 'journal.amenager' : 'journal.yAller');
       return el('li', { class: ['etape-quete', `etape-${classe}`] },
         el('span', { class: 'etape-statut' }, icone(nomIcone), t(`journal.statuts.${cle}`)),
         el('span', { class: 'etape-texte' }, texte),
         ligne.ouverte && ligne.etape.detail ? el('p', { class: 'aide' }, typographier(ligne.etape.detail)) : null,
         precision ? el('p', { class: 'aide' }, icone('cible'), majuscule(precision)) : null,
         destination ? el('button', {
-          class: 'bouton', type: 'button', 'aria-label': `${t('journal.yAller')} : ${texte}`, onClick: () => yAller(quete, destination),
-        }, icone('allerA'), t('journal.yAller')) : null);
+          class: 'bouton', type: 'button', 'aria-label': `${libelle} : ${texte}`, onClick: () => yAller(quete, destination),
+        }, icone(amenager ? 'amenager' : 'allerA'), libelle) : null);
     }));
   }
 

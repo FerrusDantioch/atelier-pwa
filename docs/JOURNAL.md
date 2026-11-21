@@ -1,5 +1,126 @@
 # Journal du projet — Atelier PWA
 
+## 🧪 Jalon 5 — La boutique, l'aménagement et les bureaux (version 0.6.0, 18 novembre 2026)
+
+Livré en une fois, à la demande de Ferrus (18 novembre) ; à essayer sur
+tablette, puis à valider. Ferrus a aussi choisi que les deux ordinateurs
+(maison et bureaux) restent utilisables ; sans préférence de sa part, le
+matériel donne un petit bonus (recommandation appliquée, voir
+`docs/PLAN.md`).
+
+Cette version comprend aussi le correctif 0.5.2 (l'identité
+`"id": "/atelier-pwa/"`, voir plus bas), publié entre-temps.
+
+### Ce qui est fait
+
+- **La boutique**, sur l'ordinateur (`data/boutique.json`), en quatre
+  rayons. Chaque article dit en toutes lettres s'il est disponible, sinon
+  pourquoi (niveau de réputation, pièces qui manquent, bureaux pas encore
+  loués) ; un achat se confirme toujours (« Il te restera… »).
+  - **Matériel pour ton bureau** : grand écran (90 pièces), clavier
+    confortable (60), siège réglable (120, niveau 2). Il s'installe tout
+    seul sur ton bureau, à la maison comme aux bureaux (on le voit en 3D),
+    et rapporte **5 pièces de plus à chaque livraison** (« Dont 5 pièces
+    grâce à ton matériel » dans le paiement).
+  - **Meubles et décoration** : dix meubles de 10 à 120 pièces (cactus,
+    pouf, tapis rond, fauteuil, tableau blanc, aquarium…), avec leur photo
+    prise par le moteur 3D. Sept sont nouveaux.
+  - **Les bureaux de l'atelier** (300 pièces, niveau 3) et **trois pièces à
+    ouvrir** : salle de pause (120), coin calme (150), salle de réunion
+    (200, niveau 4).
+- **Aménager** (Pause › Aménager ce lieu, « Placer maintenant » après un
+  achat, ou l'objectif d'une quête) : le temps s'arrête ; on choisit un
+  meuble dans ses affaires, on touche le sol (ou les flèches), « Tourner »,
+  « Poser ici ». Toucher un meuble acheté le reprend : « Ranger » ou
+  « Annuler ». Au clavier : flèches, R, Entrée, Suppr, Échap.
+- **Un meuble qui gêne est refusé, avec la raison** : il devient
+  transparent, une croix barre sa place, et le panneau explique : « En
+  fauteuil roulant, on ne pourrait plus atteindre la chambre : il faut des
+  passages d'au moins 1 m », « La place est prise par le canapé », « … faire
+  demi-tour dans la salle d'eau : il faut un espace libre de 1,50 m »… Ce
+  sont les règles vérifiées au démarrage pour chaque lieu. Aux bureaux, un
+  meuble ne peut pas non plus boucher la porte d'une pièce encore fermée.
+- **Les bureaux**, un deuxième lieu (`data/lieux/bureaux.json`) : un
+  accueil de plain-pied avec un comptoir à deux hauteurs et une sonnette
+  lumineuse, un espace de travail avec ton ordinateur, des toilettes
+  accessibles. Les pièces encore fermées ont un sol de chantier et une
+  porte close, qu'on peut examiner pour savoir comment l'ouvrir. Tout est
+  vérifié, à pied et en fauteuil roulant, pièces fermées, ouvertes une à
+  une, et toutes ouvertes.
+- **Les trajets** : devant la porte d'entrée, « Sortir… » › « Où aller ? »
+  (ou « Aller à… » › Autres lieux). Le trajet prend 10 minutes ; on arrive
+  devant la porte de l'autre lieu, et le jeu le dit. La partie se souvient
+  du lieu où l'on est. Pour dormir, on rentre chez soi.
+- **Les personnages entre les lieux** : une fois les bureaux loués et les
+  pièces ouvertes, Madeleine (salle de pause, 9 h 30), Karim (salle de
+  réunion, 11 h), Théo (coin calme, 13 h 30, avant sa visite de 16 h chez
+  toi), le mentor (14 h, en plus de sa visite du matin à la maison),
+  Samia (salle de pause, 15 h 30) et Hugo (accueil, 17 h 30) viennent aux
+  bureaux, chacun avec ses répliques. Jamais plus de deux à la fois (la
+  tablette reste fluide).
+- **Une commande du jour en plus** chaque matin, une fois les bureaux loués.
+- **Les objectifs suivent d'un lieu à l'autre** : si la personne ou
+  l'endroit est dans l'autre lieu, toucher l'objectif y emmène (jusqu'à la
+  porte, le trajet, puis jusqu'à la personne). Si elle n'est pas là, le
+  jeu dit où et quand elle passera.
+- **Trois nouvelles quêtes** : « Un intérieur où tout le monde passe » (le
+  mentor : acheter un meuble, le poser chez toi ; équiper ton bureau en
+  facultatif), « Un vrai local » (le mentor : louer les bureaux, s'y
+  rendre ; ouvrir une pièce en facultatif), « Un coin pour souffler »
+  (Théo : il a besoin d'un endroit calme pour réviser). Trois nouveaux
+  types d'étapes : « acheter », « placer » et « lieu ».
+- **Tes comptes** listent les achats.
+- Sauvegarde au **format 4** (les achats, les meubles posés, les lieux
+  loués) ; une partie de la 0.5 est mise à niveau sans rien perdre. Si une
+  version future change un lieu, un meuble qui ne tient plus à sa place
+  retourne dans les affaires.
+- Sur un petit écran ou avec un très grand texte, le panneau « Aménager »
+  passe en version compacte (boutons de 48 px, noms toujours lus).
+
+### Vérifications faites
+
+- 149 tests sans navigateur, dont 32 nouveaux : la boutique (niveau,
+  argent, bureaux à louer d'abord, achat une seule fois, bonus du
+  matériel), l'aménagement (toutes les raisons de refus, place la plus
+  proche, meubles rangés au chargement), les bureaux (pièces fermées :
+  sol, meubles, portes et points ; états vérifiés ; routines « si » ;
+  trajets ; commande du jour en plus ; un meuble qui boucherait une pièce
+  future ; deux visiteurs au plus), le format 4, les nouvelles étapes de
+  quêtes, et les données fautives refusées avec des messages clairs.
+- 60 tests dans Chromium, dont 7 nouveaux : la boutique, le matériel et son
+  bonus, l'aménagement (refus, R, Entrée, reprendre, Annuler, Ranger,
+  Échap), la quête de l'aménagement, le téléphone avec le texte « Énorme »,
+  louer les bureaux puis y aller par la porte (trajet, arrivée, pièce
+  fermée, rechargement), et un objectif qui emmène de la maison jusqu'à
+  Théo au coin calme (moins de 40 dessins par image).
+
+### Comment tester sur tablette
+
+1. Reprends ta partie : va à l'ordinateur › **Boutique**. Achète le cactus
+   (10 pièces), puis « Placer maintenant ». Touche le sol à plusieurs
+   endroits (devant une porte, sur le canapé, dans la salle d'eau) et lis
+   les raisons. « Tourner », « Poser ici » ; touche-le ensuite pour le
+   déplacer ou le ranger.
+2. Achète du matériel (le clavier, 60 pièces) : ton bureau change ; livre
+   une commande : le paiement compte le bonus.
+3. Au niveau 3, **loue les bureaux** (300 pièces). Va à la porte d'entrée :
+   « Sortir… » › « Aller aux bureaux de l'atelier ». Examine les portes
+   fermées.
+4. Ouvre une pièce (le coin calme, 150 pièces) : elle apparaît. Reviens
+   vers 13 h 30 : Théo y révise. Le mentor passe à 14 h.
+5. Dans le journal, suis une quête dont l'étape se joue dans l'autre lieu,
+   puis touche l'objectif : ton personnage y va tout seul.
+6. Ferme le jeu aux bureaux et rouvre-le : tu y es toujours.
+7. Pour aller plus vite, règle « Vitesse du temps » (Réglages).
+
+### Limites connues
+
+- On ne déplace que les meubles achetés (ceux des lieux restent en place).
+- Les visiteurs des bureaux n'ont pas encore de commandes à présenter de
+  vive voix : ils passent, et on peut leur parler.
+- À valider par Ferrus : les textes des trois nouvelles quêtes, les
+  répliques du mentor aux bureaux, et celles des clients (personnages
+  fictifs).
 ## 🔧 Correctif 0.5.2 — l'identité de l'application (21 novembre 2026)
 
 Hors jalon, à la demande de Ferrus (socle commun, section 4). Le manifeste
@@ -159,8 +280,8 @@ Ferrus) le 15 novembre 2026, telles que proposées.
 
 ### En attente
 
-- L'adresse du portfolio de Ferrus, si elle diffère de celle du site de
-  l'Omni-système (l'affiche montre celle-ci).
+- *(Réglé le 18 novembre : l'adresse du portfolio de Ferrus est celle du
+  site de l'Omni-système, que montre l'affiche.)*
 
 ## ✅ Jalon 3 — L'ordinateur, les commandes et la création d'applications (version 0.4.1, 15 novembre 2026)
 

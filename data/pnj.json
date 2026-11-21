@@ -77,7 +77,7 @@
       "id": "theo",
       "nom": "Théo",
       "presentation": "Étudiant, il habite à côté. Il passe chaque jour à 16 h : il aime savoir à l'avance comment la journée va se dérouler.",
-      "aValider": "Personnage fictif proposé par Claude dans le plan validé.",
+      "aValider": "Personnage fictif proposé par Claude dans le plan validé. Jalon 5 : il révise au coin calme des bureaux, une fois ouvert (répliques à valider par Ferrus).",
       "apparence": {
         "teint": "clair",
         "lunettes": "aucune",
@@ -97,6 +97,7 @@
         "couleurAide": "noir"
       },
       "routine": [
+        { "de": "13:30", "a": "15:30", "lieu": "bureaux", "point": "calme-pres-du-fauteuil", "activite": "reviser", "si": "coin-calme" },
         { "de": "16:00", "a": "17:00", "lieu": "domicile", "point": "table-cuisine-est", "activite": "visite" }
       ],
       "activites": {
@@ -105,6 +106,13 @@
           "repliques": [
             "J'ai plein d'idées d'applications dans mon carnet. Une appli qui annonce les changements à l'avance, ça existerait ?",
             "Je repars à 17 h. Je préfère quand c'est prévu."
+          ]
+        },
+        "reviser": {
+          "description": "révise ses cours, au calme",
+          "repliques": [
+            "Ici, personne ne me parle sans prévenir. J'avance deux fois plus vite.",
+            "Encore un chapitre, et je file chez toi pour 16 h. Comme prévu."
           ]
         }
       },
@@ -117,7 +125,7 @@
       "id": "madeleine",
       "nom": "Madeleine",
       "presentation": "Retraitée, elle s'occupe du jardin partagé du quartier. Sa vue baisse : il lui faut des textes grands et bien contrastés.",
-      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Passe commande sur l'ordinateur ; jalon 5 : vient aux bureaux, une fois la pièce ouverte (répliques à valider par Ferrus).",
       "apparence": {
         "teint": "clair",
         "lunettes": "rondes",
@@ -136,13 +144,28 @@
         "aide": "aucune",
         "couleurAide": "noir"
       },
-      "routine": []
+      "routine": [
+        { "de": "09:30", "a": "10:30", "lieu": "bureaux", "point": "pause-table-est", "activite": "cafe", "si": "salle-pause" }
+      ],
+      "activites": {
+        "cafe": {
+          "description": "boit un café dans la salle de pause",
+          "repliques": [
+            "Les étiquettes en grosses lettres sur les placards, c'est toi ? Je trouve tout sans demander.",
+            "Un café, une chaise, et quelqu'un qui prend le temps : c'est tout ce qu'il me faut."
+          ]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Bonjour ! Madeleine, du jardin partagé. On m'a dit qu'ici, on fait des applications qu'on lit sans loupe. Je viens voir ça de près !"],
+        "salut": ["Bonjour ! Je passe tous les matins, maintenant : le café est bon.", "Re-bonjour !"]
+      }
     },
     {
       "id": "samia",
       "nom": "Samia",
       "presentation": "Boulangère au coin de la rue. Ses journées commencent avant l'aube : il lui faut des outils simples, qui ne la ralentissent pas.",
-      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Passe commande sur l'ordinateur ; jalon 5 : vient aux bureaux, une fois la pièce ouverte (répliques à valider par Ferrus).",
       "apparence": {
         "teint": "mat",
         "lunettes": "aucune",
@@ -161,13 +184,28 @@
         "aide": "aucune",
         "couleurAide": "noir"
       },
-      "routine": []
+      "routine": [
+        { "de": "15:30", "a": "16:00", "lieu": "bureaux", "point": "pause-plan-devant", "activite": "viennoiseries", "si": "salle-pause" }
+      ],
+      "activites": {
+        "viennoiseries": {
+          "description": "dépose des viennoiseries pour l'atelier",
+          "repliques": [
+            "Il en reste de ce matin : c'est pour l'atelier. Régale-toi !",
+            "Grâce à ton minuteur, plus une fournée de trop cuite. Alors je partage !"
+          ]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Bonjour ! Samia, de la boulangerie du coin. Je ne reste jamais longtemps : le four n'attend pas. Mais je passerai, promis."],
+        "salut": ["Coucou ! Je ne fais que passer.", "Bonjour ! Le four m'attend, je file bientôt."]
+      }
     },
     {
       "id": "karim",
       "nom": "Karim",
       "presentation": "Menuisier, il fabrique des meubles sur mesure. Il est sourd : ce qui compte doit se voir ou se sentir, pas seulement s'entendre.",
-      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Passe commande sur l'ordinateur ; jalon 5 : vient aux bureaux, une fois la pièce ouverte (répliques à valider par Ferrus).",
       "apparence": {
         "teint": "brun",
         "lunettes": "carrees",
@@ -186,13 +224,28 @@
         "aide": "aucune",
         "couleurAide": "noir"
       },
-      "routine": []
+      "routine": [
+        { "de": "11:00", "a": "12:00", "lieu": "bureaux", "point": "reunion-table-est", "activite": "plans", "si": "salle-reunion" }
+      ],
+      "activites": {
+        "plans": {
+          "description": "étale ses plans de meubles sur la grande table",
+          "repliques": [
+            "Une étagère sur mesure, pour une cliente en fauteuil : tout doit être à portée de main.",
+            "Une grande table et de la lumière : c'est tout ce qu'il me faut pour réfléchir."
+          ]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Salut ! Karim, menuisier. En arrivant, j'ai vu ta sonnette lumineuse : enfin une sonnette dont je vois qu'elle a sonné !"],
+        "salut": ["Salut ! Je t'ai fait signe depuis la porte.", "Re-salut !"]
+      }
     },
     {
       "id": "hugo",
       "nom": "Hugo",
       "presentation": "Livreur à vélo, toujours entre deux courses. Il aime les applications qui vont droit au but.",
-      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Ne vient pas encore au domicile : passe commande sur l'ordinateur.",
+      "aValider": "Cliente ou client fictif proposé par Claude dans le plan validé. Passe commande sur l'ordinateur ; jalon 5 : vient aux bureaux, une fois la pièce ouverte (répliques à valider par Ferrus).",
       "apparence": {
         "teint": "fonce",
         "lunettes": "aucune",
@@ -211,21 +264,44 @@
         "aide": "aucune",
         "couleurAide": "noir"
       },
-      "routine": []
+      "routine": [
+        { "de": "17:30", "a": "17:45", "lieu": "bureaux", "point": "accueil-attente", "activite": "presse", "si": "bureaux" }
+      ],
+      "activites": {
+        "presse": {
+          "description": "passe en coup de vent",
+          "repliques": [
+            "Je passe juste dire que tout marche. Voilà. C'est dit.",
+            "Ton application à un seul bouton ? Je l'utilise tous les jours. Bon, j'y vais."
+          ]
+        }
+      },
+      "repliques": {
+        "rencontre": ["Hugo. Pressé. Ton atelier est bien placé : je passerai en coup de vent, de temps en temps."],
+        "salut": ["Deux minutes, pas plus !", "Salut ! Je ne reste pas."]
+      }
     },
     {
       "id": "ferrus",
       "modele": "ferrus",
       "presentation": "Ferrus Dantioch, qui a imaginé ce jeu, passe de temps en temps voir comment avance l'atelier.",
-      "aValider": "Répliques du mentor proposées par Claude : celles des visites validées par Ferrus le 14/11/2026, celles de la visio (jalon 3) le 15/11/2026. Quand on joue Ferrus, le mentor n'apparaît qu'en visio, comme « le vrai Ferrus, depuis le monde réel ».",
+      "aValider": "Répliques du mentor proposées par Claude : celles des visites validées par Ferrus le 14/11/2026, celles de la visio (jalon 3) le 15/11/2026 ; celles de la visite aux bureaux (jalon 5) à valider par Ferrus. Quand on joue Ferrus, le mentor n'apparaît qu'en visio, comme « le vrai Ferrus, depuis le monde réel ».",
       "absentSiJoueur": "ferrus",
       "routine": [
-        { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" }
+        { "de": "10:00", "a": "11:00", "lieu": "domicile", "point": "pres-du-bureau", "activite": "visite" },
+        { "de": "14:00", "a": "15:00", "lieu": "bureaux", "point": "pres-du-bureau-atelier", "activite": "visite-bureaux", "si": "bureaux" }
       ],
       "activites": {
         "visite": {
           "description": "passe voir comment avance l'atelier",
           "repliques": ["Bientôt, ton ordinateur recevra les premières commandes. Prends le temps d'écouter chaque personne : c'est elle qui sait ce dont elle a besoin."]
+        },
+        "visite-bureaux": {
+          "description": "fait le tour des bureaux",
+          "repliques": [
+            "De vrais bureaux ! Une porte large, un comptoir à deux hauteurs : ici, tout le monde est accueilli à la bonne hauteur.",
+            "Chaque pièce que tu ouvres fait venir du monde. Un atelier, ça vit de ses visites."
+          ]
         }
       },
       "repliques": {

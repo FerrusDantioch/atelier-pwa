@@ -2,13 +2,14 @@
 // ordinateur.js — l'ordinateur du bureau
 // -----------------------------------------------------------------------------
 // Une seule fenêtre, dont le contenu change d'« écran » :
-//   accueil    Commandes, Visio avec Ferrus, Tes comptes ;
+//   accueil    Commandes, Boutique, Visio avec Ferrus, Tes comptes ;
 //   commandes  projets en cours, nouvelles commandes, commandes du jour
 //              (renouvelées chaque matin), commandes livrées ;
 //   commande   ce que la personne demande, puis « Accepter la commande » ;
 //   atelier    le mini-jeu de création (atelier.js) ;
 //   visio      l'appel avec le mentor (visio.js) ;
-//   comptes    l'argent, la réputation et les commandes livrées.
+//   boutique   meubles et matériel à acheter (boutique.js, jalon 5) ;
+//   comptes    l'argent, la réputation, les commandes livrées et les achats.
 // Chaque écran a son titre (lu par les lecteurs d'écran en arrivant) et ses
 // boutons en bas, toujours visibles ; « Retour » ramène à l'écran d'avant.
 // Comme pour toute fenêtre, le temps du jeu s'arrête tant qu'elle est ouverte.
@@ -17,12 +18,14 @@
 import {
   DRAPEAU_VISIO_ACCUEIL, accepterCommande, commandesAProposer, estCommandeDuJour, etatDesCommandes,
 } from '../jeu/commandes.js';
+import { articlesDeLaBoutique } from '../jeu/boutique.js';
 import { progressionReputation } from '../jeu/economie.js';
 import { commandesConnues, commandesDuJourOuvertes } from '../jeu/generateur.js';
 import { apparenceDuJoueur, nettoyerApparence } from '../jeu/personnage.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, tPluriel, typographier } from '../noyau/textes.js';
 import { ecranAtelier } from './atelier.js';
+import { ecranBoutique } from './boutique.js';
 import { ajouter, el, identifiant, vider } from './dom.js';
 import { ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
@@ -50,11 +53,17 @@ export function encadre(nomIcone, type, ...contenu) {
 
 /**
  * Ouvre l'ordinateur.
- *   donnees   toutes les données du jeu
- *   portrait  (apparence, { largeur, hauteur }) → toile 2D (ou null)
+ *   donnees    toutes les données du jeu
+ *   portrait   (apparence, { largeur, hauteur }) → toile 2D (ou null)
+ *   photo      (meuble, { largeur, hauteur }) → toile 2D (ou null) : la
+ *              photo d'un meuble de la boutique
+ *   surAchat   (possession, article) → après un achat (le matériel s'installe)
+ *   surPlacer  (id) → commence à poser ce meuble (l'ordinateur est fermé)
  * Au premier allumage, l'appel du mentor attend : c'est le tutoriel.
  */
-export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}) {
+export function ouvrirOrdinateur({
+  donnees, portrait = null, photo = null, surAchat = null, surPlacer = null, surFermeture,
+} = {}) {
   const jeu = donnees.jeu;
   // Les personnes qui passent commande : habitants, visiteurs, et clientes
   // ou clients des commandes du jour.
@@ -133,6 +142,7 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
       commande: ecranCommande,
       atelier: (commande) => ecranAtelier(ctx, commande),
       visio: (options) => ecranVisio(ctx, options),
+      boutique: () => ecranBoutique(ctx, { photo, surAchat, surPlacer }),
       comptes: ecranComptes,
     },
   };
@@ -151,6 +161,8 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
         el('p', { class: 'aide' }, t('ordinateur.accueil.etat', { argent: ctx.montant(partie.argent), niveau: niveau.niveau, nom: niveau.nom })),
         el('ul', { class: 'menu-liste' },
           boutonMenu('enveloppe', t('ordinateur.accueil.commandes'), details.join(' · ') || t('ordinateur.accueil.rien'), ecranCommandes),
+          donnees.boutique ? boutonMenu('boutique', t('ordinateur.accueil.boutique'), t('ordinateur.accueil.boutiqueDetail'),
+            () => ctx.aller.boutique()) : null,
           boutonMenu('visio', t('ordinateur.accueil.visio', { nom: donnees.personnages.ferrus.nom }), t('ordinateur.accueil.visioDetail'),
             () => ctx.aller.visio({})),
           boutonMenu('piece', t('ordinateur.accueil.comptes'), t('ordinateur.accueil.comptesDetail'), ecranComptes)),
@@ -317,7 +329,13 @@ export function ouvrirOrdinateur({ donnees, portrait = null, surFermeture } = {}
         el('p', { class: 'texte-doux' }, t('ordinateur.commandes.livree', {
           note: t(`notes.${livraison.note}`), argent: ctx.montant(livraison.argent), jour: livraison.jour,
         }))))));
-    contenu.push(el('p', { class: 'aide' }, t('comptes.depenses')));
+    // Les achats (jalon 5), du plus récent au plus ancien.
+    const articles = donnees.boutique ? articlesDeLaBoutique(donnees.boutique, donnees.meubles.meubles) : [];
+    const nomArticle = (id) => articles.find((article) => article.id === id)?.nom || id;
+    contenu.push(el('h4', {}, t('comptes.achats')));
+    contenu.push(partie.possessions.length === 0 ? el('p', { class: 'aide' }, t('comptes.aucunAchat')) : el('ul', { class: 'liste-simple' },
+      [...partie.possessions].reverse().map((achat) => el('li', { class: 'element-liste' },
+        el('p', {}, t('comptes.achat', { article: nomArticle(achat.article), jour: achat.jour, prix: ctx.montant(achat.prix) }))))));
     montrer({
       titre: t('comptes.titre'),
       contenu,

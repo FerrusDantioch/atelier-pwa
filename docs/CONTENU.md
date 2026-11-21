@@ -58,6 +58,7 @@ et l'écran « Le jeu n'a pas pu démarrer », qui doivent s'afficher même si
 | `sauvegarde.intervalleSecondes` | toutes les combien de secondes la partie est sauvegardée s'il y a du nouveau (5 à 600) |
 | `sauvegarde.copiesDeSecours` | nombre de copies de secours gardées (1 à 20) |
 | `deplacement.vitesse` | vitesse des personnages, en mètres par seconde (0,5 à 6) |
+| `deplacement.trajet` | la durée d'un trajet d'un lieu à l'autre, en minutes de jeu (10) |
 
 ## Les lieux : `data/lieux/`
 
@@ -72,17 +73,20 @@ fait 10 m × 8 m. La case `x = 0, z = 0` est en haut à gauche du plan
 | Champ | Rôle |
 |---|---|
 | `id`, `nom`, `designation` | identifiant, nom affiché, nom dans une phrase (« ton domicile ») |
+| `vers` | facultatif : comment on y va (« chez toi », « aux bureaux de l'atelier ») : « Aller aux bureaux de l'atelier », « Te voici chez toi » |
 | `taille` | largeur et profondeur, en cases |
 | `hauteurMurs` | hauteur des murs entiers, en mètres |
 | `depart` | case d'arrivée (`x`, `z`) et direction du regard (`angle` : 0 sud, 90 est, 180 nord, 270 ouest) |
-| `pieces` | chaque pièce : `id`, `nom`, `designation` (« la cuisine »), `zones` (rectangles `[x, z, largeur, profondeur]`), `sol` (`motif` : `uni`, `lames` ou `damier`, et une ou deux couleurs de la palette), et `paroisHautes` (facultatif) : des cloisons jusqu'au plafond, translucides au-dessus du genou, pour une pièce à bien séparer (la salle d'eau) |
+| `pieces` | chaque pièce : `id`, `nom`, `designation` (« la cuisine »), `zones` (rectangles `[x, z, largeur, profondeur]`), `sol` (`motif` : `uni`, `lames` ou `damier`, et une ou deux couleurs de la palette), `paroisHautes` (facultatif) : des cloisons jusqu'au plafond, translucides au-dessus du genou, pour une pièce à bien séparer (la salle d'eau), et `ouverture` (facultatif) : la pièce reste fermée tant que cet article de la boutique (`pieces`) n'est pas acheté — sol de chantier, porte close, ni meubles ni points |
 | `murs` | segments sur les lignes de la grille : `{ "de": [x, z], "a": [x, z] }`, horizontaux ou verticaux |
 | `ouvertures` | sur un mur : `porte` (passage libre), `porte-entree` (porte fermée), `fenetre` |
 | `meubles` | `id` unique, `meuble` (du catalogue), case `x`, `z` (coin nord-ouest de l'emprise), `rotation` (0, 90, 180, 270), et une `description` facultative propre à ce lieu |
-| `points` | endroits à examiner qui ne sont pas des meubles (porte d'entrée…) : `id`, `nom`, `designation`, `description`, case et `angle` ; `lien` (facultatif) : une adresse de `js/config.js` (`siteOmni`) que la bulle « Examiner » propose d'ouvrir — jamais une adresse écrite dans les données |
+| `points` | endroits à examiner qui ne sont pas des meubles (porte d'entrée…) : `id`, `nom`, `designation`, `description`, case et `angle` ; `lien` (facultatif) : une adresse de `js/config.js` (`siteOmni`) que la bulle « Examiner » propose d'ouvrir — jamais une adresse écrite dans les données ; `fermee` (facultatif) : le point n'existe que tant que cette pièce est fermée (devant sa porte, pour dire comment l'ouvrir) |
 | `affiches` | une image contre un **mur extérieur** : `id`, `dessin` (`omni` : logo, nom et adresse de l'Omni-système), le morceau de mur `de`-`a` (l'affiche y est centrée), `largeur`, `bas` et `haut` en mètres, et le `point` d'où on l'examine. Elle se voit quand son mur est entier (selon l'angle de la vue) |
 
-Au démarrage (et dans les tests), le jeu vérifie que le lieu **tient
+Un lieu dont des pièces s'ouvrent est vérifié tout fermé, avec chaque
+pièce ouverte seule, et tout ouvert. Au démarrage (et dans les tests), le
+jeu vérifie que le lieu **tient
 debout** (pièces dans la grille, ouvertures posées sur un mur, meubles qui
 ne se chevauchent pas…) et qu'il est **accessible** : depuis le départ,
 chaque pièce, chaque meuble à examiner et chaque point doivent être
@@ -109,7 +113,13 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
 `"taille"` `[largeur, hauteur, profondeur]` pour une boîte ; `"rayon"` et
 `"hauteur"` pour un cylindre (`"rayonHaut"` pour un tronc de cône,
 `"cotes"` pour le nombre de faces) ; `"rayon"` pour une sphère à facettes.
-`"rotation"` `[x, y, z]` (en degrés) est facultative.
+`"rotation"` `[x, y, z]` (en degrés) est facultative. `"element"`
+(facultatif) range la forme dans une partie que le matériel de la
+boutique remplace : `ecran` et `clavier` sur le bureau, `siege` pour la
+chaise de bureau.
+
+Deux formes ne doivent jamais avoir une face exactement au même endroit
+(elles « scintilleraient ») : décaler d'au moins 1 cm.
 
 ## Les personnages : `data/personnages.json`
 
@@ -131,7 +141,7 @@ Chaque forme : `"forme"` (`boite`, `cylindre` ou `sphere`), `"position"`
 | `presentation` | une phrase lue dans la fenêtre de dialogue |
 | `apparence` | comme celle d'un personnage joueur (voir `data/personnages.json`) ; l'aide à la mobilité décide de la façon de se déplacer |
 | `absentSiJoueur` | `"ferrus"` : absent quand on joue Ferrus (le mentor) |
-| `routine` | les créneaux `{ "de": "08:00", "a": "12:00", "lieu": "domicile", "point": "montage", "activite": "montage" }`, dans l'ordre, entre 7 h et 23 h. Hors créneau : la personne n'est pas là |
+| `routine` | les créneaux `{ "de": "08:00", "a": "12:00", "lieu": "domicile", "point": "montage", "activite": "montage" }`, dans l'ordre, entre 7 h et 23 h. Hors créneau : la personne n'est pas là. `"si"` (facultatif) : le créneau n'a lieu qu'une fois ce lieu loué (`"bureaux"`) ou cette pièce ouverte (`"coin-calme"`) ; un créneau dans un lieu à louer en a toujours un |
 | `activites` | pour chaque activité : `description` (« monte sa prochaine vidéo ») et ses `repliques` |
 | `repliques` | `rencontre` (la première fois) et `salut` (ensuite) ; obligatoires pour qui vient dans un lieu |
 | `visio` | (le mentor) les répliques de l'appel en visio : `accueil` (`joueurFerrus` quand on joue Ferrus, `autre` sinon, avec `{nom}`), `tutoriel` (une réplique par « Suivant »), `conseils` (`aRetravailler`, `enCours`, `offres`, `general`) et `auRevoir` |
@@ -222,6 +232,9 @@ après la fin de la quête). Selon le type :
 | `reputation` | `niveau` | ce niveau de réputation est atteint |
 | `parler` | `pnj`, `question`, `replique` | le joueur a posé la question dans le dialogue ; la personne répond |
 | `aller` | `cible`, `message` (facultatif) | le joueur s'est approché de ce meuble, point ou pièce ; le message dit ce qu'il y voit |
+| `acheter` | `article` ou `sorte` (`meuble`, `materiel`, `lieu`, `piece`) | cet article (ou un article de cette sorte) a été acheté dans la boutique |
+| `lieu` | `lieu` | le joueur est allé dans ce lieu (« rends-toi aux bureaux ») ; l'objectif y emmène |
+| `placer` | `article` et `lieu` (facultatifs) | un meuble acheté (celui-là, ou n'importe lequel) est posé (dans ce lieu, ou n'importe où) ; l'objectif ouvre directement « Aménager » |
 
 ⚠️ Ne jamais changer l'`id` d'une quête ou d'une étape déjà publiée : les
 parties retiennent les étapes faites par ces identifiants
@@ -246,11 +259,58 @@ commande acceptée est gardée dans la partie jusqu'à sa livraison.
 | `sujets` | ce dont elles ont besoin : `titre`, `resume`, `demande` (écrite pour aller à n'importe quelle personne : épicène), `besoins`, `bonus`, `apercu` (facultatif) |
 | `contraintes` | une seule chose parmi `aEviter` (`{ "apporte", "texte" }`), `confort` (`{ "reglage", "valeurs", "texte" }`) et `chargeMax` |
 | `recompense` | `argent` et `reputation` : `[minimum, maximum]` ; `bonus` : pièces par petit plus |
+| `enPlus` | facultatif : `{ "lieu": "bureaux", "parJour": 1 }`, des commandes en plus chaque jour une fois ce lieu loué |
 | `reactions` | des listes de réactions possibles pour `parfait`, `bien`, `aRetravailler` |
 
 Seules les associations sujet + contrainte qu'on peut réussir
 « parfaitement » sont tirées ; le jeu refuse au démarrage un sujet qui ne
 s'accorde avec aucune contrainte.
+
+## La boutique : `data/boutique.json` (jalon 5)
+
+Ce qui s'achète sur l'ordinateur, avec des pièces.
+
+**`meubles`** : les meubles à poser chez soi (« Aménager »).
+
+| Champ | Rôle |
+|---|---|
+| `meuble` | un meuble de `data/meubles.json` (qui doit avoir une `designation`, « le cactus », et pas d'`actions`) |
+| `description` | facultative : le texte de la boutique (sinon celui du meuble) |
+| `prix` | en pièces |
+| `niveau` | facultatif : le niveau de réputation qui le débloque |
+
+Un meuble avec une `description` dans `data/meubles.json` peut être
+examiné une fois posé ; il doit alors rester atteignable (le jeu le
+vérifie quand on le pose).
+
+**`lieux`** : les lieux à louer (les bureaux) : `id` (celui du lieu dans
+`data/lieux/index.json`), `nom`, `designation`, `description`, `prix`,
+`niveau`. Une fois loué, on y va par la porte d'entrée.
+
+**`pieces`** : les pièces à ouvrir dans un lieu loué : `id` (l'`ouverture`
+d'une pièce du lieu), `lieu`, `nom`, `designation`, `description`, `prix`,
+`niveau`. Une pièce ne s'ouvre qu'une fois son lieu loué.
+
+**`materiel`** : le matériel du poste de travail. Il s'installe tout seul
+sur le bureau, ne s'achète qu'une fois, et rapporte `bonus` pièces de plus
+à chaque livraison.
+
+| Champ | Rôle |
+|---|---|
+| `id`, `nom`, `designation`, `description` | identifiant (différent de ceux des meubles), nom, nom dans une phrase (« le grand écran ») et texte de la boutique |
+| `prix`, `niveau` | comme pour les meubles |
+| `bonus` | pièces en plus à chaque livraison |
+| `element` | la partie du bureau qu'il remplace (`ecran`, `clavier`, `siege`) |
+| `formes` | ses formes, comme dans `data/meubles.json`, autour du centre du meuble qui le porte |
+
+Quand on pose un meuble, le jeu refuse, en disant pourquoi, une place :
+hors des pièces, traversée par un mur, déjà prise (par un meuble ou
+quelqu'un), qui rendrait une pièce, un objet à examiner ou la place d'un
+habitant inaccessible à pied ou en fauteuil roulant (passages d'au moins
+1 m), qui supprimerait le dernier espace de demi-tour en fauteuil d'une
+pièce (1,50 m), ou qui enfermerait le personnage. Si une nouvelle version
+change un lieu, un meuble qui ne tient plus à sa place retourne dans les
+affaires du joueur : rien n'est perdu.
 
 ## Les couleurs de la 3D : `data/palette.json`
 

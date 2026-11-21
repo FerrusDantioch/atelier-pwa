@@ -72,18 +72,21 @@ function associations(modeles, creation) {
 }
 
 /**
- * Les commandes proposées un jour donné d'une partie : « parJour »
- * commandes, chacune avec une personne et un sujet différents. Leurs
- * identifiants : « jour-<jour>-<numéro> ».
+ * Les commandes proposées un jour donné d'une partie : « nombre » commandes
+ * (« parJour » par défaut), chacune avec une personne et un sujet
+ * différents. Leurs identifiants : « jour-<jour>-<numéro> ». Les premières
+ * ne dépendent pas du nombre : une commande en plus s'ajoute aux autres
+ * sans les changer.
  */
-export function commandesDuJour({ graine, jour }, modeles, creation) {
+export function commandesDuJour({ graine, jour, nombre = null }, modeles, creation) {
+  const combien = nombre ?? modeles.parJour;
   const hasard = creerHasard(combinerGraines(graine, jour, SEL));
   const sujets = [...associations(modeles, creation)];
   const clients = [...modeles.clients];
   const [argentMin, argentMax] = modeles.recompense.argent;
   const [reputationMin, reputationMax] = modeles.recompense.reputation;
   const resultat = [];
-  for (let numero = 1; numero <= modeles.parJour && sujets.length > 0 && clients.length > 0; numero += 1) {
+  for (let numero = 1; numero <= combien && sujets.length > 0 && clients.length > 0; numero += 1) {
     const { sujet, contraintes } = sujets.splice(Math.floor(hasard() * sujets.length), 1)[0];
     const contrainte = choisirDans(hasard, contraintes);
     const client = clients.splice(Math.floor(hasard() * clients.length), 1)[0];
@@ -113,6 +116,13 @@ export function commandesDuJourOuvertes(partie, modeles, paliers) {
   return Boolean(modeles) && commandeDebloquee({ debloquee: modeles.debloquee }, partie, paliers);
 }
 
+// Combien de commandes du jour : « parJour », et quelques-unes de plus une
+// fois les bureaux loués (« enPlus », jalon 5).
+export function nombreDuJour(partie, modeles) {
+  const enPlus = modeles.enPlus && partie.lieux?.debloques?.includes(modeles.enPlus.lieu) ? modeles.enPlus.parJour : 0;
+  return modeles.parJour + enPlus;
+}
+
 // Les offres d'aujourd'hui qui ne sont ni acceptées ni livrées.
 export function offresDuJour(partie, modeles, creation, paliers) {
   if (!commandesDuJourOuvertes(partie, modeles, paliers)) return [];
@@ -120,7 +130,7 @@ export function offresDuJour(partie, modeles, creation, paliers) {
     ...Object.keys(partie.commandes.aleatoires),
     ...partie.commandes.livrees.map((livraison) => livraison.id),
   ]);
-  return commandesDuJour({ graine: partie.graine, jour: partie.temps.jour }, modeles, creation)
+  return commandesDuJour({ graine: partie.graine, jour: partie.temps.jour, nombre: nombreDuJour(partie, modeles) }, modeles, creation)
     .filter((commande) => !prises.has(commande.id));
 }
 

@@ -24,7 +24,8 @@
     "copiesDeSecours": 5
   },
   "deplacement": {
-    "vitesse": 1.8
+    "vitesse": 1.8,
+    "trajet": 10
   },
   "temps": {
     "debutJournee": "07:00",

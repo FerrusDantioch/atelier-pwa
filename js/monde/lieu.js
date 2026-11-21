@@ -12,6 +12,10 @@
 //     voit bien la séparation, sans rien cacher derrière).
 // Quand la caméra tourne, les murs coupés changent : ils sont reconstruits.
 //
+// Une pièce encore fermée (jalon 5, voir js/jeu/lieux.js) a un sol de
+// chantier, sans meubles, et ses portes sont closes : vue de la pièce
+// voisine, c'est un mur avec une porte fermée.
+//
 // Tout le décor fixe (socle, sol, meubles) forme UNE seule géométrie, et les
 // murs une autre : deux dessins par image, c'est très léger pour la tablette.
 // Les affiches (une image contre un mur extérieur, voir affiches.js) sont
@@ -151,6 +155,17 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
       else if (sol.motif === 'lames') indice = (z + Math.floor((x + (z % 2) * 2) / 4)) % 2;
       const couleur = c(sol.couleurs[Math.min(indice, sol.couleurs.length - 1)]);
       decor.dalle(x * TAILLE_CASE, z * TAILLE_CASE, (x + 1) * TAILLE_CASE, (z + 1) * TAILLE_CASE, 0, couleur);
+    }
+  }
+  // Le sol de chantier des pièces encore fermées.
+  for (const piece of lieu.pieces.filter((p) => p.verrouillee)) {
+    for (const [zx, zz, zl, zp] of piece.zones) {
+      for (let x = zx; x < zx + zl; x += 1) {
+        for (let z = zz; z < zz + zp; z += 1) {
+          const couleur = c((x + z) % 2 === 0 ? 'beton' : 'beton-2');
+          decor.dalle(x * TAILLE_CASE, z * TAILLE_CASE, (x + 1) * TAILLE_CASE, (z + 1) * TAILLE_CASE, 0, couleur);
+        }
+      }
     }
   }
   for (const place of lieu.meubles) atelier.poser(decor, place);
@@ -315,13 +330,20 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
         continue;
       }
       // Porte : un passage libre (aucune marche). Sur un mur entier, un
-      // linteau au-dessus et un cadre ; la porte d'entrée est fermée.
+      // linteau au-dessus et un cadre ; la porte d'entrée est fermée. La
+      // porte d'une pièce encore fermée (« porte-fermee ») : un battant
+      // clos sur un mur entier, un mur bas ailleurs.
+      const close = ouverture.type === 'porte-entree' || ouverture.type === 'porte-fermee';
+      if (ouverture.type === 'porte-fermee' && !entier) {
+        morceau(troncon, debut, fin, 0, hauteur);
+        continue;
+      }
       if (entier) {
         morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur);
         element(troncon, d, d + 0.06, 0, HAUT_OUVERTURE, c('porte'));
         element(troncon, f - 0.06, f, 0, HAUT_OUVERTURE, c('porte'));
         element(troncon, d, f, HAUT_OUVERTURE - 0.06, HAUT_OUVERTURE, c('porte'));
-        if (ouverture.type === 'porte-entree') {
+        if (close) {
           element(troncon, d + 0.06, f - 0.06, 0, HAUT_OUVERTURE - 0.06, c('bois'), EPAISSEUR * 0.5);
           // La poignée, du côté intérieur.
           const dedans = troncon.normale ? -1 : 1;

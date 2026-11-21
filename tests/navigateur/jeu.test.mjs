@@ -369,7 +369,7 @@ test('une partie du jalon 0 (sans personnage) passe d\'abord par le choix du per
   await page.locator('.barre-haut').waitFor();
   await attendreMonde(page);
   const partie = await lirePartieEnCours(page);
-  assert.equal(partie.versionFormat, 3);
+  assert.equal(partie.versionFormat, 4, 'mise à niveau jusqu\'au format actuel');
   assert.equal(partie.argent, 130);
   assert.equal(partie.joueur.modele, 'perso');
   assert.deepEqual(page.erreurs, []);

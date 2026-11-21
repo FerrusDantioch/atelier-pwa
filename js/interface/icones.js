@@ -79,6 +79,20 @@ const DESSINS = {
   // Jalon 4 : le journal des quêtes, et la fonction « Sous-titres ».
   journal: [['path', { d: 'M5 4.5h11a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z' }], ['path', { d: 'M5 18a2 2 0 0 1 2-2h11M9 8.5h5M9 11.5h5' }]],
   sousTitres: [['rect', { x: 3, y: 5, width: 18, height: 14, rx: 2 }], ['path', { d: 'M7 13.5h6M15 13.5h2M7 16h10' }]],
+  // Jalon 5 : la boutique et l'aménagement.
+  boutique: [['path', { d: 'M5 8.5h14l-1.2 11.5H6.2z' }], ['path', { d: 'M9 10.5V7a3 3 0 0 1 6 0v3.5' }]],
+  amenager: [
+    ['path', { d: 'M5 11V9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2' }],
+    ['path', { d: 'M3.5 12.5a1.5 1.5 0 0 1 3 0V14h11v-1.5a1.5 1.5 0 0 1 3 0V18h-17z' }],
+    ['path', { d: 'M5.5 18v2M18.5 18v2' }],
+  ],
+  pivoter: [['path', { d: 'M19 12a7 7 0 1 1-2.05-4.95' }], ['path', { d: 'M19.5 4v4.5H15' }]],
+  ranger: [['path', { d: 'M4 8l8-4 8 4v8.5l-8 4-8-4z' }], ['path', { d: 'M4 8l8 4 8-4M12 12v8.5' }]],
+  flecheHaut: [['path', { d: 'M12 19V5M6 11l6-6 6 6' }]],
+  flecheBas: [['path', { d: 'M12 5v14M6 13l6 6 6-6' }]],
+  flecheGauche: [['path', { d: 'M19 12H5M11 6l-6 6 6 6' }]],
+  flecheDroite: [['path', { d: 'M5 12h14M13 6l6 6-6 6' }]],
+  cle: [['circle', { cx: 8, cy: 12, r: 4 }], ['path', { d: 'M12 12h9M18 12v3M21 12v2' }]],
 };
 
 // Renvoie une icône <svg>, cachée aux lecteurs d'écran (le mot à côté suffit).

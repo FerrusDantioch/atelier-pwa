@@ -9,11 +9,22 @@
 // bureau », « tourner la vue ») et il la prévient en retour (« arrivé »,
 // « nouvelle pièce », « objet à examiner à côté »), par les « rappels ».
 //
+// Le lieu montré est celui des données, avec ses pièces ouvertes ou encore
+// fermées (js/jeu/lieux.js), les meubles posés par le joueur
+// (js/jeu/amenagement.js) et le matériel installé sur le bureau
+// (js/jeu/boutique.js) ; actualiserLieu() le reconstruit quand ils changent.
+// En mode « Aménager », le doigt et le clavier déplacent le meuble choisi
+// (fantome.js) au lieu du personnage.
+//
 // Le monde ne décide d'aucune règle du jeu : il montre et il déplace.
 // =============================================================================
 
 import { Color, Plane, Scene, Vector3 } from '../../lib/three/three.module.js';
+import { lieuAmenage, meublesPoses } from '../jeu/amenagement.js';
+import { catalogueEquipe, materielInstalle } from '../jeu/boutique.js';
+import { lieuSelonOuvertures, ouvertures, ouverturesDuLieu } from '../jeu/lieux.js';
 import { apparenceDuJoueur } from '../jeu/personnage.js';
+import { POINT_D_ARRIVEE } from '../jeu/routines.js';
 import { couleurDuTheme } from '../modeles/palette.js';
 import { animerPersonnage, construirePersonnage } from '../modeles/personnage.js';
 import { creerCameraIso } from './camera-iso.js';
@@ -22,6 +33,7 @@ import {
 } from './chemin.js';
 import { brancherClavier } from './controles.js';
 import { creerDeplacement, directionsPourAller } from './deplacement.js';
+import { creerFantome } from './fantome.js';
 import { TAILLE_CASE, angleVers, caseDuPoint, creerGrille, profilDeDeplacement } from './grille.js';
 import { creerHabitants, ecartEnCases } from './habitants.js';
 import { dessinerAffiche } from './affiches.js';
@@ -42,20 +54,34 @@ const SOL = new Plane(new Vector3(0, 1, 0), 0);
  *   rappels     { surArrivee, surPiece, surObjetProche, surPosition, surVue, surBloque, surVisite, actif() }
  */
 export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels }) {
-  const lieu = donnees.lieux[partie.lieux.actuel] || donnees.lieux[donnees.jeu.depart.lieu];
-  const catalogue = new Map(donnees.meubles.meubles.map((meuble) => [meuble.id, meuble]));
-  const grille = creerGrille(lieu, catalogue);
+  const lieuDeBase = donnees.lieux[partie.lieux.actuel] || donnees.lieux[donnees.jeu.depart.lieu];
+  // Le catalogue d'origine (pour les meubles à poser) et celui du lieu, avec
+  // le matériel installé sur le bureau.
+  const catalogueDeBase = new Map(donnees.meubles.meubles.map((meuble) => [meuble.id, meuble]));
+  const equiper = (p) => (donnees.boutique
+    ? catalogueEquipe(donnees.meubles.meubles, materielInstalle(p, donnees.boutique))
+    : catalogueDeBase);
+  let catalogue = equiper(partie);
+  // Ce qui est ouvert (lieux loués, pièces ouvertes), le lieu tel qu'il est
+  // avec ces ouvertures, puis avec les meubles posés par le joueur.
+  let ouvertes = ouvertures(partie);
+  let lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
+  let lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
+  let grille = creerGrille(lieu, catalogue);
   const nomsPieces = new Map(lieu.pieces.map((piece) => [piece.id, piece]));
 
   const scene = new Scene();
   scene.background = new Color(couleurDuTheme('--fond-scene', '#1f1733'));
   const lumieres = creerLumieres();
   scene.add(lumieres.groupe);
-  const construit = construireLieu({
+  const construire = () => construireLieu({
     lieu, grille, catalogue, palette,
     dessinerAffiche: (affiche) => dessinerAffiche(affiche, { palette, redessiner: () => moteur.redessiner() }),
   });
+  let construit = construire();
   scene.add(construit.groupe);
+  const fantome = creerFantome({ catalogue: catalogueDeBase, palette });
+  scene.add(fantome.groupe);
   const reperes = creerReperes();
   scene.add(reperes.groupe);
 
@@ -99,12 +125,16 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   let objetProche = null; // l'objet qu'on peut examiner, là où l'on est
   let directionClavier = null;
   let actif = true;
+  // Pendant l'aménagement : { surToucher, surDirection, surAgir } (sinon null).
+  let amenagement = null;
 
   const animationsReduites = () => document.documentElement.getAttribute('data-animations') === 'reduites';
 
   // --- Les personnages non joueurs (PNJ) ------------------------------------------
   let minuteActuelle = partie.temps.minute;
-  const habitants = creerHabitants({ scene, lieu, grille, donnees, palette, joueur: () => joueurActuel });
+  const habitants = creerHabitants({
+    scene, lieu, grille, donnees, palette, joueur: () => joueurActuel, ouvertes: () => ouvertes,
+  });
   habitants.placer(minuteActuelle, deplacement.case);
 
   function placerPerso() {
@@ -115,9 +145,9 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   placerPerso();
 
   // --- Ce qu'on peut examiner ----------------------------------------------------
-  const cibles = construit.cibles;
-  const cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
-  const pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
+  let cibles = construit.cibles;
+  let cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
+  let pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
   // Les meubles et points, plus les PNJ présents (qui bougent).
   const toutesLesCibles = () => [...cibles, ...habitants.cibles()];
 
@@ -138,9 +168,10 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     }
     if (cible.type === 'point') {
       const point = pointParId.get(cible.id);
+      // La porte d'entrée : on sort par là pour aller dans un autre lieu.
       return {
         id: point.id, type: 'point', nom: point.nom, designation: point.designation, description: point.description,
-        lien: point.lien || null, actions: [],
+        lien: point.lien || null, actions: point.id === POINT_D_ARRIVEE ? ['sortir'] : [],
       };
     }
     const emprise = grille.emprises.get(cible.id);
@@ -213,6 +244,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   }
 
   function definirObjetProche(cible) {
+    if (amenagement && cible) return; // pendant l'aménagement, rien à examiner
     if (cible === objetProche || (cible && objetProche && cible.type === 'pnj' && cible.id === objetProche.id)) return;
     objetProche = cible;
     if (cible) reperes.montrerCible(cible.boite);
@@ -426,7 +458,9 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       quandArrive();
     }
 
-    const cameraBouge = camera.mettreAJour(dt, deplacement.position);
+    // Pendant l'aménagement, la caméra suit le meuble qu'on pose.
+    const visee = amenagement && fantome.visible ? fantome.centre : deplacement.position;
+    const cameraBouge = camera.mettreAJour(dt, visee);
     lumieres.regler({ azimut: camera.azimut });
     return deplacement.enRoute || persoBouge || cameraBouge || resultat.tourne || directionClavier !== null || habitantsBougent
       || pnjAttendu !== null;
@@ -499,9 +533,32 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     return null;
   }
 
+  // En aménagement : la case du sol sous le doigt, le meuble touché et les
+  // meubles achetés posés sur cette case (un tapis, qu'on touche par le sol).
+  function toucherPourAmenager(x, y) {
+    const trouve = sousLeDoigt(x, y);
+    const rayon = camera.rayon(x, y).ray;
+    const sol = rayon.intersectPlane(SOL, new Vector3());
+    const caseSol = sol ? caseDuPoint(sol.x, sol.z) : null;
+    const achats = [];
+    if (caseSol) {
+      for (const emprise of grille.emprises.values()) {
+        if (caseSol.x >= emprise.x && caseSol.x < emprise.x + emprise.largeur
+          && caseSol.z >= emprise.z && caseSol.z < emprise.z + emprise.profondeur) achats.push(emprise.id);
+      }
+    }
+    const meuble = trouve?.cible?.type === 'meuble' ? trouve.cible.id : null;
+    const caseVisee = trouve?.case || caseSol;
+    amenagement.surToucher({ id: meuble, case: caseVisee, sousLaCase: achats });
+  }
+
   const pointage = brancherPointage(() => moteur.toile, {
     toucher(x, y) {
       if (!actif) return;
+      if (amenagement) {
+        toucherPourAmenager(x, y);
+        return;
+      }
       const trouve = sousLeDoigt(x, y);
       if (!trouve) return;
       if (trouve.cible) allerVersCible(trouve.cible);
@@ -537,6 +594,15 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   const clavier = brancherClavier({
     actif: () => actif && (rappels.actif ? rappels.actif() : true),
     direction(direction) {
+      if (amenagement) {
+        // Une case par appui, dans le sens de l'écran.
+        if (direction) {
+          const sol = camera.directionAuSol(direction.droite, direction.haut);
+          const [pas] = directionsPourAller(sol.x, sol.z);
+          if (pas) amenagement.surDirection({ dx: pas[0], dz: pas[1] });
+        }
+        return;
+      }
       directionClavier = direction;
       if (direction) {
         if (deplacement.enRoute && deplacement.destination
@@ -553,7 +619,8 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     zoomer,
     recentrer,
     agir() {
-      rappels.surAgir?.();
+      if (amenagement) amenagement.surAgir();
+      else rappels.surAgir?.();
     },
   });
 
@@ -583,7 +650,46 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   function actualiserTheme() {
     scene.background = new Color(couleurDuTheme('--fond-scene', '#1f1733'));
     reperes.actualiserCouleurs();
+    fantome.actualiserCouleurs();
     moteur.redessiner();
+  }
+
+  // Les meubles posés ou le matériel ont changé : le lieu est reconstruit
+  // (la caméra, le personnage et les habitants restent où ils sont).
+  function actualiserLieu() {
+    catalogue = equiper(partie);
+    ouvertes = ouvertures(partie);
+    lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
+    lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
+    grille = creerGrille(lieu, catalogue);
+    pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
+    scene.remove(construit.groupe);
+    construit.liberer();
+    construit = construire();
+    scene.add(construit.groupe);
+    construit.tournerMurs(camera.rotation);
+    construit.montrerContours(reglages().contraste === 'eleve');
+    cibles = construit.cibles;
+    cibleParId = new Map(cibles.map((cible) => [cible.id, cible]));
+    habitants.changerGrille(grille);
+    habitants.changerLieu(lieu);
+    cibleVisee = null;
+    // Le personnage ne peut pas se retrouver dans un meuble (l'aménagement
+    // l'empêche) ; par sécurité, il va à la case libre la plus proche.
+    const ici = deplacement.case;
+    if (!grille.caseAccessible(ici.x, ici.z, profil)) {
+      const proche = plusProcheAccessible(ici);
+      deplacement.teleporter(proche.x, proche.z);
+      placerPerso();
+    }
+    objetProche = null;
+    reperes.cacherCible();
+    if (!amenagement) {
+      const proche = chercherObjetProche();
+      if (proche) definirObjetProche(proche);
+      else rappels.surObjetProche?.(null);
+    }
+    moteur.animer(image);
   }
 
   // Démarrage : la vue de la partie, centrée sur le personnage.
@@ -595,17 +701,19 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   definirObjetProche(chercherObjetProche());
 
   return {
-    lieu,
-    grille,
+    get lieu() { return lieu; },
+    get grille() { return grille; },
     get piece() { return nomsPieces.get(pieceActuelle) || null; },
     get objetProche() { return objetProche ? infosObjet(objetProche) : null; },
     get case() { return deplacement.case; },
+    get enRoute() { return deplacement.enRoute; },
     get profil() { return profil; },
 
     // La liste de « Aller à… » : pièces, personnes présentes, meubles et
     // points à examiner.
     destinations() {
-      const liste = lieu.pieces.map((piece) => ({ type: 'piece', id: piece.id, nom: piece.nom, designation: piece.designation, piece: piece.id }));
+      const liste = lieu.pieces.filter((piece) => !piece.verrouillee)
+        .map((piece) => ({ type: 'piece', id: piece.id, nom: piece.nom, designation: piece.designation, piece: piece.id }));
       for (const cible of habitants.cibles()) {
         const caseHabitant = habitants.caseDe(cible.id);
         liste.push({ ...infosObjet(cible), piece: grille.piece(caseHabitant.x, caseHabitant.z) });
@@ -672,6 +780,69 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     tourner,
     zoomer,
     recentrer,
+    actualiserLieu,
+
+    // --- Le mode « Aménager » -----------------------------------------------------
+    // Le personnage s'arrête ; le doigt et le clavier s'adressent à
+    // « rappelsAmenagement » : surToucher({ id, case, sousLaCase }),
+    // surDirection({ dx, dz }), surAgir().
+    commencerAmenagement(rappelsAmenagement) {
+      amenagement = rappelsAmenagement;
+      if (deplacement.enRoute) deplacement.revenirAuCentre();
+      cibleVisee = null;
+      pnjAttendu = null;
+      directionClavier = null;
+      clavier.toutRelacher();
+      reperes.cacherDestination();
+      definirObjetProche(null);
+      moteur.animer(image);
+    },
+    finirAmenagement() {
+      amenagement = null;
+      fantome.cacher();
+      camera.reprendreSuivi();
+      definirObjetProche(chercherObjetProche());
+      moteur.animer(image);
+    },
+    get enAmenagement() { return amenagement !== null; },
+    // Un pas d'une case dans une direction de l'écran (droite, haut) :
+    // { dx, dz } sur la grille (pour les flèches du panneau).
+    pasVersEcran(droite, haut) {
+      const sol = camera.directionAuSol(droite, haut);
+      const [pas] = directionsPourAller(sol.x, sol.z);
+      return pas ? { dx: pas[0], dz: pas[1] } : null;
+    },
+    // Le meuble qu'on pose : { meuble, x, z, rotation, valide }.
+    montrerFantome(etat) {
+      fantome.montrer(etat);
+      camera.reprendreSuivi();
+      moteur.animer(image);
+    },
+    cacherFantome() {
+      fantome.cacher();
+      moteur.animer(image);
+    },
+    get fantome() { return fantome.etat; },
+    // Les personnes présentes (on ne pose rien sur elles) : le personnage,
+    // et chaque habitant, là où il est et là où il va.
+    casesOccupees() {
+      const ici = deplacement.case;
+      const cases = [{ x: ici.x, z: ici.z, joueur: true }];
+      for (const habitant of habitants.liste) {
+        if (!habitant.present) continue;
+        for (const caseHabitant of [habitants.caseDe(habitant.id), habitants.destinationDe(habitant.id)]) {
+          if (caseHabitant) cases.push({ x: caseHabitant.x, z: caseHabitant.z, nom: habitant.nom });
+        }
+      }
+      return cases;
+    },
+    // Le lieu avec ses pièces ouvertes, sans les meubles posés par le joueur.
+    get lieuOuvert() { return lieuOuvert; },
+    // Le même, toutes ses pièces ouvertes : un meuble posé aujourd'hui ne
+    // doit pas bloquer une pièce qui s'ouvrira demain.
+    get lieuComplet() { return lieuSelonOuvertures(lieuDeBase, new Set(ouverturesDuLieu(lieuDeBase))); },
+    get ouvertes() { return ouvertes; },
+    get catalogueDeBase() { return catalogueDeBase; },
 
     // Examiner l'objet proche : on se tourne vers lui. Renvoie ses informations.
     examiner() {
@@ -757,6 +928,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       perso.liberer();
       habitants.liberer();
       construit.liberer();
+      fantome.liberer();
       reperes.liberer();
     },
   };

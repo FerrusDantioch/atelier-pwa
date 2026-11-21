@@ -56,8 +56,11 @@ export function creerGrille(lieu, catalogue) {
   const dansLaGrille = (x, z) => x >= 0 && z >= 0 && x < largeur && z < profondeur;
 
   // --- Pièces : quelle pièce (et donc quel sol) pour chaque case -----------
+  // Une pièce encore fermée (« verrouillee », voir js/jeu/lieux.js) n'a pas
+  // de sol praticable : on n'y entre pas.
   const pieces = new Array(largeur * profondeur).fill(null);
   for (const piece of lieu.pieces) {
+    if (piece.verrouillee) continue;
     for (const [zx, zz, zl, zp] of piece.zones) {
       for (let x = zx; x < zx + zl; x += 1) {
         for (let z = zz; z < zz + zp; z += 1) {
