@@ -1,5 +1,22 @@
 # Journal du projet — Atelier PWA
 
+## 🔧 Correctif 0.5.2 — l'identité de l'application (21 novembre 2026)
+
+Hors jalon, à la demande de Ferrus (socle commun, section 4). Le manifeste
+disait `"id": "./"`. Le navigateur lit cet identifiant depuis la **racine du
+site** : le jeu avait donc l'identité `ferrusdantioch.github.io/`, la même
+que d'autres applications de Ferrus (omni-notes, omni-schema, anciennes
+installations d'omni-time, d'omni-oracle, d'omni-agenda), et le navigateur
+pouvait proposer d'ouvrir l'une à la place de l'autre.
+
+- `"id": "/atelier-pwa/"` : une identité propre au dossier du jeu. À ne
+  plus changer.
+- Un test vérifie cet identifiant (`tests/config.test.mjs`).
+- Rien d'autre ne change : les parties enregistrées restent là (elles ne
+  dépendent pas de l'identité). Un jeu déjà installé continue de marcher
+  avec l'ancienne identité ; pour profiter de la correction, exporter sa
+  partie, désinstaller, puis réinstaller (expliqué dans le README).
+
 ## ✅ Jalon 4 — Les quêtes et le journal (version 0.5.1, 18 novembre 2026)
 
 Validé par Ferrus le 18 novembre 2026, textes de la quête du mentor
