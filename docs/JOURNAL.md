@@ -8,6 +8,9 @@ tablette, puis à valider. Ferrus a aussi choisi que les deux ordinateurs
 matériel donne un petit bonus (recommandation appliquée, voir
 `docs/PLAN.md`).
 
+Cette version comprend aussi le correctif 0.5.2 (l'identité
+`"id": "/atelier-pwa/"`, voir plus bas), publié entre-temps.
+
 ### Ce qui est fait
 
 - **La boutique**, sur l'ordinateur (`data/boutique.json`), en quatre
@@ -118,6 +121,22 @@ matériel donne un petit bonus (recommandation appliquée, voir
 - À valider par Ferrus : les textes des trois nouvelles quêtes, les
   répliques du mentor aux bureaux, et celles des clients (personnages
   fictifs).
+## 🔧 Correctif 0.5.2 — l'identité de l'application (21 novembre 2026)
+
+Hors jalon, à la demande de Ferrus (socle commun, section 4). Le manifeste
+disait `"id": "./"`. Le navigateur lit cet identifiant depuis la **racine du
+site** : le jeu avait donc l'identité `ferrusdantioch.github.io/`, la même
+que d'autres applications de Ferrus (omni-notes, omni-schema, anciennes
+installations d'omni-time, d'omni-oracle, d'omni-agenda), et le navigateur
+pouvait proposer d'ouvrir l'une à la place de l'autre.
+
+- `"id": "/atelier-pwa/"` : une identité propre au dossier du jeu. À ne
+  plus changer.
+- Un test vérifie cet identifiant (`tests/config.test.mjs`).
+- Rien d'autre ne change : les parties enregistrées restent là (elles ne
+  dépendent pas de l'identité). Un jeu déjà installé continue de marcher
+  avec l'ancienne identité ; pour profiter de la correction, exporter sa
+  partie, désinstaller, puis réinstaller (expliqué dans le README).
 
 ## ✅ Jalon 4 — Les quêtes et le journal (version 0.5.1, 18 novembre 2026)
 

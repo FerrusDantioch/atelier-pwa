@@ -33,6 +33,14 @@ test('le nom est le même dans config.js, le manifeste et le titre de la page', 
   assert.match(lire('index.html'), new RegExp(`<title>${config.nom}</title>`));
 });
 
+test('l\'identité de l\'application est propre à son dossier (jamais « ./ »)', () => {
+  // L'id est lu depuis la racine du site : « ./ » donnerait l'identité
+  // ferrusdantioch.github.io/, la même que d'autres applications de Ferrus,
+  // et le navigateur les prendrait l'une pour l'autre. Ne plus la changer.
+  const manifeste = lireJson('manifest.webmanifest');
+  assert.equal(manifeste.id, '/atelier-pwa/');
+});
+
 test('le manifeste permet l\'installation, sans bloquer l\'orientation', () => {
   const manifeste = lireJson('manifest.webmanifest');
   assert.equal(manifeste.start_url, './');

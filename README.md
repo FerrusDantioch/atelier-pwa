@@ -118,6 +118,10 @@ Une fois publié sur GitHub Pages, le jeu sera à l'adresse
 - **Android** : menu du navigateur (⋮), puis « Installer l'application ».
   Sur Chrome, une seule application de ce site peut parfois être installée :
   si une autre application de Ferrus est déjà installée, passer par Brave.
+- **Installé avant la version 0.5.2 ?** Le jeu avait alors la même identité
+  que d'autres applications de Ferrus (le navigateur pouvait les confondre).
+  Il continue de marcher, mais pour profiter de la correction : exporter sa
+  partie (Pause › Sauvegarde), désinstaller, puis réinstaller.
 - **iPad / iPhone** : bouton Partager, puis « Sur l'écran d'accueil ».
 - **Ordinateur** : icône d'installation dans la barre d'adresse.
 
