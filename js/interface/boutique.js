@@ -17,6 +17,7 @@
 import {
   acheter, articlesDeLaBoutique, catalogueEquipe, etatDeLArticle, nombrePossedes,
 } from '../jeu/boutique.js';
+import { jouerEffet } from '../noyau/audio.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { niveauDeReputation } from '../noyau/format-sauvegarde.js';
 import { t, typographier } from '../noyau/textes.js';
@@ -172,6 +173,7 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
       liste();
       return;
     }
+    jouerEffet('achat');
     surAchat?.(possession, article);
     // Les quêtes avancent tout de suite (« achète un meuble ») : on le dit ici.
     const evenements = progresserQuetes({ annoncer: false });

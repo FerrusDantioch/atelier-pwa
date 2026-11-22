@@ -17,6 +17,7 @@
 // =============================================================================
 
 import { drapeauDeRencontre, repliqueDAccueil, repliqueDActivite } from '../jeu/dialogues.js';
+import { jouerVoix } from '../noyau/audio.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, typographier } from '../noyau/textes.js';
 import { el } from './dom.js';
@@ -43,6 +44,7 @@ export function ouvrirDialogue({ infos, pnj, creneau, demande = null, sujets = [
   const drapeau = drapeauDeRencontre(pnj);
   const accueil = repliqueDAccueil(pnj, { dejaRencontre: Boolean(partie.drapeaux[drapeau]), ...moment });
   if (accueil.premiereFois) modifierPartie((p) => { p.drapeaux[drapeau] = true; });
+  jouerVoix(pnj.id);
 
   const fil = el('div', { class: 'dialogue-fil', 'aria-live': 'polite' }, replique(infos.nom, accueil.texte));
   const activite = repliqueDActivite(pnj, creneau, moment);
@@ -64,6 +66,7 @@ export function ouvrirDialogue({ infos, pnj, creneau, demande = null, sujets = [
           replique(t('dialogue.toi'), sujet.question, 'replique-joueur'),
           replique(infos.nom, sujet.replique),
         );
+        jouerVoix(pnj.id);
         sujet.surDit();
         questionPosee(f, question);
         return false;
@@ -80,6 +83,7 @@ export function ouvrirDialogue({ infos, pnj, creneau, demande = null, sujets = [
           replique(infos.nom, demande.commande.demande),
           el('p', { class: 'aide' }, t('dialogue.commandeEnvoyee')),
         );
+        jouerVoix(pnj.id);
         demande.surProposee();
         questionPosee(f, question);
         return false;
@@ -95,6 +99,7 @@ export function ouvrirDialogue({ infos, pnj, creneau, demande = null, sujets = [
           replique(t('dialogue.toi'), question, 'replique-joueur'),
           replique(infos.nom, activite.texte),
         );
+        jouerVoix(pnj.id);
         questionPosee(f, question);
         return false;
       },

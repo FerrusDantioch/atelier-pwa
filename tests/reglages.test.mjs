@@ -66,8 +66,11 @@ test('chaque taille de texte et chaque police ont leur règle dans les styles', 
   assert.match(themes, /\[data-contraste="eleve"\]/);
 });
 
-test('les couleurs ne sont écrites que dans themes.css', () => {
-  for (const fichier of ['css/base.css', 'css/interface.css', 'css/ordinateur.css']) {
+test('les couleurs ne sont écrites que dans themes.css', async () => {
+  const { tousLesFichiers } = await import('./aides.mjs');
+  const feuilles = tousLesFichiers().filter((f) => f.startsWith('css/') && f.endsWith('.css') && f !== 'css/themes.css');
+  assert.ok(feuilles.length >= 5, 'feuilles CSS attendues');
+  for (const fichier of feuilles) {
     const sansCommentaires = lire(fichier).replace(/\/\*[\s\S]*?\*\//g, '');
     assert.doesNotMatch(sansCommentaires, /#[0-9a-fA-F]{3,8}\b|rgba?\(/, `${fichier} contient une couleur écrite en dur`);
   }

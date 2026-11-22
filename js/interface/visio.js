@@ -13,6 +13,7 @@
 
 import { DRAPEAU_VISIO_ACCUEIL, idsDesOffres, nouvellesOffres } from '../jeu/commandes.js';
 import { nomDuJoueur } from '../jeu/personnage.js';
+import { jouerVoix } from '../noyau/audio.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { remplir, t, typographier } from '../noyau/textes.js';
 import { el } from './dom.js';
@@ -57,7 +58,10 @@ export function ecranVisio(ctx, { appelEntrant = false } = {}) {
     fil.append(ligne);
     ligne.scrollIntoView({ block: 'nearest' });
   }
-  const dire = (texte) => ajouterLigne(replique(nom, texte));
+  const dire = (texte) => {
+    ajouterLigne(replique(nom, texte));
+    jouerVoix(mentor.id);
+  };
 
   // La fin du premier appel : la commande d'essai arrive sur l'ordinateur, et
   // l'étape de la quête de bienvenue est faite (un seul message pour tout).

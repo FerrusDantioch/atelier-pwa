@@ -20,6 +20,7 @@ import {
 import { PREFIXE_ACHAT } from '../jeu/boutique.js';
 import { profilDeDeplacement } from '../monde/grille.js';
 import { apparenceDuJoueur } from '../jeu/personnage.js';
+import { jouerEffet } from '../noyau/audio.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, typographier } from '../noyau/textes.js';
 import { el, vider } from './dom.js';
@@ -241,6 +242,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   function poser() {
     if (!selection) return;
     if (!selection.resultat?.ok) {
+      jouerEffet('refus');
       verifierEtMontrer();
       direAuxLecteurs(statut.textContent);
       return;
@@ -248,6 +250,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
     const place = placeChoisie();
     const deplace = Boolean(selection.origine);
     modifierPartie((partie) => poserMeuble(partie, monde().lieuOuvert.id, place), { important: true });
+    jouerEffet('pose');
     monde().actualiserLieu();
     const message = [
       t(deplace ? 'amenagement.deplace' : 'amenagement.pose', { meuble: designation(place.meuble) }),

@@ -152,15 +152,18 @@ test('le matériel s\'installe sur le bureau et rapporte 5 pièces de plus à ch
   await page.getByRole('button', { name: 'Livrer' }).click();
   const livraison = page.getByRole('dialog', { name: 'Livraison : parfait !' });
   await livraison.waitFor();
-  assert.match(await lireTexte(livraison), /Dont 5 pièces grâce à ton matériel\./);
-  // Le paiement : la récompense de la commande et son petit plus (le
-  // partage), plus 5 pièces de matériel.
-  const recompense = await page.evaluate(async () => {
-    const reponse = await fetch('/data/commandes.json');
-    return (await reponse.json()).commandes.find((c) => c.id === 'essai-courses').recompense;
+  const { recompense, bonusEcran } = await page.evaluate(async () => {
+    const [rCommandes, rBoutique] = await Promise.all([fetch('/data/commandes.json'), fetch('/data/boutique.json')]);
+    const commandes = (await rCommandes.json()).commandes;
+    const materiel = (await rBoutique.json()).materiel;
+    return {
+      recompense: commandes.find((c) => c.id === 'essai-courses').recompense,
+      bonusEcran: materiel.find((m) => m.id === 'grand-ecran').bonus,
+    };
   });
+  assert.match(await lireTexte(livraison), new RegExp(`Dont ${bonusEcran} pièces grâce à ton matériel\\.`));
   const partie = await lirePartieEnCours(page);
-  assert.equal(partie.commandes.livrees[0].argent, recompense.argent + recompense.bonus + 5);
+  assert.equal(partie.commandes.livrees[0].argent, recompense.argent + recompense.bonus + bonusEcran);
   assert.ok(partie.argent - argentAvant >= partie.commandes.livrees[0].argent, 'l\'argent a bien été gagné');
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
