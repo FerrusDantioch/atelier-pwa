@@ -28,22 +28,28 @@ import {
 } from '../jeu/quetes.js';
 import { POINT_D_ARRIVEE, ouEst, prochainPassage } from '../jeu/routines.js';
 import { VITESSES, avancerHorloge, bornesDeLaJournee, lendemain } from '../jeu/temps.js';
+import { definirAmbiance } from '../noyau/audio.js';
 import { ecouter } from '../noyau/evenements.js';
 import { heureEnMinutes, niveauDeReputation } from '../noyau/format-sauvegarde.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { obtenirReglages } from '../noyau/reglages.js';
 import { creerCopieDeSecours } from '../noyau/sauvegarde.js';
-import { clesDuGroupe, formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
+import { formaterHeure, formaterNombre, t, tPluriel, typographier } from '../noyau/textes.js';
 import { lienExterne } from './a-propos.js';
+import { ouvrirAllerA as afficherFenetreAllerA, ouvrirVoyage as afficherFenetreVoyage } from './aller-a.js';
 import { creerAmenagement } from './amenagement.js';
+import { creerGestionBarres } from './barres.js';
 import { ouvrirDialogue } from './dialogue.js';
 import { el } from './dom.js';
-import { confirmer, fenetreOuverte, ouvrirFenetre } from './fenetres.js';
+import { confirmer, fenetreOuverte } from './fenetres.js';
 import { icone } from './icones.js';
 import { ouvrirJournal } from './journal.js';
 import { direAuxLecteurs, notifier } from './notifications.js';
 import { ouvrirOrdinateur } from './ordinateur.js';
+import { ouvrirCommandes, ouvrirMenuPause } from './pause.js';
 import { demarrerProgression, messageDesQuetes, progresserQuetes } from './progression.js';
+
+export { ouvrirCommandes, ouvrirMenuPause };
 
 // Le monde 3D affiché (pour les tests automatiques et la fenêtre « Aller à… »).
 let mondeActuel = null;
@@ -187,11 +193,8 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
   const lieuActuel = el('p', { class: 'lieu-actuel' },
     icone('lieu'), el('span', { class: 'visuellement-cache' }, t('jeu.lieuActuel')), texteLieu);
 
-  // Les boutons qui vont et viennent selon l'endroit (voir adapterBarres), la
-  // dernière hauteur connue de la barre du bas, et les textes déjà mesurés.
+  // Les boutons qui vont et viennent selon l'endroit (voir barres.js).
   const boutonsDuMoment = [boutonAction, boutonDormir, boutonOrdinateur, boutonSortir];
-  let hauteurBarreBas = null;
-  let miseEnPage = null;
 
   const barreBas = el('footer', { class: 'barre-bas' },
     el('div', { class: 'barre-zone' }, boutonJournal, boutonAllerA, boutonAction, boutonDormir, boutonOrdinateur, boutonSortir),
@@ -212,11 +215,11 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
     surDebut: () => {
       fermerBulle();
       barreBas.hidden = true;
-      adapterBarres();
+      barres.adapterBarres();
     },
     surFin: () => {
       barreBas.hidden = false;
-      adapterBarres();
+      barres.adapterBarres();
     },
   });
 
@@ -458,30 +461,20 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
     objetProche = null;
     mondeActuel = creerMonde(rappels);
     texteLieu.textContent = mondeActuel.piece?.nom || '';
-    miseEnPage = null;
-    adapterBarres();
+    barres.reinitialiser();
+    barres.adapterBarres();
     rafraichir();
   }
 
   // « Sortir… » (à la porte d'entrée) : où aller ?
   function ouvrirVoyage() {
-    const partie = partieEnCours();
-    if (!partie) return;
-    const autres = lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux);
-    const minutes = jeu.deplacement.trajet ?? 10;
-    let fenetre = null;
-    const contenu = autres.length === 0
-      ? [el('p', {}, t('voyage.aucun'))]
-      : [el('p', { class: 'aide' }, t('voyage.aide', { minutes })),
-        el('ul', { class: 'menu-liste' }, autres.map((id) => el('li', {}, el('button', {
-          class: 'bouton bouton-menu',
-          type: 'button',
-          onClick: () => {
-            fenetre.fermer();
-            voyager(id);
-          },
-        }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))];
-    fenetre = ouvrirFenetre({ titre: t('voyage.titre'), contenu });
+    afficherFenetreVoyage({
+      partie: partieEnCours(),
+      donnees,
+      minutes: jeu.deplacement.trajet ?? 10,
+      versDe,
+      surLieu: (id) => voyager(id),
+    });
   }
 
   // Le journal des quêtes (bouton, touche J, Pause › Journal).
@@ -533,14 +526,14 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
         const partie = partieEnCours();
         boutonSortir.hidden = !infos.actions?.includes('sortir') || !partie || !donnees?.indexLieux
           || lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux).length === 0;
-        placerAuDessusDeLaBarre();
+        barres.placerAuDessusDeLaBarre();
         approcher(infos);
       } else {
         for (const bouton of [boutonAction, boutonDormir, boutonOrdinateur, boutonSortir]) {
           if (bouton === document.activeElement) bouton.blur();
           bouton.hidden = true;
         }
-        placerAuDessusDeLaBarre();
+        barres.placerAuDessusDeLaBarre();
         fermerBulle();
       }
     },
@@ -577,6 +570,12 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
   };
 
   parent.append(element);
+  const barres = creerGestionBarres({
+    element, barre, barreBas, boutonPause, boutonAllerA, boutonsDuMoment,
+    moment, argent, reputation, texteObjectif, amenagement,
+    monde: () => mondeActuel,
+    surPolicesPretes: () => rafraichir(),
+  });
   // Un meuble posé qui ne tient plus à sa place (données changées d'une
   // version à l'autre) retourne dans les affaires : rien n'est perdu.
   if (donnees?.boutique && partieEnCours()) {
@@ -590,55 +589,18 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
 
   // --- La fenêtre « Aller à… » ----------------------------------------------------
   function ouvrirAllerA() {
-    const destinations = mondeActuel.destinations();
-    const pieces = destinations.filter((d) => d.type === 'piece');
-    const ici = mondeActuel.piece?.id;
-    let fenetre = null;
-    const aller = (destination) => {
-      fenetre.fermer();
-      fermerBulle();
-      if (mondeActuel.allerVers(destination)) {
-        direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
-      }
-    };
-    const nomDePiece = (id) => pieces.find((p) => p.id === id)?.nom || '';
-    const personnes = destinations.filter((d) => d.type === 'pnj');
-    const contenu = pieces.map((piece) => {
-      const objets = destinations.filter((d) => d.type !== 'piece' && d.type !== 'pnj' && d.piece === piece.id);
-      return el('section', { class: 'groupe-destinations' },
-        el('h3', {}, piece.nom, piece.id === ici ? el('span', { class: 'etiquette' }, t('jeu.tuEsIci')) : null),
-        el('ul', { class: 'liste-destinations' },
-          el('li', {}, el('button', { class: 'bouton', type: 'button', onClick: () => aller(piece) },
-            icone('lieu'), t('jeu.allerDans', { piece: piece.designation }))),
-          objets.map((objet) => el('li', {}, el('button', { class: 'bouton', type: 'button', onClick: () => aller(objet) },
-            icone('allerA'), objet.nom)))));
-    });
-    if (personnes.length > 0) {
-      contenu.unshift(el('section', { class: 'groupe-destinations' },
-        el('h3', {}, t('jeu.personnes')),
-        el('ul', { class: 'liste-destinations' }, personnes.map((personne) => el('li', {},
-          el('button', { class: 'bouton', type: 'button', onClick: () => aller(personne) },
-            icone('personnage'), t('jeu.personneOu', { nom: personne.nom, piece: nomDePiece(personne.piece) })))))));
-    }
-    // Les autres lieux débloqués : on y va par la porte d'entrée.
-    const partie = partieEnCours();
-    const autres = partie && donnees?.indexLieux ? lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux) : [];
-    if (autres.length > 0) {
-      contenu.push(el('section', { class: 'groupe-destinations' },
-        el('h3', {}, t('jeu.autresLieux')),
-        el('ul', { class: 'liste-destinations' }, autres.map((id) => el('li', {}, el('button', {
-          class: 'bouton',
-          type: 'button',
-          onClick: () => {
-            fenetre.fermer();
-            partirVers(id);
-          },
-        }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))));
-    }
-    fenetre = ouvrirFenetre({
-      titre: t('jeu.allerATitre'),
-      contenu: [el('p', { class: 'aide' }, t('jeu.allerAAide')), ...contenu],
-      large: true,
+    afficherFenetreAllerA({
+      monde: mondeActuel,
+      donnees,
+      partie: partieEnCours(),
+      versDe,
+      surDestination: (destination) => {
+        fermerBulle();
+        if (mondeActuel.allerVers(destination)) {
+          direAuxLecteurs(t('jeu.enRoute', { destination: destination.designation }));
+        }
+      },
+      surAutreLieu: (id) => partirVers(id),
     });
   }
 
@@ -680,7 +642,7 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
     reputation.valeur.textContent = t('hud.niveau', { niveau: niveau.niveau, nom: niveau.nom });
     reputation.court.textContent = t('hud.niveauCourt', { niveau: niveau.niveau });
     const heure = formaterHeure(partie.temps.minute);
-    reserverPlaceDeLHeure(partie.temps.jour);
+    barres.reserverPlaceDeLHeure(partie.temps.jour);
     moment.valeur.textContent = `${t('hud.jour', { jour: partie.temps.jour })} · ${heure}`;
     // L'objectif : la quête suivie, sinon les commandes.
     objectifActuel = calculerObjectif(partie);
@@ -691,51 +653,8 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
       });
     } else texteObjectif.textContent = typographier(objectifActuel.etape.texte);
     moment.court.textContent = `${t('hud.jourCourt', { jour: partie.temps.jour })} · ${heure}`;
-    adapterBarresSiBesoin();
+    barres.adapterBarresSiBesoin();
   }
-
-  // L'heure garde toujours la même place : celle de l'heure la plus large de
-  // la journée, écrite avec le chiffre le plus large de la police choisie.
-  // Sinon, avec des chiffres de largeurs différentes (« 14 h 10 » est plus
-  // étroit que « 14 h 46 »), la barre changerait de forme d'une minute à
-  // l'autre, le bouton Pause passant d'une ligne à l'autre.
-  let placeDeLHeure = null;
-  function reserverPlaceDeLHeure(jour) {
-    const libelles = [[moment.valeur, t('hud.jour', { jour })], [moment.court, t('hud.jourCourt', { jour })]];
-    const styles = libelles.map(([libelle]) => getComputedStyle(libelle));
-    const cle = [jour, ...styles.map((s) => `${s.font}|${s.fontSize}|${s.fontFamily}|${s.letterSpacing}|${s.wordSpacing}`)].join('/');
-    if (cle === placeDeLHeure) return;
-    placeDeLHeure = cle;
-    const mesure = el('span', { 'aria-hidden': 'true' });
-    document.body.append(mesure);
-    libelles.forEach(([libelle, debut], index) => {
-      const style = styles[index];
-      for (const propriete of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fontVariantNumeric', 'letterSpacing', 'wordSpacing']) {
-        mesure.style[propriete] = style[propriete];
-      }
-      mesure.style.position = 'absolute';
-      mesure.style.visibility = 'hidden';
-      mesure.style.whiteSpace = 'nowrap';
-      let chiffre = '0';
-      let plusLarge = 0;
-      for (const essai of '0123456789') {
-        mesure.textContent = essai;
-        const largeur = mesure.getBoundingClientRect().width;
-        if (largeur > plusLarge) {
-          plusLarge = largeur;
-          chiffre = essai;
-        }
-      }
-      mesure.textContent = `${debut} · ${formaterHeure(23 * 60 + 59).replace(/\d/g, chiffre)}`;
-      libelle.style.minWidth = `${Math.ceil(mesure.getBoundingClientRect().width) + 1}px`;
-    });
-    mesure.remove();
-  }
-  // Une police tout juste chargée a d'autres largeurs : on remesure.
-  document.fonts?.ready.then(() => {
-    placeDeLHeure = null;
-    rafraichir();
-  });
 
   function calculerObjectif(partie) {
     if (!donnees) return null;
@@ -745,60 +664,6 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
         demain: commandesDuJourOuvertes(partie, donnees.modelesCommandes, paliers),
       });
   }
-
-  // Barre compacte si elle prend plus d'une ligne ; la caméra évite les barres.
-  // La forme des barres (compacte ou non) et la place laissée à la scène ne
-  // dépendent pas des boutons d'action (« Examiner le lit », « Dormir »…),
-  // qui apparaissent et disparaissent en marchant : on mesure sans eux (le
-  // temps de la mesure, ils sont mis hors de la barre, sans être cachés, pour
-  // ne pas perdre le focus du clavier). Ainsi la vue 3D ne bouge pas quand
-  // un de ces boutons arrive.
-  // Ce qui occupe le bas de l'écran : la barre, ou le panneau « Aménager ».
-  function basDeLEcran() {
-    return amenagement.actif ? amenagement.element : barreBas;
-  }
-
-  function adapterBarres() {
-    boutonsDuMoment.forEach((bouton) => { bouton.style.position = 'absolute'; });
-    barre.classList.remove('compacte');
-    barreBas.classList.remove('compacte');
-    const hauteurLigne = boutonPause.offsetHeight || 48;
-    if (barre.offsetHeight > hauteurLigne * 1.9) barre.classList.add('compacte');
-    if (barreBas.offsetHeight > (boutonAllerA.offsetHeight || 48) * 1.9) barreBas.classList.add('compacte');
-    // Le panneau « Aménager » passe en version compacte s'il prend plus
-    // d'un quart de l'écran (téléphone, très grand texte).
-    if (amenagement.actif) {
-      amenagement.element.classList.remove('compacte');
-      if (amenagement.element.offsetHeight > window.innerHeight * 0.25) amenagement.element.classList.add('compacte');
-    }
-    const marges = { haut: barre.offsetHeight, bas: basDeLEcran().offsetHeight, gauche: 0, droite: 0 };
-    boutonsDuMoment.forEach((bouton) => { bouton.style.position = ''; });
-    document.documentElement.style.setProperty('--hauteur-barre-haut', `${marges.haut}px`);
-    mondeActuel?.definirMarges(marges);
-    placerAuDessusDeLaBarre();
-  }
-
-  // Les boutons de la caméra se placent au-dessus de la barre du bas, telle
-  // qu'elle est vraiment (avec ou sans bouton d'action).
-  function placerAuDessusDeLaBarre() {
-    const hauteur = basDeLEcran().offsetHeight;
-    if (hauteur === hauteurBarreBas) return;
-    hauteurBarreBas = hauteur;
-    document.documentElement.style.setProperty('--hauteur-barre-bas', `${hauteur}px`);
-  }
-
-  // Les textes qui changent la taille des barres : on ne les remesure que
-  // s'ils ont changé (l'heure, elle, a toujours la même place).
-  function adapterBarresSiBesoin() {
-    const cle = [argent.valeur.textContent, reputation.valeur.textContent, texteObjectif.textContent,
-      moment.valeur.style.minWidth, moment.court.style.minWidth].join('|');
-    if (cle === miseEnPage) return;
-    miseEnPage = cle;
-    adapterBarres();
-  }
-  const observateur = new ResizeObserver(() => adapterBarres());
-  observateur.observe(element);
-  observateur.observe(amenagement.element);
 
   // Échap : ferme d'abord la bulle, sinon ouvre le menu Pause.
   // J (même place sur un clavier AZERTY ou QWERTY) : le journal.
@@ -827,11 +692,12 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
     ecouter('reglages:modifies', ({ reglages }) => {
       mondeActuel?.appliquerReglages(reglages);
       // La taille du texte change la hauteur des barres.
-      requestAnimationFrame(adapterBarres);
+      requestAnimationFrame(() => barres.adapterBarres());
     }),
   ];
   document.addEventListener('keydown', surTouche);
   document.body.classList.add('en-jeu');
+  definirAmbiance(true);
   // Les quêtes avancent toutes seules (progression.js) ; au début d'une
   // partie, la première commence.
   const arreterProgression = donnees?.quetes ? demarrerProgression(donnees) : () => {};
@@ -846,17 +712,19 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
       ecranActif = !oui;
       element.hidden = oui;
       document.body.classList.toggle('en-jeu', !oui);
+      definirAmbiance(!oui);
       mondeActuel?.activer(!oui);
-      if (!oui) requestAnimationFrame(adapterBarres);
+      if (!oui) requestAnimationFrame(() => barres.adapterBarres());
     },
     // Le mode « Aménager » (pour les tests).
     get amenagement() { return amenagement; },
     detruire() {
+      definirAmbiance(false);
       amenagement.fermer({ silencieux: true });
       arreterProgression();
       clearInterval(horloge.minuteur);
       arrets.forEach((arreter) => arreter());
-      observateur.disconnect();
+      barres.detruire();
       document.removeEventListener('keydown', surTouche);
       document.body.classList.remove('en-jeu');
       mondeActuel?.liberer();
@@ -864,65 +732,4 @@ export function afficherEcranJeu(parent, { jeu, donnees, portrait = null, photo 
       element.remove();
     },
   };
-}
-
-// Le menu Pause : le jeu s'arrête tant qu'il est ouvert.
-export function ouvrirMenuPause(menu) {
-  const ligne = (nomIcone, texte, surClic) => el('li', {}, el('button', {
-    class: 'bouton bouton-menu',
-    type: 'button',
-    onClick: surClic,
-  }, icone(nomIcone), texte));
-
-  const fenetre = ouvrirFenetre({
-    titre: t('pause.titre'),
-    contenu: [
-      el('p', { class: 'aide' }, t('pause.explication')),
-      el('ul', { class: 'menu-liste' },
-        ligne('jouer', t('pause.reprendre'), () => fenetre.fermer()),
-        menu.surJournal ? ligne('journal', t('pause.journal'), () => {
-          fenetre.fermer();
-          menu.surJournal();
-        }) : null,
-        menu.surAmenager ? ligne('amenager', t('pause.amenager'), () => {
-          fenetre.fermer();
-          menu.surAmenager();
-        }) : null,
-        ligne('personnage', t('pause.personnage'), () => {
-          fenetre.fermer();
-          menu.surPersonnage();
-        }),
-        ligne('clavier', t('pause.commandes'), () => ouvrirCommandes()),
-        ligne('reglages', t('pause.reglages'), () => menu.surReglages()),
-        ligne('sauvegarde', t('pause.sauvegarde'), () => menu.surSauvegarde()),
-        ligne('info', t('pause.aPropos'), () => menu.surAPropos()),
-        ligne('maison', t('pause.accueil'), () => {
-          fenetre.fermer();
-          menu.surAccueil();
-        })),
-    ],
-    boutonFermer: false,
-    focus: (f) => f.corps.querySelector('button'),
-  });
-  return fenetre;
-}
-
-// La fenêtre « Commandes » : toucher, souris, clavier. Chaque liste vient
-// d'un groupe de data/textes.json (commandes.clavier.deplacer.geste…).
-export function ouvrirCommandes() {
-  const liste = (cle) => el('dl', { class: 'liste-commandes' },
-    clesDuGroupe(cle).map((nom) => [
-      el('dt', {}, t(`${cle}.${nom}.geste`)),
-      el('dd', {}, t(`${cle}.${nom}.effet`)),
-    ]));
-  return ouvrirFenetre({
-    titre: t('commandes.titre'),
-    contenu: [
-      el('p', { class: 'aide' }, t('commandes.intro')),
-      el('h3', {}, t('commandes.toucherTitre')), liste('commandes.toucher'),
-      el('h3', {}, t('commandes.sourisTitre')), liste('commandes.souris'),
-      el('h3', {}, t('commandes.clavierTitre')), el('p', { class: 'aide' }, t('commandes.clavierAide')), liste('commandes.clavier'),
-    ],
-    large: true,
-  });
 }

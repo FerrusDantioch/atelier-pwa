@@ -1,5 +1,34 @@
 # Journal du projet — Atelier PWA
 
+## ✨ Améliorations 0.6.2 — Sons doux, bonus du matériel et découpage (22 novembre 2026)
+
+Suite du travail technique et de confort (jalon 5 toujours à essayer sur
+tablette, en version 0.6.2) :
+
+- **Sons doux en jeu** (`js/noyau/audio.js`, fabriqués par code, aucun fichier
+  audio à télécharger) :
+  - **effets** : petits sons doux à la livraison (Parfait, Bien, ou deux notes
+    calmes sans bruit punitif pour « À retravailler »), à l'achat en boutique,
+    à la pose ou au refus d'un meuble, et un arpège discret en fin de quête ;
+  - **bavardage** : 4 petites syllabes douces à l'affichage des répliques en
+    dialogue et en visio, avec un timbre légèrement distinct par personnage
+    (rien ne passe jamais uniquement par le son : tout reste écrit) ;
+  - **musique d'ambiance** : boucle lente de quatre accords doux pendant la
+    partie, mise en pause dès que l'application passe en arrière-plan ;
+  - **respect du confort** : « Couper tout le son » et les trois volumes
+    s'appliquent tout de suite ; le **mode calme** coupe la musique d'ambiance
+    et les effets d'événements non sollicités.
+- **Équilibrage du matériel de bureau** (`data/boutique.json`) : le grand
+  écran, le clavier confortable et le siège réglable rapportent désormais
+  **10 pièces** de plus par livraison (au lieu de 5), pour un retour sur
+  investissement plus sensible.
+- **Découpage de deux gros fichiers** (sans changer le jeu) :
+  - `js/interface/ecran-jeu.js` allégé par extraction de `aller-a.js`,
+    `barres.js` et `pause.js` ;
+  - `css/interface.css` scindé en `css/interface.css`, `css/choix-perso.css`
+    et `css/jeu.css` (ajoutés à `index.html` et `sw.js`, et tous vérifiés
+    sans couleur écrite en dur par `tests/reglages.test.mjs`).
+
 ## 🔧 Correctif 0.6.1 — Fiabilité, mises à jour plus légères et CI (22 novembre 2026)
 
 Correctif technique ciblé préparé avant la validation sur tablette du jalon 5

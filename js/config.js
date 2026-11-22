@@ -17,7 +17,7 @@ self.CONFIG_JEU = Object.freeze({
 
   // Numéro de version : à augmenter à CHAQUE publication (ex. 0.1.0 → 0.1.1).
   // Sans ce changement, les joueurs gardent l'ancienne version.
-  version: '0.6.1',
+  version: '0.6.2',
 
   // Auteur et contact affichés dans « À propos ».
   auteur: 'Ferrus Dantioch',
