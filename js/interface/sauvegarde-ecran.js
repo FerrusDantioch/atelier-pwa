@@ -42,7 +42,7 @@ export function resumeEnListe(partie, jeu) {
 
 // Ouvre le sélecteur de fichier, lit le fichier choisi, montre un résumé et
 // demande confirmation. surPartie(partie) est appelé si tout est bon.
-export function importerUnePartie({ jeu, surPartie }) {
+export function importerUnePartie({ jeu, aUnePartie = false, surPartie }) {
   const entree = el('input', { type: 'file', accept: '.json,application/json', class: 'visuellement-cache', tabindex: '-1' });
   entree.addEventListener('change', async () => {
     const fichier = entree.files?.[0];
@@ -61,7 +61,7 @@ export function importerUnePartie({ jeu, surPartie }) {
       });
       return;
     }
-    const remplacer = Boolean(partieEnCours());
+    const remplacer = Boolean(aUnePartie || partieEnCours());
     const accord = await confirmerImport(lecture.partie, jeu, remplacer);
     if (accord) await surPartie(lecture.partie);
   }, { once: true });

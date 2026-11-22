@@ -13,6 +13,7 @@
 // aucune identité civile ne doit être écrite dans le code ni les données.
 // =============================================================================
 
+import { miseAJourEnAttente, versionMiseAJour } from '../noyau/pwa.js';
 import { t } from '../noyau/textes.js';
 import { el } from './dom.js';
 import { ouvrirFenetre } from './fenetres.js';
@@ -30,8 +31,10 @@ function lienLocal(adresse, texte) {
   return el('a', { href: adresse, target: '_blank', rel: 'noopener' }, texte);
 }
 
-export function ouvrirAPropos() {
+export function ouvrirAPropos({ surMiseAJour } = {}) {
   const config = self.CONFIG_JEU;
+  const miseAJourPrete = miseAJourEnAttente() && typeof surMiseAJour === 'function';
+  const versionPrete = versionMiseAJour();
   const contenu = el('div', { class: 'a-propos' },
     el('img', {
       class: 'a-propos-logo',
@@ -42,6 +45,8 @@ export function ouvrirAPropos() {
     }),
     el('h3', {}, config.nom),
     el('p', {}, t('aPropos.version', { version: config.version })),
+    miseAJourPrete ? el('div', { class: 'encadre encadre-info' }, icone('info'), el('p', {},
+      versionPrete ? t('pwa.disponibleVersion', { version: versionPrete }) : t('pwa.disponible'))) : null,
     el('p', {}, t('aPropos.realisation', { auteur: config.auteur })),
     el('p', {},
       t('aPropos.licenceDebut', { auteur: config.auteur }), ' ',
@@ -52,5 +57,8 @@ export function ouvrirAPropos() {
     el('p', { class: 'texte-doux' }, t('aPropos.tiers'), ' ', lienLocal('licences-tierces.txt', t('aPropos.tiersLien'))),
     el('p', {}, t('aPropos.contact'), ' ', el('a', { href: `mailto:${config.contact}` }, config.contact)),
     el('p', {}, lienExterne(config.siteOmni, t('aPropos.omni'))));
-  return ouvrirFenetre({ titre: t('aPropos.titre'), contenu });
+  const actions = miseAJourPrete
+    ? [{ texte: t('pwa.mettreAJour'), icone: 'recharger', principal: true, surClic: surMiseAJour }]
+    : [];
+  return ouvrirFenetre({ titre: t('aPropos.titre'), contenu, actions });
 }

@@ -137,14 +137,52 @@ const FICHIERS = [
   'assets/polices/LICENCE-OpenDyslexic.txt',
 ];
 
+// Fichiers lourds qui ne changent que rarement (Three.js, polices) : repris
+// de l'ancien cache s'ils y sont déjà avec la même VERSION_TIERS, au lieu
+// d'être retéléchargés (~2,5 Mo économisés à chaque petite mise à jour).
+// ⚠️ Augmenter VERSION_TIERS quand outils/embarquer-tiers.mjs les met à jour.
+const VERSION_TIERS = 'r187-1';
+const MARQUE_TIERS = `__tiers_${VERSION_TIERS}`;
+const DURABLES = new Set([
+  'lib/three/three.module.js',
+  'lib/three/three.core.js',
+  'lib/three/LICENSE',
+  'assets/polices/atkinson-hyperlegible-next-latin-400-normal.woff2',
+  'assets/polices/atkinson-hyperlegible-next-latin-700-normal.woff2',
+  'assets/polices/atkinson-hyperlegible-next-latin-ext-400-normal.woff2',
+  'assets/polices/atkinson-hyperlegible-next-latin-ext-700-normal.woff2',
+  'assets/polices/opendyslexic-latin-400-normal.woff2',
+  'assets/polices/opendyslexic-latin-700-normal.woff2',
+  'assets/polices/LICENCE-Atkinson-Hyperlegible-Next.txt',
+  'assets/polices/LICENCE-OpenDyslexic.txt',
+]);
+
+async function trouverAncienneReserveCompatible() {
+  for (const nom of await caches.keys()) {
+    if (!nom.startsWith(PREFIXE) || nom === RESERVE) continue;
+    const ancienne = await caches.open(nom);
+    if (await ancienne.match(MARQUE_TIERS)) return ancienne;
+  }
+  return null;
+}
+
 // --- Installation : on copie tout ------------------------------------------
 // « no-cache » : le navigateur redemande chaque fichier au serveur, qui
 // répond « inchangé » (sans tout renvoyer) quand le fichier n'a pas bougé.
-// On évite ainsi de ranger une vieille copie dans la nouvelle réserve.
+// Les fichiers DURABLES déjà présents dans une réserve compatible sont
+// recopiés localement sans toucher au réseau.
 self.addEventListener('install', (evenement) => {
   evenement.waitUntil((async () => {
     const reserve = await caches.open(RESERVE);
-    await reserve.addAll(FICHIERS.map((fichier) => new Request(fichier, { cache: 'no-cache' })));
+    const ancienne = await trouverAncienneReserveCompatible();
+    const aTelecharger = [];
+    for (const fichier of FICHIERS) {
+      const copie = ancienne && DURABLES.has(fichier) ? await ancienne.match(fichier) : null;
+      if (copie) await reserve.put(fichier, copie);
+      else aTelecharger.push(fichier);
+    }
+    await reserve.addAll(aTelecharger.map((fichier) => new Request(fichier, { cache: 'no-cache' })));
+    await reserve.put(MARQUE_TIERS, new Response(VERSION_TIERS));
   })());
 });
 
@@ -165,9 +203,9 @@ self.addEventListener('activate', (evenement) => {
 self.addEventListener('fetch', (evenement) => {
   const demande = evenement.request;
   if (demande.method !== 'GET') return;
-  // Seulement les fichiers du jeu : les liens vers d'autres sites (les vraies
-  // applications de Ferrus) ne passent jamais par ici.
-  if (new URL(demande.url).origin !== self.location.origin) return;
+  // Seulement les fichiers de CE jeu : ni les autres sites, ni les autres
+  // applications de Ferrus sur le même domaine ne passent par ici.
+  if (new URL(demande.url).origin !== self.location.origin || !demande.url.startsWith(self.registration.scope)) return;
   evenement.respondWith(repondre(demande));
 });
 

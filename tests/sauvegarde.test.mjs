@@ -141,3 +141,61 @@ test('les quêtes en cours sont vérifiées', () => {
   partie.quetes.actives.bienvenue = { debut: 'hier' };
   assert.match(verifierPartie(partie).join(), /quetes invalides/);
 });
+
+test('restaurerCopie met à jour la date et efface une copie d\'urgence plus ancienne', async () => {
+  const { chargerConfig } = await import('./aides.mjs');
+  const config = chargerConfig();
+  const stockage = new Map();
+  globalThis.localStorage = {
+    getItem: (cle) => (stockage.has(cle) ? stockage.get(cle) : null),
+    setItem: (cle, valeur) => stockage.set(cle, String(valeur)),
+    removeItem: (cle) => stockage.delete(cle),
+  };
+  const sauvegarde = await import('../js/noyau/sauvegarde.js');
+  await sauvegarde.ouvrirSauvegarde({ copiesDeSecours: 5 });
+
+  const ancienne = creer();
+  ancienne.argent = 150;
+  ancienne.enregistreeLe = '2026-11-14T10:00:00.000Z';
+  await sauvegarde.creerCopieDeSecours(ancienne, 'nouveau-jour');
+
+  const actuelle = creer();
+  actuelle.argent = 220;
+  await sauvegarde.enregistrerPartie(actuelle);
+  sauvegarde.ecrireCopieUrgence(actuelle);
+  assert.ok(stockage.has(`${config.idStockage}.partie-urgence`));
+
+  const [copie] = await sauvegarde.listerCopies();
+  const restauree = await sauvegarde.restaurerCopie(copie.id, actuelle);
+  assert.equal(restauree.argent, 150);
+  assert.equal(restauree.versionJeu, config.version);
+  assert.notEqual(restauree.enregistreeLe, '2026-11-14T10:00:00.000Z');
+  assert.equal(stockage.has(`${config.idStockage}.partie-urgence`), false, 'la copie d\'urgence est effacée');
+  sauvegarde.fermerSauvegarde();
+});
+
+test('sauvegarderMaintenant sérialise les appels concurrents et tolère fermerPartie()', async () => {
+  const { chargerConfig } = await import('./aides.mjs');
+  chargerConfig();
+  const sauvegarde = await import('../js/noyau/sauvegarde.js');
+  const etat = await import('../js/noyau/etat.js');
+  await sauvegarde.ouvrirSauvegarde({ copiesDeSecours: 5 });
+
+  const partie = creer();
+  etat.chargerPartieEnCours(partie);
+  const p1 = etat.sauvegarderMaintenant();
+  etat.modifierPartie((p) => { p.argent = 333; });
+  const p2 = etat.sauvegarderMaintenant();
+  const [r1, r2] = await Promise.all([p1, p2]);
+  assert.equal(r1, true);
+  assert.equal(r2, true);
+  const lue = await sauvegarde.lirePartie();
+  assert.equal(lue.partie.argent, 333);
+
+  // Fermer la partie pendant une sauvegarde ne lève aucune erreur.
+  const p3 = etat.sauvegarderMaintenant();
+  etat.fermerPartie();
+  await p3;
+  assert.equal(await etat.sauvegarderMaintenant(), false);
+  sauvegarde.fermerSauvegarde();
+});

@@ -14,11 +14,26 @@ import { annoncer } from './evenements.js';
 
 let inscription = null;
 let enAttente = null;            // la nouvelle version, prête
+let versionEnAttente = null;     // son numéro, si connu
 let rechargementDemande = false; // le joueur a touché « Mettre à jour »
 let propositionInstallation = null;
 let derniereVerification = 0;
 
 const INTERVALLE_MINIMUM = 60 * 1000; // pas plus d'une vérification par minute
+
+// Écoutés dès le chargement du module (avant les lectures de démarrage) pour
+// ne jamais manquer la proposition d'installation du navigateur.
+if (typeof self !== 'undefined' && typeof self.addEventListener === 'function') {
+  self.addEventListener('beforeinstallprompt', (evenement) => {
+    evenement.preventDefault();
+    propositionInstallation = evenement;
+    annoncer('pwa:installation', { possible: true });
+  });
+  self.addEventListener('appinstalled', () => {
+    propositionInstallation = null;
+    annoncer('pwa:installation', { possible: false, installe: true });
+  });
+}
 
 // Demande au service worker en attente quelle version il apporte.
 function demanderVersion(travailleur) {
@@ -35,8 +50,8 @@ function demanderVersion(travailleur) {
 
 async function signalerNouvelleVersion(travailleur) {
   enAttente = travailleur;
-  const version = await demanderVersion(travailleur);
-  annoncer('pwa:mise-a-jour', { version });
+  versionEnAttente = await demanderVersion(travailleur);
+  annoncer('pwa:mise-a-jour', { version: versionEnAttente });
 }
 
 function surveiller(nouvelleInscription) {
@@ -67,17 +82,6 @@ export function chercherMiseAJour() {
 }
 
 export async function initialiserPwa() {
-  // Proposition d'installation (navigateurs qui la gèrent).
-  self.addEventListener('beforeinstallprompt', (evenement) => {
-    evenement.preventDefault();
-    propositionInstallation = evenement;
-    annoncer('pwa:installation', { possible: true });
-  });
-  self.addEventListener('appinstalled', () => {
-    propositionInstallation = null;
-    annoncer('pwa:installation', { possible: false, installe: true });
-  });
-
   if (!('serviceWorker' in navigator)) return { disponible: false };
 
   // Le jeu ne se recharge que si le joueur l'a demandé (jamais par surprise).
@@ -111,6 +115,10 @@ export function appliquerMiseAJour() {
 
 export function miseAJourEnAttente() {
   return Boolean(enAttente);
+}
+
+export function versionMiseAJour() {
+  return versionEnAttente;
 }
 
 // --- Installation -------------------------------------------------------------

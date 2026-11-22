@@ -70,12 +70,18 @@ export function dessinerAffiche(affiche, { palette, redessiner }) {
   const texture = new CanvasTexture(toile);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
+  let liberee = false;
   const logo = new Image();
   const dessiner = () => {
+    if (liberee) return;
     dessinerOmni(toile, logo, palette);
     texture.needsUpdate = true;
     redessiner?.();
   };
+  texture.addEventListener('dispose', () => {
+    liberee = true;
+    logo.removeEventListener('load', dessiner);
+  });
   logo.addEventListener('load', dessiner);
   logo.src = 'assets/logo-omni-systeme.webp';
   dessiner();
