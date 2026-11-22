@@ -14,8 +14,10 @@ import { ecrireCopieUrgence, enregistrerPartie } from './sauvegarde.js';
 
 let partie = null;
 let modifiee = false;
+let forcerSauvegarde = false;
 let minuteur = null;
-let enCours = null; // sauvegarde en train de se faire
+let enCours = null; // promesse de la file d'enregistrements en train de tourner
+let arreterEcouteurs = null;
 
 export function partieEnCours() {
   return partie;
@@ -24,12 +26,14 @@ export function partieEnCours() {
 export function chargerPartieEnCours(nouvelle) {
   partie = nouvelle;
   modifiee = false;
+  forcerSauvegarde = false;
   annoncer('partie:chargee', partie);
 }
 
 export function fermerPartie() {
   partie = null;
   modifiee = false;
+  forcerSauvegarde = false;
 }
 
 // modification : une fonction qui reçoit la partie et la change.
@@ -43,31 +47,52 @@ export function modifierPartie(modification, { important = false } = {}) {
 
 export async function sauvegarderMaintenant() {
   if (!partie) return false;
-  // Si une sauvegarde est déjà en cours, on attend qu'elle finisse, puis on
-  // en refait une (la partie a pu changer entre-temps).
-  if (enCours) await enCours;
-  modifiee = false;
-  enCours = enregistrerPartie(partie);
-  const reussi = await enCours;
-  enCours = null;
-  if (!reussi) modifiee = true;
-  return reussi;
+  // Si une sauvegarde tourne déjà, on demande un nouveau tour après elle
+  // plutôt que d'écrire deux fois en même temps dans la base.
+  forcerSauvegarde = true;
+  if (enCours) return enCours;
+  enCours = (async () => {
+    let reussi = false;
+    while (partie && (forcerSauvegarde || modifiee)) {
+      const cible = partie;
+      forcerSauvegarde = false;
+      modifiee = false;
+      reussi = await enregistrerPartie(cible);
+      if (!reussi) {
+        if (partie === cible) modifiee = true;
+        break;
+      }
+    }
+    return reussi;
+  })();
+  try {
+    return await enCours;
+  } finally {
+    enCours = null;
+  }
 }
 
 export function demarrerSauvegardeAutomatique(intervalleSecondes) {
   clearInterval(minuteur);
+  arreterEcouteurs?.();
   minuteur = setInterval(() => {
     if (modifiee) sauvegarderMaintenant();
   }, intervalleSecondes * 1000);
-  // En quittant : copie d'urgence immédiate, puis sauvegarde normale (qui
-  // n'a pas toujours le temps de finir, d'où la copie d'urgence).
+  // En quittant : copie d'urgence immédiate si quelque chose a changé OU si
+  // une écriture dans la base est encore en cours (elle peut être coupée
+  // avant d'avoir fini), puis sauvegarde normale.
   const enQuittant = () => {
-    if (!modifiee) return;
+    if (!partie || (!modifiee && !enCours)) return;
     ecrireCopieUrgence(partie);
     sauvegarderMaintenant();
   };
-  document.addEventListener('visibilitychange', () => {
+  const surVisibilite = () => {
     if (document.visibilityState === 'hidden') enQuittant();
-  });
+  };
+  document.addEventListener('visibilitychange', surVisibilite);
   self.addEventListener('pagehide', enQuittant);
+  arreterEcouteurs = () => {
+    document.removeEventListener('visibilitychange', surVisibilite);
+    self.removeEventListener('pagehide', enQuittant);
+  };
 }

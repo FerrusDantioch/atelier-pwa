@@ -117,10 +117,12 @@ function montrerAccueil({ focaliser = false } = {}) {
     installe: estInstalle(),
     surContinuer: () => jouer(partieEnregistree),
     surNouvellePartie: demanderNouvellePartie,
-    surImporter: () => importerUnePartie({ jeu: donnees.jeu, surPartie: chargerAutrePartie }),
+    surImporter: () => importerUnePartie({
+      jeu: donnees.jeu, aUnePartie: Boolean(partieEnregistree), surPartie: chargerAutrePartie,
+    }),
     surReglages: ouvrirReglages,
     surInstaller: installerLeJeu,
-    surAPropos: ouvrirAPropos,
+    surAPropos: () => ouvrirAPropos({ surMiseAJour: lancerMiseAJour }),
   });
   const titre = element.querySelector('h1');
   titre?.setAttribute('tabindex', '-1');
@@ -199,7 +201,7 @@ async function afficherJeu() {
     menu: {
       surReglages: ouvrirReglages,
       surSauvegarde: () => ouvrirFenetreSauvegarde({ jeu: donnees.jeu, surPartie: chargerAutrePartie }),
-      surAPropos: ouvrirAPropos,
+      surAPropos: () => ouvrirAPropos({ surMiseAJour: lancerMiseAJour }),
       surAccueil: retournerAccueil,
       surPersonnage: modifierPersonnage,
     },
@@ -288,25 +290,32 @@ async function chargerAutrePartie(partie, { dejaEnregistree = false } = {}) {
     await remplacerPartie(partie, partieEnCours() || partieEnregistree, 'avant-import');
   }
   await jouer(partie);
-  notifier(t('sauvegarde.import.reussi'), { type: 'succes' });
+  // Une copie de secours a déjà son propre message (« Copie de secours reprise »).
+  if (!dejaEnregistree) notifier(t('sauvegarde.import.reussi'), { type: 'succes' });
 }
 
 // --- Démarrage ----------------------------------------------------------------------
 
+async function lancerMiseAJour() {
+  await sauvegarderMaintenant();
+  if (!appliquerMiseAJour()) notifier(t('pwa.echec'), { type: 'erreur' });
+}
+
 function brancherMisesAJour() {
+  let autreOngletSignale = false;
   ecouter('pwa:mise-a-jour', ({ version }) => {
     notifier(version ? t('pwa.disponibleVersion', { version }) : t('pwa.disponible'), {
       type: 'info',
-      action: {
-        texte: t('pwa.mettreAJour'),
-        surClic: async () => {
-          await sauvegarderMaintenant();
-          if (!appliquerMiseAJour()) notifier(t('pwa.echec'), { type: 'erreur' });
-        },
-      },
+      action: { texte: t('pwa.mettreAJour'), surClic: lancerMiseAJour },
     });
   });
   ecouter('sauvegarde:echec', () => notifier(t('sauvegarde.echec'), { type: 'erreur' }));
+  ecouter('sauvegarde:copie-echec', () => notifier(t('sauvegarde.copieEchec'), { type: 'attention' }));
+  ecouter('sauvegarde:autre-onglet', () => {
+    if (autreOngletSignale) return;
+    autreOngletSignale = true;
+    notifier(t('sauvegarde.autreOnglet'), { type: 'attention', persistante: true });
+  });
 }
 
 async function demarrer() {

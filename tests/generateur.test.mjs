@@ -7,7 +7,9 @@ import { test } from 'node:test';
 import { chargerDonneesDuDisque } from './aides.mjs';
 import { accepterCommande, etatDesCommandes, livrerProjet, objectifDuMoment } from '../js/jeu/commandes.js';
 import { evaluerProjet, meilleurProjet } from '../js/jeu/creation.js';
-import { commandesConnues, commandesDuJour, commandesDuJourOuvertes, offresDuJour } from '../js/jeu/generateur.js';
+import {
+  associationsPossibles, commandesConnues, commandesDuJour, commandesDuJourOuvertes, offresDuJour,
+} from '../js/jeu/generateur.js';
 import { nouvellePartie, preparerPartie, verifierPartie } from '../js/noyau/format-sauvegarde.js';
 import { SCHEMA_COMMANDE } from '../js/noyau/schemas.js';
 import { verifier } from '../js/noyau/verification.js';
@@ -113,4 +115,10 @@ test('tout est livré et les commandes du jour ont commencé : « demain »', ()
   partie.commandes.livrees = liste.map((c) => ({ id: c.id, note: 'bien', jour: 1, argent: 1, reputation: 1 }));
   assert.equal(objectifDuMoment(partie, liste, paliers).cle, 'fini');
   assert.equal(objectifDuMoment(partie, liste, paliers, { demain: true }).cle, 'demain');
+});
+
+test('associationsPossibles garde son résultat en mémoire pour les mêmes données', () => {
+  const premiere = associationsPossibles(modeles, creation);
+  const seconde = associationsPossibles(modeles, creation);
+  assert.equal(premiere, seconde);
 });

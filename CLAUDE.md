@@ -15,10 +15,50 @@ l'avancement dans `docs/JOURNAL.md`. Lire les deux avant de travailler.
   avant le jalon suivant.
 - Avant tout changement important ou toute nouvelle bibliothèque, outil ou
   site contacté : l'expliquer et attendre l'accord.
-- Règles communes de l'écosystème : la version de référence est dans le
-  dépôt privé `omni-socle` (`SOCLE.md`). Ferrus n'a pas encore dit si une
-  copie adaptée doit figurer ici (ce dépôt est public) : **ne pas la
-  recopier sans son accord**.
+- Règles communes de l'écosystème : version adaptée du socle commun
+  ci-dessous (accord de Ferrus du 22 novembre 2026 ; la référence complète
+  reste dans le dépôt privé `omni-socle`).
+
+## Règles communes à l'écosystème Omni (version adaptée)
+
+- **Esprit et public** : les outils servent à aider les autres, en priorité
+  les personnes autistes et les personnes en situation de handicap, avec pour
+  objectif d'être indépendant des comptes, des grandes plateformes et
+  d'internet. Réponses en français simple, chaque terme technique expliqué,
+  ton direct et honnête sur ce qui est fragile.
+- **Règles non négociables** : pas de compte, pas de serveur distant
+  (backend), pas d'IA intégrée ; fonctionnement **hors ligne systématique** ;
+  zéro appel réseau sans accord préalable ; les données restent sur
+  l'appareil ; les liens externes ne s'ouvrent que sur geste de la personne ;
+  pas de CDN ni de téléchargement tiers pendant la publication (tout est
+  embarqué avec sa licence et son empreinte vérifiée).
+- **Identité, ton et mentions** : signature « Ferrus Dantioch » ; tutoiement
+  partout ; « À propos » complet (nom, version, « réalisé par Ferrus
+  Dantioch, avec l'aide de l'intelligence artificielle », licence
+  CC BY-NC-ND 4.0, confidentialité, licences tierces, contact alias de
+  l'Omni-système, lien « Découvrir l'Omni-système », logo Omni) ; thème
+  violet nuit (Omni) par défaut, plus Sombre, Clair et Auto.
+- **Sécurité et origine partagée** : CSP stricte ; toutes les applications
+  partageant la même adresse de base (`ferrusdantioch.github.io`), chacune
+  garde son propre préfixe (`atelier-pwa`) pour caches, IndexedDB et
+  localStorage, et son identité propre dans le manifeste
+  (`"id": "/atelier-pwa/"`, `"scope": "./"` — ne plus changer). Mentionner
+  Brave comme palliatif d'installation sur Android.
+- **Hors ligne et versions** : tout est copié à l'installation puis servi
+  « cache d'abord », avec plan B en cas d'échec réseau et réutilisation
+  locale des gros fichiers tiers inchangés (`DURABLES` dans `sw.js`).
+  Vérification de mise à jour au retour au premier plan, proposition claire
+  jamais imposée, source unique de numéro de version (`js/config.js`).
+- **Accessibilité minimum** : cibles tactiles ≥ 44 px (48 px ici), contraste
+  ≥ 4,5 (7 pour le texte principal), contour de focus clavier toujours
+  visible, respect des animations réduites, un seul `<h1>` visible, Échap
+  ferme les fenêtres, Tab reste dans la fenêtre, thème appliqué avant le
+  premier affichage (pas d'éclair).
+- **Tests et livraison** : test automatique de chaque nouvelle fonction
+  (et vérification CI dans `.github/workflows/tests.yml`), vérification hors
+  ligne, téléphone/tablette, « À propos » et absence de requête réseau ;
+  documentation tenue à jour. HTML/CSS/JS pur sans compilation, publié sur
+  GitHub Pages.
 
 ## Vie privée et contenu (impératif)
 

@@ -327,6 +327,8 @@
     "automatique": "Ta partie est sauvegardée toute seule sur cet appareil : après chaque événement important, régulièrement pendant le jeu, et quand tu le quittes.",
     "faite": "Partie sauvegardée.",
     "echec": "La sauvegarde n'a pas pu se faire. Pense à exporter ta partie dans un fichier.",
+    "copieEchec": "La copie de secours n'a pas pu être enregistrée (espace plein ?). Pense à exporter ta partie.",
+    "autreOnglet": "Ta partie a été enregistrée dans un autre onglet. Recharge la page avant de continuer ici pour ne rien écraser.",
     "exportee": "Fichier créé : {fichier}",
     "modeMemoire": "Ce navigateur ne permet pas d'enregistrer la partie (navigation privée ?). Elle sera perdue en fermant le jeu : pense à l'exporter dans un fichier.",
     "reparee": "Ta sauvegarde était abîmée : la copie de secours du {date} a été reprise.",

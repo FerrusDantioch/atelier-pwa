@@ -48,7 +48,14 @@ function assembler(sujet, contrainte) {
  * doit tenir. Renvoie [{ sujet, contraintes: [...] }] (les sujets sans
  * aucune contrainte possible sont laissés de côté).
  */
+// Les associations ne changent pas pour un même couple (modeles, creation) :
+// on les garde en mémoire, pour que la vérification au démarrage (coherence.js)
+// évite au jeu de les recalculer ensuite.
+const enMemoire = new WeakMap();
+
 export function associationsPossibles(modeles, creation) {
+  let parCreation = enMemoire.get(modeles);
+  if (parCreation?.has(creation)) return parCreation.get(creation);
   const resultat = [];
   for (const sujet of modeles.sujets) {
     const demandes = new Set([...sujet.besoins, ...sujet.bonus].map((attente) => attente.apporte));
@@ -61,14 +68,16 @@ export function associationsPossibles(modeles, creation) {
     });
     if (contraintes.length > 0) resultat.push({ sujet, contraintes });
   }
+  if (!parCreation) {
+    parCreation = new WeakMap();
+    enMemoire.set(modeles, parCreation);
+  }
+  parCreation.set(creation, resultat);
   return resultat;
 }
 
-// Les associations ne changent pas pendant le jeu : calculées une seule fois.
-const enMemoire = new WeakMap();
 function associations(modeles, creation) {
-  if (!enMemoire.has(modeles)) enMemoire.set(modeles, associationsPossibles(modeles, creation));
-  return enMemoire.get(modeles);
+  return associationsPossibles(modeles, creation);
 }
 
 /**

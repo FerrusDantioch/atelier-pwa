@@ -258,8 +258,8 @@ Questions ouvertes (à trancher avant le jalon indiqué) :
    *(Réglé le 18/11 : le portfolio est le site de l'Omni-système, dont
    l'adresse est déjà dans `js/config.js`.)*
 4. **Mentions légales** (avant J6) : statut et champs à compléter.
-5. **Règles communes** : recopier une version adaptée du socle commun dans
-   `CLAUDE.md` (dépôt public) ? En attente d'accord.
+5. *(Réglée le 22/11 : version adaptée des règles communes ajoutée dans
+   `CLAUDE.md`, avec l'accord de Ferrus.)*
 6. *(Réglée : tablette Android, Brave.)*
 7. *(Réglée : première commande d'Halaé validée le 15/11 ; elle la
    présente de vive voix, avant toutes les autres.)*

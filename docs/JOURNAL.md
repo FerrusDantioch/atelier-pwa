@@ -1,5 +1,45 @@
 # Journal du projet — Atelier PWA
 
+## 🔧 Correctif 0.6.1 — Fiabilité, mises à jour plus légères et CI (22 novembre 2026)
+
+Correctif technique ciblé préparé avant la validation sur tablette du jalon 5
+(toujours à essayer et valider) :
+
+- **Sauvegarde plus fiable** :
+  - les sauvegardes rapides d'affilée passent désormais dans une vraie file
+    d'attente (`js/noyau/etat.js`) au lieu de se chevaucher, et fermer le
+    jeu pendant qu'une écriture dans la base est encore en cours déclenche
+    bien la copie d'urgence instantanée ;
+  - reprendre une copie de secours met à jour sa date, efface une éventuelle
+    copie d'urgence plus ancienne, et n'affiche plus deux notifications à la
+    suite ;
+  - importer une partie depuis l'écran d'accueil quand une partie existe déjà
+    affiche bien « Remplacer ma partie » et rappelle qu'une copie de secours
+    est gardée ;
+  - protection en cas de stockage plein sur une copie de secours (message
+    clair sans bloquer l'action) et avertissement si la partie est enregistrée
+    dans un autre onglet (`BroadcastChannel` + `onversionchange`).
+- **Mises à jour PWA plus légères et plus sûres** :
+  - le service worker (`sw.js`) réutilise localement Three.js et les polices
+    (`DURABLES`, ~2,5 Mo) d'une version à l'autre tant que `VERSION_TIERS` ne
+    change pas, et ne répond qu'aux fichiers du dossier du jeu (`scope`) ;
+  - la proposition d'installation (`beforeinstallprompt`) est écoutée dès le
+    chargement pour ne jamais être manquée ;
+  - si une nouvelle version attend, « À propos » propose aussi le bouton
+    « Mettre à jour » (utile si la notification a été fermée).
+- **Petits correctifs 3D et démarrage** :
+  - le calcul des associations de commandes du jour fait par la vérification
+    complète au démarrage (conservée) est désormais partagé avec le jeu sans
+    être recalculé une seconde fois (`js/jeu/generateur.js`) ;
+  - libération d'une géométrie intermédiaire dans `js/monde/portrait.js`,
+    clé de cache fiable pour les photos de meubles, et garde contre un
+    redessin tardif d'affiche après changement de lieu (`js/monde/affiches.js`).
+- **Qualité et règles communes** :
+  - ajout de `.github/workflows/tests.yml` pour lancer automatiquement les
+    tests sans navigateur (`node --test`) sur GitHub ;
+  - ajout de la version adaptée des règles communes de l'écosystème Omni
+    dans `CLAUDE.md` (accord de Ferrus).
+
 ## 🧪 Jalon 5 — La boutique, l'aménagement et les bureaux (version 0.6.0, 18 novembre 2026)
 
 Livré en une fois, à la demande de Ferrus (18 novembre) ; à essayer sur

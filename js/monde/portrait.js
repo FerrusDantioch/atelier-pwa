@@ -31,8 +31,10 @@ export function creerPortraits({ moteur, donnees, palette, luminosite = () => 'n
   if (recette) {
     const meuble = creerConstructeur();
     ajouterRecette(meuble, recette.formes, palette);
+    const geometrieMeuble = meuble.construire();
     const fond = creerConstructeur();
-    fond.ajouterConstruite(meuble.construire(), new Matrix4().makeTranslation(-0.75, 0, -0.9));
+    fond.ajouterConstruite(geometrieMeuble, new Matrix4().makeTranslation(-0.75, 0, -0.9));
+    geometrieMeuble.dispose();
     decor = new Mesh(fond.construire(), matiereDecor());
     scene.add(decor);
   }
@@ -50,7 +52,7 @@ export function creerPortraits({ moteur, donnees, palette, luminosite = () => 'n
   const direction = new Vector3(0.75, 0.9, 1.2).normalize();
 
   function photographierMeuble(meuble, { largeur, hauteur }) {
-    const cle = `meuble|${meuble.id}|${JSON.stringify(meuble.formes).length}|${largeur}x${hauteur}`;
+    const cle = `meuble|${meuble.id}|${JSON.stringify(meuble.formes)}|${largeur}x${hauteur}`;
     if (photos.has(cle)) return photos.get(cle);
     const constructeur = creerConstructeur();
     ajouterRecette(constructeur, meuble.formes, palette);
