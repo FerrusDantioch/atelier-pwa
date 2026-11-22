@@ -69,17 +69,19 @@ test('le matériel rapporte quelques pièces de plus à chaque livraison', () =>
   assert.equal(bonusDuMateriel(p, boutique), 0);
   acheter(p, trouverArticle(articles, 'grand-ecran'), paliers);
   acheter(p, trouverArticle(articles, 'clavier-confort'), paliers);
-  assert.equal(bonusDuMateriel(p, boutique), 10);
+  const bonusAttendu = trouverArticle(articles, 'grand-ecran').bonus + trouverArticle(articles, 'clavier-confort').bonus;
+  assert.equal(bonusAttendu, 20);
+  assert.equal(bonusDuMateriel(p, boutique), bonusAttendu);
   assert.deepEqual(materielInstalle(p, boutique).map((article) => article.id), ['grand-ecran', 'clavier-confort']);
 
   const commande = donnees.commandes.commandes.find((c) => c.id === 'essai-courses');
   const { projet } = meilleurProjet(commande, creation);
   const sans = evaluerProjet(projet, commande, creation);
-  const avec = evaluerProjet(projet, commande, creation, { bonusMateriel: 10 });
-  assert.equal(avec.recompense.argent, sans.recompense.argent + 10);
-  assert.equal(avec.recompense.materiel, 10);
+  const avec = evaluerProjet(projet, commande, creation, { bonusMateriel: bonusAttendu });
+  assert.equal(avec.recompense.argent, sans.recompense.argent + bonusAttendu);
+  assert.equal(avec.recompense.materiel, bonusAttendu);
   assert.equal(avec.recompense.reputation, sans.recompense.reputation, 'la réputation ne change pas');
-  const rate = evaluerProjet({ modele: null, fonctions: [], confort: {} }, commande, creation, { bonusMateriel: 10 });
+  const rate = evaluerProjet({ modele: null, fonctions: [], confort: {} }, commande, creation, { bonusMateriel: bonusAttendu });
   assert.deepEqual([rate.recompense.argent, rate.recompense.materiel ?? 0], [0, 0], 'rien pour un projet à retravailler');
 
   accepterCommande(p, commande, creation);

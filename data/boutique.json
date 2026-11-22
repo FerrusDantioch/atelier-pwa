@@ -8,7 +8,7 @@
       "description": "Un grand écran sur un bras réglable : l'application tient tout entière sous tes yeux, et tu ne te penches plus.",
       "prix": 90,
       "niveau": 1,
-      "bonus": 5,
+      "bonus": 10,
       "element": "ecran",
       "formes": [
         { "forme": "boite", "taille": [0.08, 0.05, 0.08], "position": [0, 0.785, -0.2], "couleur": "anthracite" },
@@ -29,7 +29,7 @@
       "description": "Un clavier en deux moitiés, aux touches douces et bien lisibles, avec un repose-poignets : tes mains te disent merci.",
       "prix": 60,
       "niveau": 1,
-      "bonus": 5,
+      "bonus": 10,
       "element": "clavier",
       "formes": [
         { "forme": "boite", "taille": [0.22, 0.025, 0.15], "position": [-0.15, 0.7725, 0.09], "couleur": "anthracite", "rotation": [0, 8, 0] },
@@ -47,7 +47,7 @@
       "description": "Un siège qui se règle en hauteur, avec un vrai dossier, un appui-tête et des accoudoirs : tu travailles longtemps sans mal de dos.",
       "prix": 120,
       "niveau": 2,
-      "bonus": 5,
+      "bonus": 10,
       "element": "siege",
       "formes": [
         { "forme": "boite", "taille": [0.5, 0.04, 0.06], "position": [0, 0.05, 0], "couleur": "noir", "rotation": [0, 30, 0] },
