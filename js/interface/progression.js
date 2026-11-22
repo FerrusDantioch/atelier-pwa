@@ -14,6 +14,7 @@
 // =============================================================================
 
 import { empreinteDesQuetes, faireEtape, mettreAJourQuetes } from '../jeu/quetes.js';
+import { jouerEffet } from '../noyau/audio.js';
 import { ecouter } from '../noyau/evenements.js';
 import { modifierPartie, partieEnCours, sauvegarderMaintenant } from '../noyau/etat.js';
 import { t, tPluriel } from '../noyau/textes.js';
@@ -74,8 +75,10 @@ export function progresserQuetes({ geste = null, annoncer = true } = {}) {
   derniereEmpreinte = empreinteDesQuetes(partieEnCours());
   if (evenements.length > 0) {
     sauvegarderMaintenant();
+    const queteFinie = evenements.some((e) => e.type === 'finie');
     if (annoncer) {
-      notifier(messageDesQuetes(evenements), { type: evenements.some((e) => e.type === 'finie') ? 'succes' : 'info' });
+      if (queteFinie) jouerEffet('quete', { calme: true });
+      notifier(messageDesQuetes(evenements), { type: queteFinie ? 'succes' : 'info' });
     }
   }
   return evenements;

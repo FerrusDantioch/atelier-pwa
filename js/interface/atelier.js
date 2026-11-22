@@ -16,6 +16,7 @@ import { commandesAProposer, idsDesOffres, livrerProjet, nouvellesOffres } from 
 import { bonusDuMateriel } from '../jeu/boutique.js';
 import { capaciteDuProjet, chargeDuProjet, evaluerProjet, nettoyerProjet } from '../jeu/creation.js';
 import { DRAPEAU_TEXTE_AGRANDI } from '../jeu/quetes.js';
+import { jouerEffet } from '../noyau/audio.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, typographier } from '../noyau/textes.js';
 import { el, identifiant, vider } from './dom.js';
@@ -284,6 +285,8 @@ export function ecranAtelier(ctx, commande) {
     let resultat = null;
     modifierPartie((partie) => { resultat = livrerProjet(partie, commande, evaluation, ctx.paliers); }, { important: true });
     if (!resultat) return;
+    const effets = { parfait: 'livraisonParfaite', bien: 'livraisonBien', aRetravailler: 'livraisonARetravailler' };
+    jouerEffet(effets[evaluation.note]);
     // Les quêtes avancent tout de suite : on le dit dans cette fenêtre.
     const evenementsQuetes = resultat.livree ? progresserQuetes({ annoncer: false }) : [];
     const contenu = [el('p', { class: 'replique' },
