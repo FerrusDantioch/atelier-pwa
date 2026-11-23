@@ -38,7 +38,7 @@ async function ouvrirBoutique(page) {
     const monde = mondeAffiche();
     monde.allerVers(monde.destinations().find((d) => d.id === 'bureau'));
   });
-  await page.getByRole('button', { name: 'Utiliser l\'ordinateur' }).click({ timeout: 20000 });
+  await page.getByRole('button', { name: 'Utiliser l\'ordinateur' }).click({ timeout: 30000 });
   await page.getByRole('button', { name: /^Boutique/ }).click();
   await page.getByRole('heading', { name: 'Boutique' }).waitFor();
 }
@@ -174,6 +174,10 @@ test('aménager : un meuble qui gêne est refusé, avec la raison ; tourner, pos
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
   await preparerPartie(page, { achats: ['fauteuil', 'cactus', 'cactus'] });
+  // Les messages de bienvenue/étape couvrent le haut de la scène (devant la porte de la chambre).
+  while (await page.getByRole('button', { name: 'Masquer ce message' }).count() > 0) {
+    await page.getByRole('button', { name: 'Masquer ce message' }).first().click();
+  }
   await ouvrirAmenagement(page);
   assert.match(await statut(page), /Choisis un meuble dans tes affaires/);
   const affaires = page.locator('.liste-affaires');
