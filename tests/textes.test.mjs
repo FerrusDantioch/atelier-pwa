@@ -91,4 +91,5 @@ test('un « de » devant un nom ou un objet inséré suit la grammaire', async (
   assert.equal(remplir('Impossible de t\'approcher de {objet}.', { objet: 'l\'armoire' }), 'Impossible de t\'approcher de l\'armoire.');
   assert.equal(remplir('une charge de {n} au plus', { n: 2 }), 'une charge de 2 au plus');
   assert.equal(remplir('Le monde {x}', { x: 'entier' }), 'Le monde entier', '« monde » n\'est pas « de »');
+  assert.equal(remplir('Ce texte précède {nom}', { nom: 'Antoine' }), 'Ce texte précède Antoine', 'un accent avant « de » n\'est pas une frontière de mot');
 });

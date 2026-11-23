@@ -19,7 +19,10 @@ test('après une première visite, le jeu se lance en mode avion', async () => {
   const reserve = await page.evaluate(async () => {
     const noms = await caches.keys();
     const reserve = await caches.open(noms.find((nom) => nom.startsWith('atelier-pwa-')));
-    return { noms, fichiers: (await reserve.keys()).map((demande) => new URL(demande.url).pathname) };
+    const fichiers = (await reserve.keys())
+      .map((demande) => new URL(demande.url).pathname)
+      .filter((chemin) => !chemin.split('/').pop().startsWith('__tiers_'));
+    return { noms, fichiers };
   });
   assert.deepEqual(reserve.noms, [`atelier-pwa-${config.version}`]);
   assert.equal(reserve.fichiers.length, fichiersDuServiceWorker().length, 'tous les fichiers sont gardés');

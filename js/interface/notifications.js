@@ -19,18 +19,31 @@ import { icone } from './icones.js';
 
 const MAXIMUM_VISIBLES = 3;
 const persistantes = new Set();
+const annoncesEnAttente = new WeakMap();
 
 function conteneur() {
   return fenetreDuDessus()?.zoneMessages || document.getElementById('notifications');
 }
 
 // Fait lire un texte par les lecteurs d'écran, sans rien afficher.
+// Plusieurs annonces émises dans le même instant sont réunies plutôt que de
+// s'effacer mutuellement.
 export function direAuxLecteurs(texte) {
   const zone = fenetreDuDessus()?.annonces || document.getElementById('annonces');
-  if (!zone) return;
-  zone.textContent = '';
+  if (!zone || !texte) return;
+  let attente = annoncesEnAttente.get(zone);
+  if (!attente) {
+    attente = { messages: [], minuteur: null };
+    annoncesEnAttente.set(zone, attente);
+    zone.textContent = '';
+  }
+  attente.messages.push(texte);
+  clearTimeout(attente.minuteur);
   // Petit délai : certains lecteurs d'écran ignorent un texte remplacé trop vite.
-  setTimeout(() => { zone.textContent = texte; }, 60);
+  attente.minuteur = setTimeout(() => {
+    zone.textContent = attente.messages.join(' ');
+    annoncesEnAttente.delete(zone);
+  }, 60);
 }
 
 /**
@@ -70,8 +83,10 @@ export function notifier(texte, { type = 'info', action = null, persistante = fa
 
   const zone = conteneur();
   zone.append(element);
-  // Pas plus de trois messages à la fois : les plus anciens partent.
-  const anciens = [...zone.children].filter((noeud) => !persistantes.has(noeud) && noeud !== element);
+  // Pas plus de trois messages à la fois : les plus anciens partent (sauf
+  // ceux qui sont persistants ou ont actuellement le focus clavier).
+  const anciens = [...zone.children].filter((noeud) => !persistantes.has(noeud)
+    && noeud !== element && !noeud.contains(document.activeElement));
   while (zone.children.length > MAXIMUM_VISIBLES && anciens.length > 0) anciens.shift().remove();
 
   direAuxLecteurs(texte);

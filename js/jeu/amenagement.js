@@ -145,8 +145,9 @@ export function problemesDAcces(lieu, grille, catalogue) {
 }
 
 // La pièce a-t-elle un espace de demi-tour en fauteuil (un carré libre de
-// 1,50 m de côté, entièrement dans la pièce) ?
-export function aUnEspaceDeDemiTour(grille, piece) {
+// 1,50 m de côté, entièrement dans la pièce, sans mur au milieu, et
+// atteignable en fauteuil si « distancesFauteuil » est fourni) ?
+export function aUnEspaceDeDemiTour(grille, piece, distancesFauteuil = null) {
   if (piece.verrouillee) return false;
   const cote = COTE_DEMI_TOUR;
   for (const [zx, zz, zl, zp] of piece.zones) {
@@ -155,10 +156,14 @@ export function aUnEspaceDeDemiTour(grille, piece) {
         let libre = true;
         for (let dx = 0; dx < cote && libre; dx += 1) {
           for (let dz = 0; dz < cote && libre; dz += 1) {
-            libre = grille.piece(x + dx, z + dz) === piece.id && grille.libre(x + dx, z + dz);
+            const cx = x + dx;
+            const cz = z + dz;
+            libre = grille.piece(cx, cz) === piece.id && grille.libre(cx, cz);
+            if (libre && dx < cote - 1) libre = !grille.murEntre(cx, cz, cx + 1, cz);
+            if (libre && dz < cote - 1) libre = !grille.murEntre(cx, cz, cx, cz + 1);
           }
         }
-        if (libre) return true;
+        if (libre && (!distancesFauteuil || distancesFauteuil.has(`${x + 1},${z + 1}`))) return true;
       }
     }
   }
@@ -249,11 +254,17 @@ function verifierAcces({ lieu, catalogue, avant, apres, place, habitants, joueur
     }
   }
 
-  // L'espace de demi-tour : une pièce qui en avait un le garde.
+  // L'espace de demi-tour : une pièce qui en avait un le garde (et reste
+  // atteignable en fauteuil roulant).
   const touchees = new Set(casesDe(place, catalogue.get(place.meuble)).map(({ x, z }) => apres.piece(x, z)));
-  for (const piece of lieu.pieces) {
-    if (touchees.has(piece.id) && aUnEspaceDeDemiTour(avant, piece) && !aUnEspaceDeDemiTour(apres, piece)) {
-      return { ok: false, raison: 'demiTour', designation: piece.designation };
+  const piecesTouchees = lieu.pieces.filter((piece) => touchees.has(piece.id));
+  if (piecesTouchees.length > 0) {
+    const distancesAvant = distancesDepuis(avant, lieu.depart, 'fauteuil');
+    const distancesApres = distancesDepuis(apres, lieu.depart, 'fauteuil');
+    for (const piece of piecesTouchees) {
+      if (aUnEspaceDeDemiTour(avant, piece, distancesAvant) && !aUnEspaceDeDemiTour(apres, piece, distancesApres)) {
+        return { ok: false, raison: 'demiTour', designation: piece.designation };
+      }
     }
   }
 
@@ -267,17 +278,22 @@ function verifierAcces({ lieu, catalogue, avant, apres, place, habitants, joueur
 
 /**
  * Peut-on poser ce meuble là ?
- *   lieu        le lieu d'origine (data/lieux/*.json)
- *   catalogue   Map id → meuble (data/meubles.json)
- *   poses       les AUTRES meubles posés par le joueur dans ce lieu
- *   place       { id, meuble, x, z, rotation } (x, z : coin nord-ouest)
- *   occupants   [{ x, z, nom, joueur }] les personnes présentes
- *   habitants   placesDesHabitants() de ce lieu
- *   joueur      { x, z, profil } : là où se trouve le personnage
+ *   lieu             le lieu d'origine ou ouvert selon la partie
+ *   catalogue        Map id → meuble (data/meubles.json)
+ *   poses            les AUTRES meubles posés par le joueur dans ce lieu
+ *   place            { id, meuble, x, z, rotation } (x, z : coin nord-ouest)
+ *   occupants        [{ x, z, nom, joueur }] les personnes présentes
+ *   habitants        placesDesHabitants() de ce lieu
+ *   joueur           { x, z, profil } : là où se trouve le personnage
+ *   lieuComplet      (facultatif) le lieu avec toutes ses pièces ouvertes
+ *   habitantsComplet (facultatif) placesDesHabitants() du lieu complet
  * Renvoie { ok: true } ou { ok: false, raison, … } (raisons : dehors, mur,
  * chevauche, personne, acces, arrivee, place, demiTour, coince, inconnu).
  */
-export function verifierPlacement({ lieu, catalogue, poses = [], place, occupants = [], habitants = [], joueur = null }) {
+export function verifierPlacement({
+  lieu, catalogue, poses = [], place, occupants = [], habitants = [], joueur = null,
+  lieuComplet = null, habitantsComplet = null,
+}) {
   const meuble = catalogue.get(place.meuble);
   if (!meuble) return { ok: false, raison: 'inconnu' };
   const avant = creerGrille(lieuAmenage(lieu, poses), catalogue);
@@ -285,7 +301,19 @@ export function verifierPlacement({ lieu, catalogue, poses = [], place, occupant
   if (!rapide.ok) return rapide;
   const lieuApres = lieuAmenage(lieu, [...poses, place]);
   const apres = creerGrille(lieuApres, catalogue);
-  return verifierAcces({ lieu: lieuApres, catalogue, avant, apres, place, habitants, joueur });
+  const resultat = verifierAcces({ lieu: lieuApres, catalogue, avant, apres, place, habitants, joueur });
+  if (!resultat.ok) return resultat;
+  // Un meuble posé aujourd'hui ne doit pas bloquer une pièce qui s'ouvrira plus tard.
+  if (lieuComplet && lieuComplet !== lieu) {
+    return verifierPlacement({
+      lieu: lieuComplet,
+      catalogue,
+      poses,
+      place,
+      habitants: habitantsComplet || habitants,
+    });
+  }
+  return resultat;
 }
 
 /**
@@ -325,11 +353,11 @@ export function trouverPlace({ depuis, rotation = 0, essaisMax = 60, ...options 
  * Renvoie { gardes, retires } : les meubles qui ne conviennent plus sont
  * à ranger (rien n'est perdu).
  */
-export function trierMeublesPoses({ lieu, catalogue, poses, habitants = [] }) {
+export function trierMeublesPoses({ lieu, catalogue, poses, habitants = [], lieuComplet = null, habitantsComplet = null }) {
   const gardes = [];
   const retires = [];
   for (const place of poses) {
-    const resultat = verifierPlacement({ lieu, catalogue, poses: gardes, place, habitants });
+    const resultat = verifierPlacement({ lieu, catalogue, poses: gardes, place, habitants, lieuComplet, habitantsComplet });
     if (resultat.ok) gardes.push(place);
     else retires.push(place);
   }
@@ -347,10 +375,18 @@ export function rangerCeQuiNeTientPlus(partie, { lieux, meubles, pnj, personnage
   const ouvertes = ouvertures(partie);
   let ranges = 0;
   for (const idLieu of Object.keys(partie.lieux.amenagements)) {
-    const lieu = lieux[idLieu] ? lieuSelonOuvertures(lieux[idLieu], ouvertes) : null;
+    const lieuComplet = lieux[idLieu] || null;
+    const lieu = lieuComplet ? lieuSelonOuvertures(lieuComplet, ouvertes) : null;
     const poses = meublesPoses(partie, idLieu);
     const aRanger = lieu
-      ? trierMeublesPoses({ lieu, catalogue, poses, habitants: placesDesHabitants(lieu, pnj, personnages, ouvertes) }).retires
+      ? trierMeublesPoses({
+        lieu,
+        catalogue,
+        poses,
+        habitants: placesDesHabitants(lieu, pnj, personnages, ouvertes),
+        lieuComplet,
+        habitantsComplet: placesDesHabitants(lieuComplet, pnj, personnages),
+      }).retires
       : poses;
     // Un achat inconnu (absent des possessions) ne compte pas comme posé.
     const connus = new Set(poses.map((place) => place.id));

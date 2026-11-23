@@ -168,6 +168,7 @@ export function verifierPartie(partie) {
   exiger(possessionsValides(partie.possessions), 'possessions invalides');
   exiger(estObjet(partie.lieux) && typeof partie.lieux.actuel === 'string'
     && estListeDeTextes(partie.lieux.debloques)
+    && partie.lieux.debloques.includes(partie.lieux.actuel)
     && amenagementsValides(partie.lieux.amenagements, partie.possessions), 'lieux invalides');
   exiger(estObjet(partie.drapeaux), 'drapeaux invalides');
   exiger(estObjet(partie.vue) && estEntier(partie.vue.rotation) && partie.vue.rotation <= 3

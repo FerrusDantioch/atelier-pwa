@@ -17,6 +17,7 @@ let enAttente = null;            // la nouvelle version, prête
 let versionEnAttente = null;     // son numéro, si connu
 let rechargementDemande = false; // le joueur a touché « Mettre à jour »
 let propositionInstallation = null;
+let installeSession = false;     // installation réussie pendant cette visite
 let derniereVerification = 0;
 
 const INTERVALLE_MINIMUM = 60 * 1000; // pas plus d'une vérification par minute
@@ -31,6 +32,7 @@ if (typeof self !== 'undefined' && typeof self.addEventListener === 'function') 
   });
   self.addEventListener('appinstalled', () => {
     propositionInstallation = null;
+    installeSession = true;
     annoncer('pwa:installation', { possible: false, installe: true });
   });
 }
@@ -108,7 +110,16 @@ export async function initialiserPwa() {
 // À appeler APRÈS avoir sauvegardé la partie.
 export function appliquerMiseAJour() {
   if (!enAttente) return false;
+  if (enAttente.state === 'redundant') {
+    enAttente = null;
+    versionEnAttente = null;
+    return false;
+  }
   rechargementDemande = true;
+  if (enAttente.state === 'activated' || navigator.serviceWorker?.controller === enAttente) {
+    self.location.reload();
+    return true;
+  }
   enAttente.postMessage({ type: 'activer' });
   return true;
 }
@@ -128,7 +139,7 @@ export function installationPossible() {
 }
 
 export function estInstalle() {
-  return Boolean(self.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone);
+  return Boolean(installeSession || self.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone);
 }
 
 // Ouvre la fenêtre d'installation du navigateur. Renvoie true si accepté.
@@ -138,6 +149,8 @@ export async function proposerInstallation() {
   propositionInstallation = null;
   await proposition.prompt();
   const choix = await proposition.userChoice;
-  annoncer('pwa:installation', { possible: false, installe: choix.outcome === 'accepted' });
-  return choix.outcome === 'accepted';
+  const accepte = choix.outcome === 'accepted';
+  if (accepte) installeSession = true;
+  annoncer('pwa:installation', { possible: false, installe: accepte });
+  return accepte;
 }

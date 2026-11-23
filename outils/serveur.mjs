@@ -44,7 +44,13 @@ const TYPES = {
 // servir le fichier tel quel.
 export function demarrerServeur(port = 8080, { remplacer } = {}) {
   const serveur = createServer((demande, reponse) => {
-    const chemin = decodeURIComponent(new URL(demande.url, 'http://localhost').pathname);
+    let chemin;
+    try {
+      chemin = decodeURIComponent(new URL(demande.url, 'http://localhost').pathname);
+    } catch {
+      reponse.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Requête invalide');
+      return;
+    }
     let fichier = normalize(join(RACINE, chemin));
     // Sécurité : jamais de fichier en dehors du dépôt.
     if (fichier !== RACINE && !fichier.startsWith(RACINE + sep)) {
@@ -62,8 +68,15 @@ export function demarrerServeur(port = 8080, { remplacer } = {}) {
     const type = TYPES[extname(fichier).toLowerCase()] || 'text/plain; charset=utf-8';
     const remplace = remplacer?.(chemin, () => readFileSync(fichier, 'utf8'));
     reponse.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' });
-    if (remplace !== undefined) reponse.end(remplace);
-    else createReadStream(fichier).pipe(reponse);
+    if (demande.method === 'HEAD') {
+      reponse.end();
+      return;
+    }
+    if (remplace !== undefined) {
+      reponse.end(remplace);
+    } else {
+      createReadStream(fichier).on('error', () => reponse.destroy()).pipe(reponse);
+    }
   });
   return new Promise((resoudre) => {
     serveur.listen(port, () => resoudre(serveur));

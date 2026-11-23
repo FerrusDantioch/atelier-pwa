@@ -194,7 +194,7 @@
 @media (max-width: 760px), (orientation: portrait) and (max-width: 1000px) {
   .ecran-perso {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: clamp(150px, 30vh, 320px) minmax(0, 1fr);
+    grid-template-rows: clamp(120px, 28dvh, 320px) minmax(0, 1fr);
   }
   .perso-panneau {
     border-left: 0;
@@ -202,8 +202,26 @@
     box-shadow: 0 -8px 32px var(--ombre);
   }
   .perso-tourner {
-    top: calc(clamp(150px, 30vh, 320px) - 60px);
+    top: calc(clamp(120px, 28dvh, 320px) - 60px);
     bottom: auto;
+  }
+}
+
+/* Téléphone en paysage (largeur réduite et très peu de hauteur) : on garde
+   l'aperçu à gauche et le panneau à droite pour laisser défiler les choix. */
+@media (max-width: 760px) and (max-height: 500px) {
+  .ecran-perso {
+    grid-template-columns: minmax(140px, 38vw) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .perso-panneau {
+    border-top: 0;
+    border-left: var(--epaisseur-bordure) solid var(--bordure);
+    box-shadow: -8px 0 32px var(--ombre);
+  }
+  .perso-tourner {
+    top: auto;
+    bottom: max(0.8rem, env(safe-area-inset-bottom));
   }
 }
 

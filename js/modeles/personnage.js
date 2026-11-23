@@ -336,8 +336,8 @@ export function construirePersonnage(apparence, personnages, palette) {
   }
   const ombre = new Mesh(new CircleGeometry(assis ? 0.42 : 0.3, 16), matiereOmbre);
   ombre.rotation.x = -Math.PI / 2;
-  ombre.position.y = 0.006;
-  ombre.renderOrder = -1;
+  ombre.position.y = 0.02;
+  ombre.renderOrder = 1;
   groupe.add(ombre);
 
   return {

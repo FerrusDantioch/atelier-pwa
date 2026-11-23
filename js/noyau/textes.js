@@ -32,7 +32,7 @@ function chercher(cle) {
 // « de le lit » → « du lit », « de les toilettes » → « des toilettes ».
 const ELISION = /^[aeiouyhàâäéèêëîïôöùûüÿæœ]/i;
 export function remplir(modele, valeurs = {}) {
-  return modele.replace(/(\b[Dd]e )?\{(\w+)\}/g, (morceau, de, nom) => {
+  return modele.replace(/((?<![\p{L}\p{N}_])[Dd]e )?\{(\w+)\}/gu, (morceau, de, nom) => {
     if (!Object.prototype.hasOwnProperty.call(valeurs, nom)) return morceau;
     const valeur = String(valeurs[nom]);
     if (!de) return valeur;

@@ -23,12 +23,12 @@ export function creerReperes() {
   const matiereSombre = new MeshBasicMaterial({ color: couleurDuTheme('--fond', '#171126') });
   const matiereTrait = new LineBasicMaterial({ color: couleurDuTheme('--focus', '#ffd166') });
 
-  // Destination : un anneau posé au sol (avec un fin liseré sombre dessous,
-  // visible sur les sols clairs comme foncés).
+  // Destination : un anneau posé au sol (au-dessus des tapis et des ombres,
+  // avec un fin liseré sombre dessous, visible sur les sols clairs comme foncés).
   const destination = new Group();
   const anneau = new Mesh(new RingGeometry(0.13, 0.21, 24), matiere);
   const lisere = new Mesh(new RingGeometry(0.11, 0.23, 24), matiereSombre);
-  for (const [forme, hauteur] of [[lisere, 0.012], [anneau, 0.016]]) {
+  for (const [forme, hauteur] of [[lisere, 0.022], [anneau, 0.026]]) {
     forme.rotation.x = -Math.PI / 2;
     forme.position.y = hauteur;
     destination.add(forme);
@@ -40,7 +40,7 @@ export function creerReperes() {
   const contour = new BufferGeometry();
   const m = 0.03;
   contour.setAttribute('position', new Float32BufferAttribute([
-    m, 0.02, m, TAILLE_CASE - m, 0.02, m, TAILLE_CASE - m, 0.02, TAILLE_CASE - m, m, 0.02, TAILLE_CASE - m,
+    m, 0.028, m, TAILLE_CASE - m, 0.028, m, TAILLE_CASE - m, 0.028, TAILLE_CASE - m, m, 0.028, TAILLE_CASE - m,
   ], 3));
   const survol = new LineLoop(contour, matiereTrait);
   survol.visible = false;

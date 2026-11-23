@@ -51,14 +51,14 @@ export function verifier(valeur, schema, chemin = '') {
       }
       const champs = schema.champs || {};
       for (const [cle, sousSchema] of Object.entries(champs)) {
-        if (!(cle in valeur)) {
+        if (!Object.hasOwn(valeur, cle) || valeur[cle] === undefined) {
           if (!sousSchema.facultatif) signaler(`le champ « ${cle} » manque`);
           continue;
         }
         erreurs.push(...verifier(valeur[cle], sousSchema, joindre(chemin, cle)));
       }
       for (const cle of Object.keys(valeur)) {
-        if (cle in champs) continue;
+        if (Object.hasOwn(champs, cle)) continue;
         if (schema.valeurs) {
           erreurs.push(...verifier(valeur[cle], schema.valeurs, joindre(chemin, cle)));
         } else if (!schema.ouvert) {

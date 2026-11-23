@@ -66,7 +66,8 @@ export function creerHabitants({
     const { x, z } = habitant.deplacement.position;
     habitant.perso.groupe.position.set(x, 0, z);
     habitant.perso.groupe.rotation.y = habitant.deplacement.angle * Math.PI / 180;
-    habitant.boite.set(new Vector3(x - 0.3, 0, z - 0.3), new Vector3(x + 0.3, 1.8, z + 0.3));
+    const hauteur = habitant.perso.assis ? 1.45 : 1.8;
+    habitant.boite.set(new Vector3(x - 0.3, 0, z - 0.3), new Vector3(x + 0.3, hauteur, z + 0.3));
   }
 
   // Les cases déjà prises (joueur, autres PNJ), à éviter comme destination.
@@ -218,6 +219,11 @@ export function creerHabitants({
 
     trouver(id) {
       return habitants.find((habitant) => habitant.id === id) || null;
+    },
+
+    disponible(id) {
+      const habitant = this.trouver(id);
+      return Boolean(habitant?.present && !habitant.sortant);
     },
 
     // La case d'un PNJ (où il est, ou là où il va s'il marche).

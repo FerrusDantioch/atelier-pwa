@@ -110,6 +110,23 @@ try {
   const nouveau = `${texte.slice(0, debut)}${DEBUT}\n${lignes.join('\n')}\n${texte.slice(fin)}`;
   writeFileSync(cheminLicences, nouveau);
   console.log('Empreintes écrites dans licences-tierces.txt.');
+
+  // Met aussi à jour VERSION_TIERS dans sw.js à partir des empreintes triées,
+  // pour que les joueurs retéléchargent les fichiers tiers si l'un d'eux change.
+  const versionTiers = createHash('sha256')
+    .update(lignes.map((ligne) => {
+      const [h, chemin] = ligne.split('  ');
+      return `${chemin}:${h}`;
+    }).sort().join('\n'))
+    .digest('hex')
+    .slice(0, 12);
+  const cheminSw = join(RACINE, 'sw.js');
+  const sw = readFileSync(cheminSw, 'utf8');
+  if (!/const VERSION_TIERS = '[^']+';/.test(sw)) {
+    throw new Error('sw.js : constante VERSION_TIERS introuvable.');
+  }
+  writeFileSync(cheminSw, sw.replace(/const VERSION_TIERS = '[^']+';/, `const VERSION_TIERS = '${versionTiers}';`));
+  console.log(`VERSION_TIERS mis à jour dans sw.js : ${versionTiers}.`);
 } finally {
   rmSync(temporaire, { recursive: true, force: true });
 }

@@ -29,11 +29,11 @@ import { creerConstructeur, matiereDecor, matiereParoi } from '../modeles/formes
 import { creerAtelierDeMeubles } from '../modeles/meubles.js';
 import { TAILLE_CASE } from './grille.js';
 
-const HAUTEUR_COUPEE = 0.45;
+const HAUTEUR_COUPEE = 0.35;
 const EPAISSEUR = 0.12;
 const MARGE_SOCLE = 0.6;
-const BAS_FENETRE = 0.9;
-const HAUT_OUVERTURE = 2.1;
+const BAS_FENETRE = 0.85;
+const HAUT_OUVERTURE = 2.0;
 const CHAPEAU_PAROI = 0.06; // le bord opaque en haut d'une paroi translucide
 const DEPASSE = 0.015; // les traverses d'une fenêtre dépassent de 1,5 cm (voir plus bas)
 
@@ -66,20 +66,32 @@ function preparerTroncons(lieu, grille) {
     }
   }
 
-  // Pour chaque bord : extérieur ? de quel côté ? quelle ouverture ? paroi
-  // haute (il borde une pièce à « paroisHautes ») ?
-  const sol = (x, z) => grille.piece(x, z) !== null;
+  // Pour déterminer les murs extérieurs, on compte TOUTES les pièces du
+  // bâtiment (y compris celles encore fermées) : une cloison intérieure qui
+  // borde une pièce fermée ne doit jamais devenir une façade extérieure.
+  const [largeur, profondeur] = lieu.taille;
+  const dansBatiment = new Set();
+  for (const piece of lieu.pieces) {
+    for (const [zx, zz, zl, zp] of piece.zones) {
+      for (let x = zx; x < zx + zl; x += 1) {
+        for (let z = zz; z < zz + zp; z += 1) {
+          if (x >= 0 && z >= 0 && x < largeur && z < profondeur) dansBatiment.add(`${x},${z}`);
+        }
+      }
+    }
+  }
+  const solBatiment = (x, z) => dansBatiment.has(`${x},${z}`);
   const piecesHautes = new Set(lieu.pieces.filter((piece) => piece.paroisHautes).map((piece) => piece.id));
   const haute = (x, z) => piecesHautes.has(grille.piece(x, z));
   for (const [cle, bord] of bords) {
     const [avant, apres] = bord.sens === 'h'
-      ? [sol(bord.debut, bord.ligne - 1), sol(bord.debut, bord.ligne)]
-      : [sol(bord.ligne - 1, bord.debut), sol(bord.ligne, bord.debut)];
+      ? [solBatiment(bord.debut, bord.ligne - 1), solBatiment(bord.debut, bord.ligne)]
+      : [solBatiment(bord.ligne - 1, bord.debut), solBatiment(bord.ligne, bord.debut)];
     bord.exterieur = avant !== apres;
     bord.haute = !bord.exterieur && (bord.sens === 'h'
       ? haute(bord.debut, bord.ligne - 1) || haute(bord.debut, bord.ligne)
       : haute(bord.ligne - 1, bord.debut) || haute(bord.ligne, bord.debut));
-    // La normale pointe vers le dehors (le côté sans sol).
+    // La normale pointe vers le dehors (le côté sans pièce).
     if (bord.exterieur) {
       const signe = avant ? 1 : -1;
       bord.normale = bord.sens === 'h' ? { x: 0, z: signe } : { x: signe, z: 0 };
@@ -102,19 +114,19 @@ function preparerTroncons(lieu, grille) {
     }
   }
 
-  // Un tronçon se prolonge d'une demi-épaisseur à chaque bout qui touche un
-  // mur perpendiculaire : les coins sont bien fermés.
-  const murPerpendiculaire = (sens, x, z) => (sens === 'h'
-    ? bords.has(`v ${x},${z - 1}`) || bords.has(`v ${x},${z}`)
-    : bords.has(`h ${x - 1},${z}`) || bords.has(`h ${x},${z}`));
+  // Les bords perpendiculaires qui touchent chaque bout d'un tronçon : sert
+  // à fermer les coins proprement sans superposition de faces (scintillement).
+  const bordsPerpendiculaires = (sens, x, z) => (sens === 'h'
+    ? [bords.get(`v ${x},${z - 1}`), bords.get(`v ${x},${z}`)]
+    : [bords.get(`h ${x - 1},${z}`), bords.get(`h ${x},${z}`)]).filter(Boolean);
   for (const troncon of troncons) {
     const [xDebut, zDebut, xFin, zFin] = troncon.sens === 'h'
       ? [troncon.debut, troncon.ligne, troncon.fin, troncon.ligne]
       : [troncon.ligne, troncon.debut, troncon.ligne, troncon.fin];
-    troncon.prolongeDebut = murPerpendiculaire(troncon.sens, xDebut, zDebut) ? EPAISSEUR / 2 : 0;
-    troncon.prolongeFin = murPerpendiculaire(troncon.sens, xFin, zFin) ? EPAISSEUR / 2 : 0;
+    troncon.perpDebut = bordsPerpendiculaires(troncon.sens, xDebut, zDebut);
+    troncon.perpFin = bordsPerpendiculaires(troncon.sens, xFin, zFin);
   }
-  return troncons;
+  return { troncons, bords };
 }
 
 /**
@@ -174,6 +186,21 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
   meshDecor.name = 'decor';
   groupe.add(meshDecor);
 
+  const { troncons, bords } = preparerTroncons(lieu, grille);
+
+  // Quel mur extérieur regarde un point (ex. porte d'entrée) ? Sert à adapter
+  // la hauteur de sa boîte de clic quand son mur est coupé.
+  function normaleDuMurDePoint(point) {
+    const dx = Math.round(Math.sin(point.angle * Math.PI / 180));
+    const dz = Math.round(Math.cos(point.angle * Math.PI / 180));
+    let bord = null;
+    if (dx === -1) bord = bords.get(`v ${point.x},${point.z}`);
+    else if (dx === 1) bord = bords.get(`v ${point.x + 1},${point.z}`);
+    else if (dz === -1) bord = bords.get(`h ${point.x},${point.z}`);
+    else if (dz === 1) bord = bords.get(`h ${point.x},${point.z + 1}`);
+    return bord?.exterieur ? bord.normale : null;
+  }
+
   // --- Ce qu'on peut toucher : meubles et points d'intérêt -------------------
   const cibles = [];
   for (const [id, emprise] of grille.emprises) {
@@ -187,32 +214,44 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
     forme.matrixAutoUpdate = false;
     forme.matrix.copy(atelier.matrice(emprise.place));
     forme.updateMatrixWorld(true);
+    const boiteForme = new Box3().setFromObject(forme);
+    const boite = boiteForme.isEmpty()
+      ? new Box3(
+        new Vector3(emprise.x * TAILLE_CASE, 0, emprise.z * TAILLE_CASE),
+        new Vector3((emprise.x + emprise.largeur) * TAILLE_CASE, hauteur, (emprise.z + emprise.profondeur) * TAILLE_CASE),
+      )
+      : boiteForme;
     cibles.push({
       type: 'meuble',
       id,
       examinable,
       hauteur,
       forme,
-      boite: new Box3(
-        new Vector3(emprise.x * TAILLE_CASE, 0, emprise.z * TAILLE_CASE),
-        new Vector3((emprise.x + emprise.largeur) * TAILLE_CASE, hauteur, (emprise.z + emprise.profondeur) * TAILLE_CASE),
-      ),
+      boite,
     });
   }
+  const ciblesPoints = [];
   for (const point of (lieu.points || []).filter((p) => p.description)) {
     const angle = point.angle * Math.PI / 180;
-    const boite = new Box3(
+    const boiteCoupee = new Box3(
       new Vector3(point.x * TAILLE_CASE, 0, point.z * TAILLE_CASE),
-      new Vector3((point.x + 1) * TAILLE_CASE, HAUT_OUVERTURE, (point.z + 1) * TAILLE_CASE),
+      new Vector3((point.x + 1) * TAILLE_CASE, HAUTEUR_COUPEE, (point.z + 1) * TAILLE_CASE),
     );
-    // La boîte s'étend vers ce que le point regarde (la porte dans le mur).
-    boite.expandByPoint(new Vector3((point.x + 0.5 + Math.sin(angle) * 1.1) * TAILLE_CASE, 0, (point.z + 0.5 + Math.cos(angle) * 1.1) * TAILLE_CASE));
-    cibles.push({ type: 'point', id: point.id, examinable: true, hauteur: HAUT_OUVERTURE, boite });
+    boiteCoupee.expandByPoint(new Vector3(
+      (point.x + 0.5 + Math.sin(angle) * 0.75) * TAILLE_CASE,
+      0,
+      (point.z + 0.5 + Math.cos(angle) * 0.75) * TAILLE_CASE,
+    ));
+    const boiteEntiere = boiteCoupee.clone();
+    boiteEntiere.max.y = HAUT_OUVERTURE;
+    const cible = { type: 'point', id: point.id, examinable: true, hauteur: HAUTEUR_COUPEE, boite: boiteCoupee.clone() };
+    cibles.push(cible);
+    ciblesPoints.push({ cible, boiteCoupee, boiteEntiere, normale: normaleDuMurDePoint(point) });
   }
 
   // --- Les affiches : une image contre un mur extérieur ------------------------
   // Posée 1,5 cm devant le mur (deux faces au même endroit scintilleraient).
-  // Toucher l'affiche mène au point d'où on l'examine.
+  // Toucher l'affiche mène au point d'où on l'examine (seulement quand son mur est entier).
   const affiches = [];
   for (const affiche of dessinerAffiche ? lieu.affiches || [] : []) {
     const [x1, z1] = affiche.de;
@@ -238,13 +277,16 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
     mesh.updateMatrixWorld(true);
     groupe.add(mesh);
     // La direction vers l'extérieur du mur (pour savoir s'il est entier).
-    affiches.push({ id: affiche.id, mesh, normale: leLongDeZ ? { x: -versInterieur, z: 0 } : { x: 0, z: -versInterieur } });
-    const cible = affiche.point ? cibles.find((c) => c.type === 'point' && c.id === affiche.point) : null;
-    cible?.boite.union(new Box3().setFromObject(mesh));
+    const normale = leLongDeZ ? { x: -versInterieur, z: 0 } : { x: 0, z: -versInterieur };
+    affiches.push({ id: affiche.id, mesh, normale });
+    const entreePoint = affiche.point ? ciblesPoints.find((p) => p.cible.id === affiche.point) : null;
+    if (entreePoint) {
+      entreePoint.boiteEntiere.union(new Box3().setFromObject(mesh));
+      if (!entreePoint.normale) entreePoint.normale = normale;
+    }
   }
 
   // --- Les murs (selon la rotation de la caméra) ------------------------------
-  const troncons = preparerTroncons(lieu, grille);
   const hauteurMurs = lieu.hauteurMurs;
   let meshMurs = null;
   let rotationMurs = null;
@@ -254,6 +296,43 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
     const murs = creerConstructeur();
     const mur = c('mur');
     const coupe = c('mur-coupe');
+    const facade = c('facade');
+
+    const estEntier = (bord) => bord.exterieur && (bord.normale.x * camera.x + bord.normale.z * camera.z) < 0;
+    const hauteurDe = (bord) => {
+      const ouv = bord.ouverture === null ? null : lieu.ouvertures[bord.ouverture];
+      if (ouv && ouv.type === 'porte' && !estEntier(bord)) return 0;
+      return estEntier(bord) ? hauteurMurs : HAUTEUR_COUPEE;
+    };
+    // Qui possède le poteau d'angle (EPAISSEUR × EPAISSEUR) à un bout de tronçon ?
+    // Le mur le plus haut gagne ; à hauteur égale, le mur extérieur passe devant
+    // une cloison intérieure ; à nature égale, le mur horizontal prolonge et le
+    // mur vertical s'arrête au ras : zéro face superposée, zéro scintillement.
+    const decalageBout = (troncon, hauteur, perp) => {
+      if (perp.length === 0) return 0;
+      const hMax = Math.max(...perp.map(hauteurDe));
+      if (hMax === 0) return 0;
+      if (hauteur > hMax) return EPAISSEUR / 2;
+      if (hauteur < hMax) return -EPAISSEUR / 2;
+      const perpExterieur = perp.some((p) => p.exterieur);
+      if (troncon.exterieur && !perpExterieur) return EPAISSEUR / 2;
+      if (!troncon.exterieur && perpExterieur) return -EPAISSEUR / 2;
+      return troncon.sens === 'h' ? EPAISSEUR / 2 : -EPAISSEUR / 2;
+    };
+    // Si un mur extérieur se prolonge dans un angle extérieur, sa face de bout
+    // donne sur la façade et prend la couleur « facade ».
+    const facesDeBout = (troncon, decDebut, decFin) => {
+      const faces = {};
+      if (!troncon.exterieur) return faces;
+      if (troncon.sens === 'h') {
+        if (decDebut > 0 && troncon.perpDebut.some((p) => p.exterieur && p.normale.x < 0)) faces.nx = facade;
+        if (decFin > 0 && troncon.perpFin.some((p) => p.exterieur && p.normale.x > 0)) faces.px = facade;
+      } else {
+        if (decDebut > 0 && troncon.perpDebut.some((p) => p.exterieur && p.normale.z < 0)) faces.nz = facade;
+        if (decFin > 0 && troncon.perpFin.some((p) => p.exterieur && p.normale.z > 0)) faces.pz = facade;
+      }
+      return faces;
+    };
 
     // Une boîte de mur entre deux hauteurs, sur une partie du tronçon.
     const morceau = (troncon, debut, fin, bas, haut, faces = {}) => {
@@ -261,10 +340,10 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
       const exterieur = troncon.exterieur ? troncon.normale : null;
       const couleurs = { px: mur, nx: mur, py: coupe, ny: mur, pz: mur, nz: mur, ...faces };
       if (exterieur) {
-        if (exterieur.x > 0) couleurs.px = c('facade');
-        if (exterieur.x < 0) couleurs.nx = c('facade');
-        if (exterieur.z > 0) couleurs.pz = c('facade');
-        if (exterieur.z < 0) couleurs.nz = c('facade');
+        if (exterieur.x > 0) couleurs.px = facade;
+        if (exterieur.x < 0) couleurs.nx = facade;
+        if (exterieur.z > 0) couleurs.pz = facade;
+        if (exterieur.z < 0) couleurs.nz = facade;
       }
       const milieu = (debut + fin) / 2;
       const longueur = fin - debut;
@@ -287,18 +366,28 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
     };
 
     for (const troncon of troncons) {
-      const entier = troncon.exterieur
-        && (troncon.normale.x * camera.x + troncon.normale.z * camera.z) < 0;
+      const entier = estEntier(troncon);
       const hauteur = entier ? hauteurMurs : HAUTEUR_COUPEE;
-      const debut = troncon.debut * TAILLE_CASE - troncon.prolongeDebut;
-      const fin = troncon.fin * TAILLE_CASE + troncon.prolongeFin;
-      const ouverture = troncon.ouverture === null ? null : lieu.ouvertures[troncon.ouverture];
-
       const d = troncon.debut * TAILLE_CASE;
       const f = troncon.fin * TAILLE_CASE;
+      const ouverture = troncon.ouverture === null ? null : lieu.ouvertures[troncon.ouverture];
+      const decDebut = ouverture ? 0 : decalageBout(troncon, hauteur, troncon.perpDebut);
+      const decFin = ouverture ? 0 : decalageBout(troncon, hauteur, troncon.perpFin);
+      const debut = d - decDebut;
+      const fin = f + decFin;
+      const faces = facesDeBout(troncon, decDebut, decFin);
+
       if (troncon.haute) {
-        // Paroi haute : le bord opaque du haut, et le cadre d'une porte.
-        morceau(troncon, debut, fin, hauteurMurs - CHAPEAU_PAROI, hauteurMurs);
+        // Paroi haute : le bord opaque du haut (en évitant de chevaucher un
+        // mur extérieur entier ou une autre paroi haute perpendiculaire).
+        const decalageChapeau = (perp) => {
+          if (perp.some((p) => estEntier(p))) return -EPAISSEUR / 2;
+          if (perp.some((p) => p.haute)) return troncon.sens === 'h' ? EPAISSEUR / 2 : -EPAISSEUR / 2;
+          return 0;
+        };
+        const dCap = d - (ouverture ? 0 : decalageChapeau(troncon.perpDebut));
+        const fCap = f + (ouverture ? 0 : decalageChapeau(troncon.perpFin));
+        morceau(troncon, dCap, fCap, hauteurMurs - CHAPEAU_PAROI, hauteurMurs);
         if (ouverture) {
           element(troncon, d, d + 0.06, 0, HAUT_OUVERTURE, c('cadre'));
           element(troncon, f - 0.06, f, 0, HAUT_OUVERTURE, c('cadre'));
@@ -306,17 +395,17 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
         }
       }
       if (!ouverture) {
-        morceau(troncon, debut, fin, 0, hauteur);
+        morceau(troncon, debut, fin, 0, hauteur, faces);
         continue;
       }
       const cadre = c('cadre');
       if (ouverture.type === 'fenetre') {
         if (!entier) {
-          morceau(troncon, debut, fin, 0, hauteur);
+          morceau(troncon, debut, fin, 0, hauteur, faces);
           continue;
         }
-        morceau(troncon, debut, fin, 0, BAS_FENETRE);
-        morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur);
+        morceau(troncon, debut, fin, 0, BAS_FENETRE, faces);
+        morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur, faces);
         element(troncon, d, f, BAS_FENETRE, HAUT_OUVERTURE, c('vitre'), EPAISSEUR * 0.3);
         // Les traverses du bas et du haut dépassent un peu dans l'ouverture :
         // deux faces exactement au même endroit (le dessus du mur et celui de
@@ -332,14 +421,17 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
       // Porte : un passage libre (aucune marche). Sur un mur entier, un
       // linteau au-dessus et un cadre ; la porte d'entrée est fermée. La
       // porte d'une pièce encore fermée (« porte-fermee ») : un battant
-      // clos sur un mur entier, un mur bas ailleurs.
+      // clos sur un mur entier, ou un seuil de porte bois reconnaissable sur
+      // une cloison coupée (sans mur opaque qui cacherait la pièce voisine).
       const close = ouverture.type === 'porte-entree' || ouverture.type === 'porte-fermee';
       if (ouverture.type === 'porte-fermee' && !entier) {
-        morceau(troncon, debut, fin, 0, hauteur);
+        element(troncon, d, d + 0.06, 0, hauteur, c('porte'));
+        element(troncon, f - 0.06, f, 0, hauteur, c('porte'));
+        element(troncon, d + 0.06, f - 0.06, 0, hauteur, c('bois'), EPAISSEUR * 0.65);
         continue;
       }
       if (entier) {
-        morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur);
+        morceau(troncon, debut, fin, HAUT_OUVERTURE, hauteur, faces);
         element(troncon, d, d + 0.06, 0, HAUT_OUVERTURE, c('porte'));
         element(troncon, f - 0.06, f, 0, HAUT_OUVERTURE, c('porte'));
         element(troncon, d, f, HAUT_OUVERTURE - 0.06, HAUT_OUVERTURE, c('porte'));
@@ -362,14 +454,20 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
 
   // --- Les parois translucides (elles ne dépendent pas de la caméra) ---------
   const parois = creerConstructeur();
+  const epaisseurParoi = EPAISSEUR * 0.6;
+  const decalageParoi = (troncon, perp) => {
+    if (perp.some((p) => p.exterieur)) return -EPAISSEUR / 2;
+    if (perp.some((p) => p.haute)) return troncon.sens === 'h' ? epaisseurParoi / 2 : -epaisseurParoi / 2;
+    return 0;
+  };
   for (const troncon of troncons.filter((t) => t.haute)) {
     const ouverture = troncon.ouverture === null ? null : lieu.ouvertures[troncon.ouverture];
     const bas = ouverture ? HAUT_OUVERTURE : HAUTEUR_COUPEE;
     const haut = hauteurMurs - CHAPEAU_PAROI;
-    const debut = troncon.debut * TAILLE_CASE - troncon.prolongeDebut;
-    const fin = troncon.fin * TAILLE_CASE + troncon.prolongeFin;
+    const debut = troncon.debut * TAILLE_CASE - (ouverture ? 0 : decalageParoi(troncon, troncon.perpDebut));
+    const fin = troncon.fin * TAILLE_CASE + (ouverture ? 0 : decalageParoi(troncon, troncon.perpFin));
     const milieu = (debut + fin) / 2;
-    const taille = troncon.sens === 'h' ? [fin - debut, haut - bas, EPAISSEUR * 0.6] : [EPAISSEUR * 0.6, haut - bas, fin - debut];
+    const taille = troncon.sens === 'h' ? [fin - debut, haut - bas, epaisseurParoi] : [epaisseurParoi, haut - bas, fin - debut];
     const position = troncon.sens === 'h'
       ? [milieu, (bas + haut) / 2, troncon.ligne * TAILLE_CASE]
       : [troncon.ligne * TAILLE_CASE, (bas + haut) / 2, milieu];
@@ -387,9 +485,16 @@ export function construireLieu({ lieu, grille, catalogue, palette, dessinerAffic
     const r = ((rotation % 4) + 4) % 4;
     if (r === rotationMurs) return false;
     rotationMurs = r;
-    // Une affiche se voit quand son mur est entier (il tourne le dos à la caméra).
+    // Une affiche et la boîte de clic d'une porte/affiche s'adaptent à la
+    // hauteur réelle de leur mur (entier ou coupé à 35 cm).
     const camera = directionCamera(r);
     for (const { mesh, normale } of affiches) mesh.visible = normale.x * camera.x + normale.z * camera.z < 0;
+    for (const entree of ciblesPoints) {
+      const entier = entree.normale && (entree.normale.x * camera.x + entree.normale.z * camera.z) < 0;
+      const source = entier ? entree.boiteEntiere : entree.boiteCoupee;
+      entree.cible.boite.copy(source);
+      entree.cible.hauteur = source.max.y;
+    }
     const geometrie = construireMurs(r);
     if (meshMurs) {
       meshMurs.geometry.dispose();

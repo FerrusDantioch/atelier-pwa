@@ -150,6 +150,7 @@ export function objectifDuMoment(partie, commandes, paliers, { demain = false } 
   const aProposer = commandesAProposer(partie, commandes, paliers);
   if (aProposer.length > 0) return { cle: 'parler', commande: aProposer[0], destination: aProposer[0].client };
   if (etat.offres.length > 0) return { cle: 'choisir', destination: ID_BUREAU };
-  if (etat.livrees.length === commandes.length) return { cle: demain ? 'demain' : 'fini' };
+  if (demain) return { cle: 'demain' };
+  if (etat.livrees.length === commandes.length) return { cle: 'fini' };
   return { cle: 'attendre' };
 }

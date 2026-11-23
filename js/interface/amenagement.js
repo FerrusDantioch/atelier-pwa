@@ -59,31 +59,19 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
     const partie = partieEnCours();
     const m = monde();
     const lieu = m.lieuOuvert;
+    const complet = m.lieuComplet;
     const apparence = apparenceDuJoueur(partie.joueur, donnees.personnages);
     const ici = m.case;
     return {
       lieu,
+      lieuComplet: complet === lieu ? null : complet,
       catalogue: catalogue(),
       poses: meublesPoses(partie, lieu.id).filter((place) => place.id !== id),
       occupants: m.casesOccupees(),
       habitants: placesDesHabitants(lieu, donnees.pnj.pnj, donnees.personnages, m.ouvertes),
+      habitantsComplet: complet === lieu ? null : placesDesHabitants(complet, donnees.pnj.pnj, donnees.personnages),
       joueur: { x: ici.x, z: ici.z, profil: profilDeDeplacement(apparence.aide) },
     };
-  }
-
-  // La même place, avec toutes les pièces du lieu ouvertes : un meuble posé
-  // aujourd'hui ne doit pas bloquer la porte d'une pièce qui s'ouvrira demain.
-  function verifierPourPlusTard(place) {
-    const m = monde();
-    const complet = m.lieuComplet;
-    if (complet === m.lieuOuvert) return { ok: true };
-    return verifierPlacement({
-      lieu: complet,
-      catalogue: catalogue(),
-      poses: meublesPoses(partieEnCours(), complet.id).filter((p) => p.id !== place.id),
-      place,
-      habitants: placesDesHabitants(complet, donnees.pnj.pnj, donnees.personnages),
-    });
   }
 
   // La raison d'un refus, en toutes lettres.
@@ -111,8 +99,7 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   // Vérifie la place, montre le meuble, et dit si c'est possible.
   function verifierEtMontrer() {
     const place = placeChoisie();
-    let resultat = verifierPlacement({ ...contexteDeVerification(selection.id), place });
-    if (resultat.ok) resultat = verifierPourPlusTard(place);
+    const resultat = verifierPlacement({ ...contexteDeVerification(selection.id), place });
     selection.resultat = resultat;
     monde().montrerFantome({ meuble: place.meuble, x: place.x, z: place.z, rotation: place.rotation, valide: resultat.ok });
     const nom = majuscule(designation(place.meuble));
@@ -200,9 +187,9 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
       origine = { x: posee.place.x, z: posee.place.z, rotation: posee.place.rotation };
       rotation = posee.place.rotation;
       milieu = milieuDepuisCoin(meuble, rotation, posee.place);
-      // Le meuble est retiré du lieu le temps de le déplacer.
-      modifierPartie((partie) => retirerMeuble(partie, id));
-      monde().actualiserLieu();
+      // Le meuble est caché dans la scène le temps de le déplacer, sans
+      // toucher à la partie tant que le joueur n'a pas confirmé.
+      monde().actualiserLieu({ ignorerMeuble: id });
     } else {
       // Un meuble rangé : la place libre la plus proche du personnage.
       const ici = monde().case;
@@ -263,9 +250,9 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   // Ranger un meuble qui était posé : il retourne dans les affaires.
   function ranger() {
     if (!selection) return;
-    const { meuble } = selection;
-    // Il a déjà été retiré du lieu en le choisissant : rien d'autre à faire.
-    modifierPartie(() => {}, { important: true });
+    const { id, meuble } = selection;
+    modifierPartie((partie) => retirerMeuble(partie, id), { important: true });
+    monde().actualiserLieu();
     afficherAffaires(t('amenagement.range', { meuble: designation(meuble) }));
     focusSurPremier();
   }
@@ -273,10 +260,9 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
   // Annuler : un meuble qui était posé reprend sa place, un meuble rangé le reste.
   function annuler() {
     if (!selection) return;
-    const { origine, id, meuble } = selection;
+    const { origine, meuble } = selection;
     let message = null;
     if (origine) {
-      modifierPartie((partie) => poserMeuble(partie, monde().lieuOuvert.id, { id, ...origine }), { important: true });
       monde().actualiserLieu();
       message = t('amenagement.remis', { meuble: majuscule(designation(meuble)) });
     }
@@ -318,6 +304,9 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
       titre.textContent = t('amenagement.titre', { lieu: monde().lieuOuvert.designation });
       element.hidden = false;
       surDebut?.();
+    } else if (selection) {
+      if (selection.origine) monde().actualiserLieu();
+      selection = null;
     }
     if (achat) choisir(achat);
     else {
@@ -328,11 +317,12 @@ export function creerAmenagement({ donnees, monde, surDebut, surFin }) {
 
   function fermer({ silencieux = false } = {}) {
     if (!actif) return;
-    // Un meuble en cours de déplacement reprend sa place.
-    if (selection?.origine) annuler();
+    // Un meuble en cours de déplacement retrouve sa place dans la scène.
+    const aRemettre = Boolean(selection?.origine);
     selection = null;
     actif = false;
     element.hidden = true;
+    if (aRemettre) monde()?.actualiserLieu();
     monde()?.finirAmenagement();
     surFin?.();
     if (!silencieux) notifier(t('amenagement.fini'), { type: 'info' });

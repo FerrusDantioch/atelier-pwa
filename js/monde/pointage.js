@@ -66,6 +66,7 @@ export function brancherPointage(obtenirToile, actions) {
       const nouvelEcart = ecart();
       if (pincement.ecart > 0 && nouvelEcart > 0) actions.zoomer(nouvelEcart / pincement.ecart);
       pincement.ecart = nouvelEcart;
+      pointeur.derniere = point;
       return;
     }
     if (!glisse && Math.hypot(point.x - pointeur.depart.x, point.y - pointeur.depart.y) > SEUIL_GLISSER) {
@@ -79,7 +80,10 @@ export function brancherPointage(obtenirToile, actions) {
     const pointeur = pointeurs.get(evenement.pointerId);
     if (!pointeur) return;
     pointeurs.delete(evenement.pointerId);
-    if (pointeurs.size < 2) pincement = null;
+    if (pointeurs.size < 2) {
+      pincement = null;
+      for (const restant of pointeurs.values()) restant.derniere = { x: restant.x, y: restant.y };
+    }
     if (!glisse && pointeurs.size === 0 && evenement.type === 'pointerup') {
       actions.toucher(pointeur.depart.x, pointeur.depart.y);
     }

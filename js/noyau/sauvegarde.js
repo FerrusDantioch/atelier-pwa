@@ -29,6 +29,16 @@ let canalOnglets = null;
 let modeMemoire = false;
 const memoire = { partie: null, secours: [], abimees: [], prochainId: 1 };
 let copiesMaximum = 5;
+let versionUrgence = 0;
+let persistanceDemandee = false;
+
+function demanderPersistance() {
+  if (persistanceDemandee || modeMemoire) return;
+  persistanceDemandee = true;
+  if (typeof navigator !== 'undefined' && typeof navigator.storage?.persist === 'function') {
+    navigator.storage.persist().catch(() => {});
+  }
+}
 
 function ouvrirCanalOnglets() {
   canalOnglets?.close();
@@ -92,10 +102,11 @@ function ouvrirBase(nom) {
     demande.onsuccess = () => {
       const db = demande.result;
       // Si un autre onglet demande une mise à niveau future de la base, on
-      // ferme proprement cette connexion au lieu de le bloquer.
+      // ferme proprement cette connexion au lieu de le bloquer et on prévient.
       db.onversionchange = () => {
         db.close();
         if (base === db) base = null;
+        annoncer('sauvegarde:autre-onglet', { date: new Date().toISOString() });
       };
       resoudre(db);
     };
@@ -136,7 +147,7 @@ async function lireBrut() {
 
 async function ecrireBrut(partie) {
   if (modeMemoire) {
-    memoire.partie = partie;
+    memoire.partie = structuredClone(partie);
     return;
   }
   if (!base) throw new Error('base fermée');
@@ -173,6 +184,7 @@ export function ecrireCopieUrgence(partie) {
   try {
     const copie = { ...partie, enregistreeLe: new Date().toISOString(), versionJeu: self.CONFIG_JEU.version };
     self.localStorage.setItem(cleUrgence(), JSON.stringify(copie));
+    versionUrgence += 1;
     return true;
   } catch {
     return false; // stockage plein ou indisponible : la sauvegarde normale reste
@@ -196,16 +208,33 @@ async function reprendreCopieUrgence() {
     return;
   }
   if (!texte) return;
+  let urgence;
   try {
-    const urgence = preparerPartie(JSON.parse(texte));
-    const brute = await lireBrut();
-    if (!brute || String(urgence.enregistreeLe) > String(brute.enregistreeLe || '')) {
-      await ecrireBrut(urgence);
-    }
+    urgence = preparerPartie(JSON.parse(texte));
   } catch (erreur) {
     console.warn('Copie d\'urgence illisible, ignorée :', erreur);
+    effacerCopieUrgence();
+    return;
   }
-  effacerCopieUrgence();
+  try {
+    const brute = await lireBrut();
+    let principaleValide = null;
+    if (brute !== undefined && brute !== null) {
+      try {
+        principaleValide = preparerPartie(brute);
+      } catch {
+        principaleValide = null;
+      }
+    }
+    if (!principaleValide || String(urgence.enregistreeLe) >= String(principaleValide.enregistreeLe || '')) {
+      await ecrireBrut(urgence);
+    }
+    // On n'efface la copie d'urgence qu'une fois la base durablement à jour
+    // (en mode mémoire, elle reste le seul filet si IndexedDB revient plus tard).
+    if (!modeMemoire) effacerCopieUrgence();
+  } catch (erreur) {
+    console.warn('Copie d\'urgence conservée (base indisponible) :', erreur);
+  }
 }
 
 // Lit la partie en cours.
@@ -239,10 +268,13 @@ export async function lirePartie() {
 export async function enregistrerPartie(partie) {
   partie.enregistreeLe = new Date().toISOString();
   partie.versionJeu = self.CONFIG_JEU.version;
+  const marqueUrgence = versionUrgence;
   try {
     await ecrireBrut(partie);
-    // La sauvegarde est à jour : la copie d'urgence ne sert plus.
-    effacerCopieUrgence();
+    // On n'efface la copie d'urgence que si aucune copie plus récente n'a été
+    // écrite pendant l'enregistrement dans la base.
+    if (versionUrgence === marqueUrgence) effacerCopieUrgence();
+    demanderPersistance();
     prevenirAutresOnglets(partie.enregistreeLe);
     annoncer('sauvegarde:faite', { date: partie.enregistreeLe });
     return true;
@@ -269,6 +301,7 @@ export async function creerCopieDeSecours(partie, raison) {
   try {
     if (!base) throw new Error('base fermée');
     const transaction = base.transaction('secours', 'readwrite');
+    const fin = terminer(transaction);
     const rangement = transaction.objectStore('secours');
     rangement.add(copie);
     // On ne garde que les plus récentes (les clés vont de la plus ancienne à
@@ -276,7 +309,7 @@ export async function creerCopieDeSecours(partie, raison) {
     const cles = await attendre(rangement.getAllKeys());
     const enTrop = cles.length - copiesMaximum;
     for (const cleCopie of cles.slice(0, Math.max(0, enTrop))) rangement.delete(cleCopie);
-    await terminer(transaction);
+    await fin;
     return true;
   } catch (erreur) {
     console.warn('Copie de secours impossible :', erreur);
@@ -316,8 +349,9 @@ export async function restaurerCopie(id, partieActuelle) {
   await creerCopieDeSecours(partieActuelle, 'avant-restauration');
   partie.enregistreeLe = new Date().toISOString();
   partie.versionJeu = self.CONFIG_JEU.version;
+  const marqueUrgence = versionUrgence;
   await ecrireBrut(partie);
-  effacerCopieUrgence();
+  if (versionUrgence === marqueUrgence) effacerCopieUrgence();
   prevenirAutresOnglets(partie.enregistreeLe);
   return partie;
 }

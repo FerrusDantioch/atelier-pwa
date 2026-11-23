@@ -46,18 +46,18 @@ test('une pièce fermée : pas de sol praticable, ni meubles, ni places ; une po
   assert.ok(ferme.meubles.some((m) => m.id === 'comptoir'));
   assert.equal(ferme.points.some((p) => p.id === 'calme-pres-du-fauteuil'), false);
   assert.ok(ferme.points.some((p) => p.id === 'porte-calme'), 'on peut examiner la porte fermée');
-  const porte = ferme.ouvertures.find((o) => o.de[0] === 15 && o.de[1] === 7);
+  const porte = ferme.ouvertures.find((o) => o.de[0] === 21 && o.de[1] === 10);
   assert.equal(porte.type, 'porte-fermee');
   const grille = creerGrille(ferme, catalogue);
-  assert.equal(grille.piece(16, 3), null, 'on n\'entre pas dans une pièce fermée');
-  assert.equal(grille.libre(16, 3), false);
+  assert.equal(grille.piece(22, 4), null, 'on n\'entre pas dans une pièce fermée');
+  assert.equal(grille.libre(22, 4), false);
 
   const ouvert = lieuSelonOuvertures(bureaux, new Set(['coin-calme']));
   assert.equal(ouvert.pieces.find((p) => p.id === 'coin-calme').verrouillee, undefined);
   assert.ok(ouvert.meubles.some((m) => m.id === 'calme-fauteuil'));
   assert.equal(ouvert.points.some((p) => p.id === 'porte-calme'), false, 'le point de la porte fermée disparaît');
-  assert.equal(ouvert.ouvertures.find((o) => o.de[0] === 15 && o.de[1] === 7).type, 'porte');
-  assert.equal(creerGrille(ouvert, catalogue).piece(16, 3), 'coin-calme');
+  assert.equal(ouvert.ouvertures.find((o) => o.de[0] === 21 && o.de[1] === 10).type, 'porte');
+  assert.equal(creerGrille(ouvert, catalogue).piece(22, 4), 'coin-calme');
   assert.equal(lieuSelonOuvertures(donnees.lieux.domicile, new Set()), donnees.lieux.domicile, 'rien ne change au domicile');
 });
 
@@ -102,8 +102,8 @@ test('les routines : un créneau « si » n\'a lieu qu\'avec son ouverture', () 
 });
 
 test('les trajets : on arrive devant la porte, le temps passe sans dépasser la fin de journée', () => {
-  assert.deepEqual(arriveeDans(bureaux), { x: 0, z: 13, angle: 90 });
-  assert.deepEqual(arriveeDans(donnees.lieux.domicile), { x: 0, z: 12, angle: 90 });
+  assert.deepEqual(arriveeDans(bureaux), { x: 0, z: 18, angle: 90 });
+  assert.deepEqual(arriveeDans(donnees.lieux.domicile), { x: 0, z: 16, angle: 90 });
   assert.equal(heureApresTrajet(9 * 60, 10, 23 * 60), 9 * 60 + 10);
   assert.equal(heureApresTrajet(22 * 60 + 55, 10, 23 * 60), 23 * 60);
   assert.equal(heureApresTrajet(23 * 60, 10, 23 * 60), 23 * 60);
@@ -128,7 +128,7 @@ test('aux bureaux, un meuble posé ne doit pas bloquer une pièce qui s\'ouvrira
   const ferme = lieuSelonOuvertures(bureaux, new Set(['bureaux']));
   const complet = lieuSelonOuvertures(bureaux, new Set(ouverturesDuLieu(bureaux)));
   // Une étagère juste devant la porte (encore fermée) du coin calme.
-  const place = { id: 'achat-1', meuble: 'etagere-basse', x: 15, z: 7, rotation: 0 };
+  const place = { id: 'achat-1', meuble: 'etagere-basse', x: 21, z: 10, rotation: 0 };
   assert.equal(verifierPlacement({
     lieu: ferme, catalogue, place, habitants: placesDesHabitants(ferme, donnees.pnj.pnj, donnees.personnages, new Set(['bureaux'])),
   }).ok, false, 'elle cache le point « porte du coin calme »');
@@ -142,7 +142,7 @@ test('aux bureaux, un meuble posé ne doit pas bloquer une pièce qui s\'ouvrira
 test('les données fautives des bureaux sont refusées, avec des messages clairs', () => {
   const copie = JSON.parse(JSON.stringify(donnees));
   copie.lieux.bureaux.pieces.find((p) => p.id === 'coin-calme').ouverture = 'jacuzzi';
-  copie.lieux.bureaux.points.push({ id: 'porte-sauna', nom: 'Porte', designation: 'la porte', description: 'Fermée.', fermee: 'sauna', x: 1, z: 8, angle: 0 });
+  copie.lieux.bureaux.points.push({ id: 'porte-sauna', nom: 'Porte', designation: 'la porte', description: 'Fermée.', fermee: 'sauna', x: 1, z: 10, angle: 0 });
   copie.pnj.pnj.find((p) => p.id === 'hugo').routine[0].si = undefined;
   copie.pnj.pnj.find((p) => p.id === 'samia').routine[0].si = 'piscine';
   copie.boutique.lieux.push({ id: 'chateau', nom: 'Château', designation: 'le château', description: 'Un château.', prix: 9000 });
@@ -160,7 +160,7 @@ test('les données fautives des bureaux sont refusées, avec des messages clairs
 test('une porte bouchée aux bureaux est repérée, même quand la pièce est encore fermée', () => {
   const copie = JSON.parse(JSON.stringify(donnees));
   // Une bibliothèque devant la porte de la salle de pause, côté espace de travail.
-  copie.lieux.bureaux.meubles.push({ id: 'bouchon', meuble: 'bibliotheque', x: 9, z: 7, rotation: 0 });
+  copie.lieux.bureaux.meubles.push({ id: 'bouchon', meuble: 'bibliotheque', x: 14, z: 10, rotation: 0 });
   const texte = verifierCoherence(copie).join('\n');
   assert.match(texte, /bureaux\.json › pieces › salle-pause : impossible d'y entrer .*\(salle-pause ouvert\)/);
 });

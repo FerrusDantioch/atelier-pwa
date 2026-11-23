@@ -14,6 +14,7 @@
 // Les règles (prix, niveau, bonus) sont dans js/jeu/boutique.js.
 // =============================================================================
 
+import { meublesRanges } from '../jeu/amenagement.js';
 import {
   acheter, articlesDeLaBoutique, catalogueEquipe, etatDeLArticle, nombrePossedes,
 } from '../jeu/boutique.js';
@@ -95,8 +96,15 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
     return el('p', { class: 'carte-article-verrou' }, icone('piece'), t('boutique.manque', { argent: ctx.montant(etat.manque) }));
   }
 
-  function carte(article, partie) {
+  function textePossedes(possedes, ranges) {
+    if (ranges <= 0) return t('boutique.possedes', { n: possedes });
+    if (ranges === possedes) return t('boutique.possedesTousRanges', { n: possedes });
+    return t('boutique.possedesDontRanges', { n: possedes, ranges });
+  }
+
+  function carte(article, partie, comptesRanges) {
     const possedes = article.sorte === 'meuble' ? nombrePossedes(partie, article.id) : 0;
+    const ranges = article.sorte === 'meuble' ? (comptesRanges.get(article.id) || 0) : 0;
     const image = photoDe(article);
     return el('li', {}, el('article', { class: 'carte-commande carte-article' },
       image ? el('div', { class: 'carte-article-photo' }, image) : null,
@@ -105,33 +113,37 @@ export function ecranBoutique(ctx, { photo = null, surAchat = null, surPlacer = 
       el('p', { class: 'carte-article-prix' }, icone('piece'), t('boutique.prix', { prix: ctx.montant(article.prix) })),
       article.sorte === 'materiel' && article.bonus > 0
         ? el('p', { class: 'texte-doux' }, t('boutique.bonus', { argent: ctx.montant(article.bonus) })) : null,
-      possedes > 0 ? el('p', { class: 'texte-doux' }, t('boutique.possedes', { n: possedes })) : null,
+      possedes > 0 ? el('p', { class: 'texte-doux' }, textePossedes(possedes, ranges)) : null,
       etatDeLaCarte(article, partie)));
   }
 
-  function rayon(sorte, partie) {
+  function rayon(sorte, partie, comptesRanges) {
     const liste = articles.filter((article) => article.sorte === sorte);
     if (liste.length === 0) return null;
     return el('section', { class: 'groupe-commandes' },
       el('h4', {}, t(`boutique.rayons.${sorte}`)),
       el('p', { class: 'aide' }, t(`boutique.${sorte}Aide`)),
-      el('ul', { class: 'liste-commandes-recues liste-articles' }, liste.map((article) => carte(article, partie))));
+      el('ul', { class: 'liste-commandes-recues liste-articles' }, liste.map((article) => carte(article, partie, comptesRanges))));
   }
 
   // --- La liste des articles -------------------------------------------------------
   function liste() {
     const partie = partieEnCours();
     const niveau = niveauDeReputation(partie.reputation, ctx.paliers);
+    const comptesRanges = new Map();
+    for (const p of meublesRanges(partie)) {
+      comptesRanges.set(p.article, (comptesRanges.get(p.article) || 0) + 1);
+    }
     ctx.montrer({
       titre: t('boutique.titre'),
       contenu: [
         el('p', { class: 'aide' }, t('boutique.intro')),
         el('p', { class: 'ligne-compte' }, icone('piece'), t('boutique.argent', { argent: ctx.montant(partie.argent) })),
         el('p', { class: 'ligne-compte' }, icone('etoile'), t('boutique.niveauActuel', { niveau: niveau.niveau, nom: niveau.nom })),
-        rayon('materiel', partie),
-        rayon('meuble', partie),
-        rayon('lieu', partie),
-        rayon('piece', partie),
+        rayon('materiel', partie, comptesRanges),
+        rayon('meuble', partie, comptesRanges),
+        rayon('lieu', partie, comptesRanges),
+        rayon('piece', partie, comptesRanges),
       ],
       actions: [{ texte: t('ordinateur.retour'), icone: 'retour', surClic: () => ctx.aller.accueil() }],
     });

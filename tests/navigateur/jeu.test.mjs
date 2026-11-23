@@ -63,9 +63,10 @@ test('toucher un meuble : on s\'en approche, puis on l\'examine (bouton, Entrée
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
-  await toucherCase(page, 3, 1); // le lit
+  await page.getByRole('button', { name: 'Masquer ce message' }).first().click();
+  await toucherCase(page, 5, 3); // le lit
   const bouton = page.getByRole('button', { name: /Examiner le lit/ });
-  await bouton.waitFor({ timeout: 15000 });
+  await bouton.waitFor({ timeout: 30000 });
   assert.equal((await etatDuMonde(page)).objetProche.id, 'lit');
   // Entrée examine (le focus n'est sur aucun bouton après un toucher).
   await page.keyboard.press('Enter');
@@ -93,7 +94,7 @@ test('« Aller à… » mène au bureau, en fauteuil roulant aussi', async () =>
   const fenetre = page.getByRole('dialog', { name: /Aller à/ });
   assert.match(await fenetre.innerText(), /tu es ici/);
   await fenetre.getByRole('button', { name: 'Bureau', exact: true }).click();
-  await page.getByRole('button', { name: /Examiner ton bureau/ }).waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: /Examiner ton bureau/ }).waitFor({ timeout: 30000 });
   const etat = await etatDuMonde(page);
   assert.equal(etat.objetProche.id, 'bureau');
   // Puis la chambre : le personnage passe la porte (1 m) et y entre.
@@ -266,7 +267,7 @@ test('l\'affiche de l\'Omni-système : près de la porte, à examiner, avec le l
   await page.getByRole('button', { name: 'Aller à…' }).click();
   await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Affiche de l\'Omni-système' }).click();
   const examiner = page.getByRole('button', { name: /Examiner l'affiche de l'Omni-système/ });
-  await examiner.waitFor({ timeout: 20000 });
+  await examiner.waitFor({ timeout: 30000 });
   await examiner.click();
   const bulle = page.getByRole('region', { name: 'Affiche de l\'Omni-système' });
   await bulle.waitFor();

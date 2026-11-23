@@ -99,6 +99,13 @@ export function chargerReglages() {
   }
   reglages = nettoyerReglages(brut, lireAppareil());
   appliquer();
+  if (typeof self !== 'undefined') {
+    self.surChangementAppareilAffichage = () => {
+      if (!reglages) return;
+      mettreAJourCouleurNavigateur();
+      annoncer('reglages:modifies', { cle: 'appareil', valeur: null, reglages });
+    };
+  }
   return reglages;
 }
 
@@ -111,13 +118,18 @@ function enregistrer() {
   }
 }
 
+function mettreAJourCouleurNavigateur() {
+  if (typeof document === 'undefined') return;
+  const fond = getComputedStyle(document.documentElement).getPropertyValue('--fond').trim();
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta && fond) meta.setAttribute('content', fond);
+}
+
 // Pose les réglages sur la page, puis accorde la couleur de la barre du
 // navigateur (theme-color) au fond du thème choisi.
 function appliquer() {
   self.appliquerReglagesAffichage?.(reglages);
-  const fond = getComputedStyle(document.documentElement).getPropertyValue('--fond').trim();
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta && fond) meta.setAttribute('content', fond);
+  mettreAJourCouleurNavigateur();
 }
 
 export function obtenirReglages() {

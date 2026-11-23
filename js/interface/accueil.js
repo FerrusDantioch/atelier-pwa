@@ -53,7 +53,9 @@ export function afficherAccueil(parent, options) {
     boutonMenu({ icone: 'reglages', texte: t('accueil.reglages'), surClic: options.surReglages }),
   );
   if (!installe) {
-    boutons.push(boutonMenu({ icone: 'installer', texte: t('accueil.installer'), surClic: options.surInstaller }));
+    const item = boutonMenu({ icone: 'installer', texte: t('accueil.installer'), surClic: options.surInstaller });
+    item.dataset.action = 'installer';
+    boutons.push(item);
   }
   boutons.push(boutonMenu({ icone: 'info', texte: t('accueil.aPropos'), surClic: options.surAPropos }));
 
