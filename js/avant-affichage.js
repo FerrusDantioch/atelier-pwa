@@ -36,6 +36,7 @@
 
   var sombreDemande = self.matchMedia ? self.matchMedia('(prefers-color-scheme: dark)') : null;
   var calmeDemande = self.matchMedia ? self.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  var contrasteDemande = self.matchMedia ? self.matchMedia('(prefers-contrast: more)') : null;
   var derniersReglages = {};
 
   function permis(nom, valeur) {
@@ -57,10 +58,11 @@
   function appliquer(reglages) {
     derniersReglages = reglages || {};
     var racine = document.documentElement;
+    var contrasteDefaut = contrasteDemande && contrasteDemande.matches ? 'eleve' : 'normal';
     var attributs = {
       theme: permis('theme', derniersReglages.theme || 'omni'),
       texte: permis('texte', derniersReglages.texte || 1),
-      contraste: permis('contraste', derniersReglages.contraste || 'normal'),
+      contraste: permis('contraste', derniersReglages.contraste || contrasteDefaut),
       police: permis('police', derniersReglages.police || 'lisible'),
       espacement: permis('espacement', derniersReglages.espacement || 'normal'),
       animations: permis('animations', derniersReglages.animations || 'auto'),
@@ -74,10 +76,15 @@
   }
 
   // Si l'appareil passe en mode sombre ou réduit ses animations pendant le
-  // jeu, les réglages « auto » suivent aussitôt.
+  // jeu, les réglages « auto » suivent aussitôt (y compris la 3D et theme-color).
   function suivreAppareil(demande) {
     if (!demande) return;
-    var reagir = function () { appliquer(derniersReglages); };
+    var reagir = function () {
+      appliquer(derniersReglages);
+      if (typeof self.surChangementAppareilAffichage === 'function') {
+        self.surChangementAppareilAffichage();
+      }
+    };
     if (demande.addEventListener) demande.addEventListener('change', reagir);
     else if (demande.addListener) demande.addListener(reagir);
   }
@@ -95,6 +102,7 @@
   appliquer(enregistres);
   suivreAppareil(sombreDemande);
   suivreAppareil(calmeDemande);
+  suivreAppareil(contrasteDemande);
 
   self.appliquerReglagesAffichage = appliquer;
 })();

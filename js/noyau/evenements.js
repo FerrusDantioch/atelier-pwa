@@ -10,12 +10,14 @@
 //   reglages:modifies   { cle, valeur, reglages }
 //   partie:chargee      partie
 //   partie:modifiee     partie
-//   sauvegarde:faite    { date }
-//   sauvegarde:echec    { erreur }
-//   fenetre:ouverte     { element }
-//   fenetre:fermee      { element }
-//   pwa:mise-a-jour     { version }
-//   pwa:installation    { possible }
+//   sauvegarde:faite        { date }
+//   sauvegarde:echec        { erreur }
+//   sauvegarde:copie-echec  { erreur }
+//   sauvegarde:autre-onglet { date }
+//   fenetre:ouverte         { element }
+//   fenetre:fermee          { element }
+//   pwa:mise-a-jour         { version }
+//   pwa:installation        { possible, installe }
 // =============================================================================
 
 const abonnes = new Map();

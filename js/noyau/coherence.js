@@ -24,20 +24,32 @@
 // Ce module n'utilise ni la 3D ni la page (testé avec node --test).
 // =============================================================================
 
-import { etatDesCommandes } from '../jeu/commandes.js';
+import { commandesAProposer, drapeauDeProposition, etatDesCommandes } from '../jeu/commandes.js';
 import { meilleurProjet, recompensePour } from '../jeu/creation.js';
 import { associationsPossibles, commandesDuJourOuvertes } from '../jeu/generateur.js';
-import { DRAPEAUX_D_ETAPES, mettreAJourQuetes } from '../jeu/quetes.js';
+import { DRAPEAUX_D_ETAPES, drapeauDEtape, etapesDeQuete, faireEtape, mettreAJourQuetes } from '../jeu/quetes.js';
 import { CHAMPS_APPARENCE, CHAMPS_COULEUR, FORMES_CONNUES } from '../jeu/personnage.js';
-import { POINT_D_ARRIVEE, verifierRoutine } from '../jeu/routines.js';
-import { heureEnMinutes } from './format-sauvegarde.js';
-import { problemesDAcces } from '../jeu/amenagement.js';
+import { POINT_D_ARRIVEE, creneauPossible, presenceDans, verifierRoutine } from '../jeu/routines.js';
+import { heureEnMinutes, niveauDeReputation } from './format-sauvegarde.js';
+import { aUnEspaceDeDemiTour, problemesDAcces } from '../jeu/amenagement.js';
 import { articlesDeLaBoutique } from '../jeu/boutique.js';
-import { etatsAVerifier, lieuSelonOuvertures, ouverturesDuLieu } from '../jeu/lieux.js';
+import { etatsAVerifier, lieuSelonOuvertures, ouvertures, ouverturesDuLieu } from '../jeu/lieux.js';
 import { distancesDepuis } from '../monde/chemin.js';
 import { TAILLE_CASE, creerGrille, empriseTournee, profilDeDeplacement } from '../monde/grille.js';
 
 const NOMS_PROFILS = { pieton: 'à pied', fauteuil: 'en fauteuil roulant (passages d\'au moins 1 m)' };
+const MAX_PNJ_SIMULTANES = 2;
+
+function drapeauxConnusDe(donnees) {
+  const connus = new Set(DRAPEAUX_D_ETAPES);
+  for (const quete of donnees.quetes?.quetes || []) {
+    for (const etape of quete.etapes || []) connus.add(drapeauDEtape(quete, etape));
+  }
+  for (const commande of donnees.commandes?.commandes || []) {
+    if (commande.enPersonne) connus.add(drapeauDeProposition(commande));
+  }
+  return connus;
+}
 
 function verifierCouleurs(donnees, signaler) {
   const couleurs = donnees.palette?.couleurs || {};
@@ -270,16 +282,28 @@ function verifierLieu(lieu, donnees, signaler) {
     const ouvert = lieuSelonOuvertures(lieu, etat.ouvertes);
     const grille = creerGrille(ouvert, catalogue);
     const quand = etat.nom ? ` (${etat.nom})` : '';
-    for (const probleme of problemesDAcces(ouvert, grille, catalogue)) {
-      const facon = NOMS_PROFILS[probleme.profil];
+    for (const problemeAcces of problemesDAcces(ouvert, grille, catalogue)) {
+      const facon = NOMS_PROFILS[problemeAcces.profil];
       let message;
-      if (probleme.type === 'depart') message = `depart : la case ${lieu.depart.x},${lieu.depart.z} n'est pas libre ${facon}`;
-      else if (probleme.type === 'piece') message = `pieces › ${probleme.id} : impossible d'y entrer ${facon}`;
-      else if (probleme.type === 'meuble') message = `meubles › ${probleme.id} : impossible de s'en approcher ${facon}`;
-      else message = `points › ${probleme.id} : la case ${probleme.x},${probleme.z} n'est pas atteignable ${facon}`;
+      if (problemeAcces.type === 'depart') message = `depart : la case ${lieu.depart.x},${lieu.depart.z} n'est pas libre ${facon}`;
+      else if (problemeAcces.type === 'piece') message = `pieces › ${problemeAcces.id} : impossible d'y entrer ${facon}`;
+      else if (problemeAcces.type === 'meuble') message = `meubles › ${problemeAcces.id} : impossible de s'en approcher ${facon}`;
+      else message = `points › ${problemeAcces.id} : la case ${problemeAcces.x},${problemeAcces.z} n'est pas atteignable ${facon}`;
       if (dits.has(message)) continue;
       dits.add(message);
       signaler(chemin, `${message}${quand}`);
+    }
+    if (grille.caseAccessible(lieu.depart.x, lieu.depart.z, 'fauteuil')) {
+      const distancesFauteuil = distancesDepuis(grille, lieu.depart, 'fauteuil');
+      for (const piece of ouvert.pieces) {
+        if (piece.verrouillee) continue;
+        if (!aUnEspaceDeDemiTour(grille, piece, distancesFauteuil)) {
+          const message = `pieces › ${piece.id} : aucun espace de demi-tour en fauteuil roulant (carré libre de 1,50 m × 1,50 m atteignable)`;
+          if (dits.has(message)) continue;
+          dits.add(message);
+          signaler(chemin, `${message}${quand}`);
+        }
+      }
     }
   }
 }
@@ -327,8 +351,14 @@ function verifierBoutique(donnees, signaler) {
   const catalogue = new Map(meubles.map((meuble) => [meuble.id, meuble]));
   const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
   const elements = new Set(meubles.flatMap((meuble) => meuble.formes.map((forme) => forme.element)).filter(Boolean));
+  const idsBoutique = new Set();
+  const verifierIdUnique = (id, ou) => {
+    if (idsBoutique.has(id)) signaler(chemin, `${ou} : identifiant « ${id} » déjà utilisé dans la boutique`);
+    idsBoutique.add(id);
+  };
   for (const article of boutique.materiel) {
     const ou = `materiel › ${article.id}`;
+    verifierIdUnique(article.id, ou);
     if (catalogue.has(article.id)) signaler(chemin, `${ou} : cet identifiant est déjà celui d'un meuble de data/meubles.json`);
     if (!elements.has(article.element)) {
       signaler(chemin, `${ou} › element : aucun meuble de data/meubles.json n'a de formes « ${article.element} » à remplacer`);
@@ -337,6 +367,7 @@ function verifierBoutique(donnees, signaler) {
   }
   for (const article of boutique.meubles) {
     const ou = `meubles › ${article.meuble}`;
+    verifierIdUnique(article.meuble, ou);
     const meuble = catalogue.get(article.meuble);
     if (!meuble) signaler(chemin, `${ou} : le meuble « ${article.meuble} » n'existe pas dans data/meubles.json`);
     else if (!meuble.designation) signaler(chemin, `${ou} : le meuble doit avoir une « designation » dans data/meubles.json (« le cactus »)`);
@@ -348,6 +379,7 @@ function verifierBoutique(donnees, signaler) {
   const depart = donnees.jeu?.depart.lieu;
   for (const article of boutique.lieux || []) {
     const ou = `lieux › ${article.id}`;
+    verifierIdUnique(article.id, ou);
     if (!lieux[article.id]) signaler(chemin, `${ou} : le lieu « ${article.id} » n'existe pas dans data/lieux/index.json`);
     if (article.id === depart) signaler(chemin, `${ou} : c'est le lieu de départ, il n'y a rien à louer`);
     if ((article.niveau || 1) > niveauMax) signaler(chemin, `${ou} › niveau : il n'y a que ${niveauMax} niveaux de réputation`);
@@ -355,6 +387,7 @@ function verifierBoutique(donnees, signaler) {
   const pieces = new Map((boutique.pieces || []).map((article) => [article.id, article]));
   for (const article of boutique.pieces || []) {
     const ou = `pieces › ${article.id}`;
+    verifierIdUnique(article.id, ou);
     const lieu = lieux[article.lieu];
     if (!lieu) signaler(chemin, `${ou} › lieu : « ${article.lieu} » n'existe pas`);
     else if (!lieu.pieces.some((piece) => piece.ouverture === article.id)) {
@@ -437,14 +470,19 @@ function verifierModelesCommandes(donnees, signaler) {
       signaler(chemin, `sujets › ${sujet.id} : aucune contrainte ne lui convient, il ne serait jamais réussi « parfaitement »`);
     }
   }
-  if (possibles.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} sujets possibles`);
-  if (modeles.clients.length < modeles.parJour) signaler(chemin, `parJour : il faut au moins ${modeles.parJour} clientes ou clients`);
+  const totalParJour = modeles.parJour + (modeles.enPlus?.parJour || 0);
+  if (possibles.length < totalParJour) signaler(chemin, `parJour : il faut au moins ${totalParJour} sujets possibles`);
+  if (modeles.clients.length < totalParJour) signaler(chemin, `parJour : il faut au moins ${totalParJour} clientes ou clients`);
   if (modeles.enPlus && !donnees.lieux?.[modeles.enPlus.lieu]) {
     signaler(chemin, `enPlus › lieu : « ${modeles.enPlus.lieu} » n'existe pas`);
   }
   const commandes = new Set((donnees.commandes?.commandes || []).map((commande) => commande.id));
   for (const id of modeles.debloquee?.apres || []) {
     if (!commandes.has(id)) signaler(chemin, `debloquee › apres : la commande « ${id} » n'existe pas dans data/commandes.json`);
+  }
+  const drapeauxConnus = drapeauxConnusDe(donnees);
+  if (modeles.debloquee?.drapeau && !drapeauxConnus.has(modeles.debloquee.drapeau)) {
+    signaler(chemin, `debloquee › drapeau : « ${modeles.debloquee.drapeau} » n'est posé nulle part par le jeu`);
   }
 }
 
@@ -523,40 +561,108 @@ function verifierQuetes(donnees, signaler) {
     }
   }
 
-  // Une partie qui fait tout, mais n'obtient que des « Bien » : chaque quête
-  // doit commencer puis se terminer, et les commandes du jour arriver.
+  // Simulation réelle d'une partie qui fait tous les gestes possibles mais
+  // n'obtient que des « Bien » : sans drapeau magique, chaque quête doit
+  // commencer puis se terminer, et les commandes du jour arriver.
   if (!donnees.jeu || !donnees.commandes || !donnees.creation) return;
   const paliers = donnees.jeu.reputation.paliers;
   const liste = donnees.commandes.commandes;
-  // Tout ce qui se vend est acheté, et chaque meuble posé dans chaque lieu.
-  const possessions = [...articles.values()].map((article, n) => ({
-    id: `achat-${n + 1}`, article: article.id, sorte: article.sorte, jour: 1, prix: article.prix,
-  }));
-  const poses = possessions.filter((p) => p.sorte === 'meuble').map((p) => ({ id: p.id, x: 0, z: 0, rotation: 0 }));
+  let prochainAchat = 1;
   const partie = {
-    drapeaux: new Proxy({}, { get: () => true }), // tous les gestes faits
+    drapeaux: Object.fromEntries(DRAPEAUX_D_ETAPES.map((drapeau) => [drapeau, true])),
     argent: 0,
     reputation: donnees.jeu.depart.reputation,
     temps: { jour: 1, minute: 0 },
     commandes: { enCours: {}, livrees: [], aleatoires: {} },
     quetes: { actives: {}, finies: [], suivie: null },
-    possessions,
-    lieux: {
-      actuel: donnees.jeu.depart.lieu,
-      debloques: Object.keys(donnees.lieux || {}),
-      amenagements: Object.fromEntries(Object.keys(donnees.lieux || {}).map((id) => [id, poses])),
-    },
+    possessions: [],
+    lieux: { actuel: donnees.jeu.depart.lieu, debloques: [donnees.jeu.depart.lieu], amenagements: {} },
   };
-  for (let tour = 0; tour <= liste.length + fichier.quetes.length + 1; tour += 1) {
-    // On passe dans chaque lieu (étapes « lieu »).
-    for (const id of Object.keys(donnees.lieux || {})) {
-      partie.lieux.actuel = id;
-      mettreAJourQuetes(partie, fichier.quetes, paliers);
+  const pnjJoignable = (idPnj) => {
+    const pnj = pnjParId.get(idPnj);
+    if (!pnj) return false;
+    const ouv = ouvertures(partie);
+    return pnj.routine.some((c) => c.lieu !== 'ailleurs'
+      && partie.lieux.debloques.includes(c.lieu)
+      && creneauPossible(c, ouv));
+  };
+  const endroitAccessible = (cible) => {
+    const ouv = ouvertures(partie);
+    return partie.lieux.debloques.some((idLieu) => {
+      const brut = donnees.lieux?.[idLieu];
+      if (!brut) return false;
+      const lieu = lieuSelonOuvertures(brut, ouv);
+      return ['meubles', 'points', 'pieces'].some((g) => (lieu[g] || []).some((e) => !e.verrouillee && e.id === cible));
+    });
+  };
+  const acheterCeQuiEstDebloque = () => {
+    const niveau = niveauDeReputation(partie.reputation, paliers).niveau;
+    let changement = false;
+    for (const article of articles.values()) {
+      if ((article.niveau || 1) > niveau) continue;
+      if (article.sorte === 'piece' && !partie.lieux.debloques.includes(article.lieu)) continue;
+      if (article.sorte === 'meuble') {
+        for (const idLieu of partie.lieux.debloques) {
+          const dejaPose = (partie.lieux.amenagements[idLieu] || []).some((place) => {
+            const p = partie.possessions.find((poss) => poss.id === place.id);
+            return p?.article === article.id;
+          });
+          if (dejaPose) continue;
+          const id = `achat-${prochainAchat}`;
+          prochainAchat += 1;
+          partie.possessions.push({ id, article: article.id, sorte: 'meuble', jour: 1, prix: article.prix });
+          if (!partie.lieux.amenagements[idLieu]) partie.lieux.amenagements[idLieu] = [];
+          partie.lieux.amenagements[idLieu].push({ id, x: 0, z: 0, rotation: 0 });
+          changement = true;
+        }
+        continue;
+      }
+      if (partie.possessions.some((p) => p.article === article.id)) continue;
+      const id = `achat-${prochainAchat}`;
+      prochainAchat += 1;
+      partie.possessions.push({ id, article: article.id, sorte: article.sorte, jour: 1, prix: article.prix });
+      if (article.sorte === 'lieu' && !partie.lieux.debloques.includes(article.id)) {
+        partie.lieux.debloques.push(article.id);
+      }
+      changement = true;
     }
+    return changement;
+  };
+
+  const maxTours = (liste.length + fichier.quetes.length + articles.size) * 2 + 5;
+  for (let tour = 0; tour < maxTours; tour += 1) {
+    let progres = acheterCeQuiEstDebloque();
+    // On passe dans chaque lieu débloqué (étapes « lieu »).
+    for (const idLieu of [...partie.lieux.debloques]) {
+      partie.lieux.actuel = idLieu;
+      if (mettreAJourQuetes(partie, fichier.quetes, paliers).length > 0) progres = true;
+    }
+    // On écoute les commandes « enPersonne » des PNJ joignables.
+    for (const commande of commandesAProposer(partie, liste, paliers)) {
+      if (pnjJoignable(commande.client)) {
+        partie.drapeaux[drapeauDeProposition(commande)] = true;
+        progres = true;
+      }
+    }
+    if (mettreAJourQuetes(partie, fichier.quetes, paliers).length > 0) progres = true;
+    // On accomplit les étapes « parler » et « aller » réellement ouvertes.
+    for (const quete of fichier.quetes) {
+      for (const { etape, ouverte } of etapesDeQuete(quete, partie, paliers)) {
+        if (!ouverte) continue;
+        if (etape.type === 'parler' && pnjJoignable(etape.pnj)) {
+          if (faireEtape(partie, quete, etape, paliers).length > 0) progres = true;
+        } else if (etape.type === 'aller' && endroitAccessible(etape.cible)) {
+          if (faireEtape(partie, quete, etape, paliers).length > 0) progres = true;
+        }
+      }
+    }
+    if (mettreAJourQuetes(partie, fichier.quetes, paliers).length > 0) progres = true;
     for (const commande of etatDesCommandes(partie, liste, paliers).offres) {
       partie.reputation += recompensePour('bien', commande, 0, donnees.creation.bareme).reputation;
       partie.commandes.livrees.push({ id: commande.id });
+      progres = true;
     }
+    if (!progres) break;
   }
   mettreAJourQuetes(partie, fichier.quetes, paliers);
   for (const quete of fichier.quetes) {
@@ -583,6 +689,7 @@ function verifierCommandes(donnees, signaler) {
   const reglages = new Map(creation.confort.map((reglage) => [reglage.id, new Set(reglage.valeurs.map((v) => v.id))]));
   const ids = new Set(commandes.map((commande) => commande.id));
   const niveauMax = donnees.jeu?.reputation.paliers.length || 1;
+  const drapeauxConnus = drapeauxConnusDe(donnees);
 
   for (const commande of commandes) {
     const ou = `commandes › ${commande.id}`;
@@ -614,6 +721,9 @@ function verifierCommandes(donnees, signaler) {
     for (const id of commande.debloquee?.apres || []) {
       if (!ids.has(id)) signaler(chemin, `${ou} › debloquee › apres : la commande « ${id} » n'existe pas`);
     }
+    if (commande.debloquee?.drapeau && !drapeauxConnus.has(commande.debloquee.drapeau)) {
+      signaler(chemin, `${ou} › debloquee › drapeau : « ${commande.debloquee.drapeau} » n'est posé nulle part par le jeu`);
+    }
     if ((commande.debloquee?.niveau || 1) > niveauMax) {
       signaler(chemin, `${ou} › debloquee › niveau : il n'y a que ${niveauMax} niveaux de réputation (data/jeu.json)`);
     }
@@ -622,11 +732,12 @@ function verifierCommandes(donnees, signaler) {
     }
   }
 
-  // Une partie qui n'obtiendrait que des « Bien » : tout doit se débloquer.
+  // Une partie qui n'obtiendrait que des « Bien » : tout doit se débloquer
+  // (seuls les drapeaux réellement connus du jeu sont posés).
   if (!donnees.jeu) return;
   const paliers = donnees.jeu.reputation.paliers;
   const partie = {
-    drapeaux: new Proxy({}, { get: () => true }), // tous les drapeaux (appel du mentor…)
+    drapeaux: Object.fromEntries([...drapeauxConnus].map((drapeau) => [drapeau, true])),
     reputation: donnees.jeu.depart.reputation,
     commandes: { enCours: {}, livrees: [] },
   };
@@ -671,7 +782,8 @@ function verifierPnj(donnees, signaler) {
     ...lieuxALouer,
     ...Object.values(donnees.lieux || {}).flatMap((lieu) => ouverturesDuLieu(lieu)),
   ]);
-  for (const pnj of donnees.pnj?.pnj || []) {
+  const listePnj = donnees.pnj?.pnj || [];
+  for (const pnj of listePnj) {
     const ou = `pnj › ${pnj.id}`;
     const apparence = pnj.modele === 'ferrus' ? personnages?.ferrus?.apparence : pnj.apparence;
     if (pnj.apparence && personnages) {
@@ -713,5 +825,21 @@ function verifierPnj(donnees, signaler) {
         signaler(chemin, `${ici} : le point « ${creneau.point} » n'est pas atteignable ${NOMS_PROFILS[profil]} depuis l'entrée`);
       }
     });
+  }
+
+  // Budget 3D : jamais plus de MAX_PNJ_SIMULTANES personnes dans le même lieu
+  // à la même minute (avec toutes les pièces ouvertes et un personnage perso).
+  if (journee) {
+    for (const idLieu of Object.keys(donnees.lieux || {})) {
+      for (let minute = journee.debut; minute < journee.fin; minute += 1) {
+        const presents = listePnj.filter((pnj) => presenceDans(pnj, idLieu, minute, { modele: 'perso' }, ouverturesConnues));
+        if (presents.length > MAX_PNJ_SIMULTANES) {
+          const h = String(Math.floor(minute / 60)).padStart(2, '0');
+          const m = String(minute % 60).padStart(2, '0');
+          signaler(chemin, `routines › ${idLieu} à ${h}:${m} : ${presents.length} personnages ensemble (${presents.map((p) => p.id).join(', ')}) ; maximum ${MAX_PNJ_SIMULTANES} pour garder la 3D fluide`);
+          break;
+        }
+      }
+    }
   }
 }

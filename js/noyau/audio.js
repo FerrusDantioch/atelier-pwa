@@ -22,6 +22,7 @@ import { CANAUX_SON, obtenirReglages } from './reglages.js';
 
 let contexte = null;
 let sortie = null;
+let gainAmbiance = null;
 const canaux = {};
 let gesteRecu = false;
 let ambianceActive = false;
@@ -53,20 +54,44 @@ export function hauteurDeVoix(id = '') {
   return 290 + (h % 130);
 }
 
+function contexteEnPause() {
+  return Boolean(contexte && (contexte.state === 'suspended' || contexte.state === 'interrupted'));
+}
+
+function reveillerContexte() {
+  if (!contexteEnPause() || typeof contexte.resume !== 'function') return null;
+  return contexte.resume().then(() => {
+    if (contexte?.state === 'running') mettreAJourMusique();
+  }).catch(() => {});
+}
+
 function preparer() {
   if (!contexte) {
     const Contexte = self.AudioContext || self.webkitAudioContext;
     if (!Contexte) return null;
-    contexte = new Contexte();
+    try {
+      contexte = new Contexte();
+    } catch {
+      return null;
+    }
     sortie = contexte.createGain();
     sortie.connect(contexte.destination);
     for (const canal of CANAUX_SON) {
       canaux[canal] = contexte.createGain();
       canaux[canal].connect(sortie);
     }
+    // Gain dédié à la boucle d'ambiance : la couper en douceur n'empêche pas
+    // le son d'essai « Écouter » du canal musique dans les réglages.
+    gainAmbiance = contexte.createGain();
+    gainAmbiance.gain.setValueAtTime(1, contexte.currentTime);
+    gainAmbiance.connect(canaux.musique);
+    contexte.addEventListener?.('statechange', () => {
+      if (contexte?.state === 'running') mettreAJourMusique();
+      else if (contexte && contexte.state !== 'running') arreterMusique();
+    });
     appliquerVolumes(obtenirReglages());
   }
-  if (contexte.state === 'suspended') contexte.resume().catch(() => {});
+  if (contexteEnPause()) reveillerContexte();
   return contexte;
 }
 
@@ -83,7 +108,7 @@ function appliquerVolumes(reglages) {
 }
 
 // Une note douce : montée progressive, puis extinction (pas de « clic »).
-function note(canal, { frequence, debut, duree, attaque = 0.02, forme = 'sine', volume = 0.2 }) {
+function note(canal, { frequence, debut, duree, attaque = 0.02, forme = 'sine', volume = 0.2, destination = canaux[canal] }) {
   const oscillateur = contexte.createOscillator();
   oscillateur.type = forme;
   oscillateur.frequency.value = frequence;
@@ -92,7 +117,15 @@ function note(canal, { frequence, debut, duree, attaque = 0.02, forme = 'sine', 
   enveloppe.gain.exponentialRampToValueAtTime(volume, debut + Math.min(attaque, duree * 0.45));
   enveloppe.gain.exponentialRampToValueAtTime(0.0001, debut + duree);
   oscillateur.connect(enveloppe);
-  enveloppe.connect(canaux[canal]);
+  enveloppe.connect(destination);
+  oscillateur.addEventListener?.('ended', () => {
+    try {
+      oscillateur.disconnect();
+      enveloppe.disconnect();
+    } catch {
+      // déjà débranché
+    }
+  }, { once: true });
   oscillateur.start(debut);
   oscillateur.stop(debut + duree + 0.05);
 }
@@ -100,11 +133,22 @@ function note(canal, { frequence, debut, duree, attaque = 0.02, forme = 'sine', 
 // --- Musique d'ambiance douce ------------------------------------------------
 
 function jouerAccordSuivant() {
-  if (!ambianceActive || document.hidden || !peutJouer('musique', obtenirReglages(), { calme: true })) {
+  if (!ambianceActive || (typeof document !== 'undefined' && document.hidden)
+    || !peutJouer('musique', obtenirReglages(), { calme: true })) {
     arreterMusique();
     return;
   }
-  if (!preparer()) return;
+  // Ne jamais empiler de notes si le moteur sonore est en pause : sinon tous
+  // les accords partiraient ensemble au réveil.
+  if (!preparer() || contexte.state !== 'running') {
+    arreterMusique();
+    return;
+  }
+  if (gainAmbiance) {
+    const maintenant = contexte.currentTime;
+    gainAmbiance.gain.cancelScheduledValues?.(maintenant);
+    gainAmbiance.gain.setTargetAtTime(1, maintenant, 0.015);
+  }
   const accord = ACCORDS[indexAccord % ACCORDS.length];
   indexAccord += 1;
   const debut = contexte.currentTime + 0.08;
@@ -116,6 +160,7 @@ function jouerAccordSuivant() {
       attaque: 0.75,
       forme: i === 0 ? 'sine' : 'triangle',
       volume: i === 0 ? 0.055 : 0.038,
+      destination: gainAmbiance || canaux.musique,
     });
   });
 }
@@ -125,12 +170,27 @@ function arreterMusique() {
     clearInterval(minuteurMusique);
     minuteurMusique = null;
   }
+  if (contexte && gainAmbiance) {
+    const maintenant = contexte.currentTime;
+    gainAmbiance.gain.cancelScheduledValues?.(maintenant);
+    gainAmbiance.gain.setTargetAtTime(0, maintenant, 0.015);
+  }
 }
 
 function mettreAJourMusique() {
-  const doitJouer = ambianceActive && gesteRecu && (typeof document === 'undefined' || !document.hidden)
+  const cache = typeof document !== 'undefined' && document.hidden;
+  if (cache) {
+    arreterMusique();
+    if (contexte && contexte.state === 'running') contexte.suspend?.().catch(() => {});
+    return;
+  }
+  const doitJouer = ambianceActive && gesteRecu
     && peutJouer('musique', obtenirReglages(), { calme: true });
   if (!doitJouer) {
+    arreterMusique();
+    return;
+  }
+  if (!preparer() || contexte.state !== 'running') {
     arreterMusique();
     return;
   }
@@ -178,7 +238,7 @@ export function jouerEffet(nom, { calme = false } = {}) {
   const recette = EFFETS[nom];
   if (!recette || !gesteRecu) return false;
   if (!peutJouer('effets', obtenirReglages(), { calme })) return false;
-  if (!preparer()) return false;
+  if (!preparer() || contexte.state !== 'running') return false;
   recette(contexte.currentTime + 0.02);
   return true;
 }
@@ -187,7 +247,7 @@ export function jouerEffet(nom, { calme = false } = {}) {
 export function jouerVoix(id = '') {
   if (!gesteRecu) return false;
   if (!peutJouer('voix', obtenirReglages())) return false;
-  if (!preparer()) return false;
+  if (!preparer() || contexte.state !== 'running') return false;
   const base = hauteurDeVoix(id);
   const debut = contexte.currentTime + 0.02;
   [1, 1.12, 0.96, 1.06].forEach((rapport, i) => {
@@ -229,7 +289,13 @@ export function jouerEssai(canal) {
   if (reglages.sonCoupe) return 'coupe';
   if (reglages.volumes[canal] === 0) return 'muet';
   if (!preparer()) return 'indisponible';
-  ESSAIS[canal](contexte.currentTime + 0.05);
+  if (contexte.state === 'running') {
+    ESSAIS[canal](contexte.currentTime + 0.05);
+  } else if (typeof contexte.resume === 'function') {
+    contexte.resume().then(() => {
+      if (contexte?.state === 'running') ESSAIS[canal](contexte.currentTime + 0.05);
+    }).catch(() => {});
+  }
   return 'ok';
 }
 
@@ -239,14 +305,24 @@ export function initialiserAudio() {
     mettreAJourMusique();
   });
   if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', mettreAJourMusique);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && gesteRecu && !obtenirReglages()?.sonCoupe && contexteEnPause()) {
+        reveillerContexte();
+      }
+      mettreAJourMusique();
+    });
   }
-  // Prépare le son au premier geste (sans rien jouer de surprenant).
-  const auPremierGeste = () => {
+  // Débloque le son sur des gestes reconnus partout (y compris Safari/iPad et
+  // après une mise en veille « interrupted ») sans jamais rien jouer de surprenant.
+  const auGeste = () => {
     gesteRecu = true;
-    if (!obtenirReglages().sonCoupe) preparer();
+    if (obtenirReglages()?.sonCoupe) return;
+    if (!contexte || contexte.state !== 'running') {
+      preparer();
+    }
     mettreAJourMusique();
   };
-  self.addEventListener('pointerdown', auPremierGeste, { once: true });
-  self.addEventListener('keydown', auPremierGeste, { once: true });
+  for (const evenement of ['pointerup', 'touchend', 'click', 'keydown']) {
+    self.addEventListener(evenement, auGeste, { capture: true, passive: true });
+  }
 }
