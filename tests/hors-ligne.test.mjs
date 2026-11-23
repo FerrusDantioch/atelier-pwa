@@ -2,6 +2,7 @@
 // Tout nouveau fichier du jeu doit être ajouté à FICHIERS dans sw.js.
 
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -36,7 +37,7 @@ test('la liste de sw.js n\'a pas de doublon et commence par la page', () => {
   assert.ok(liste.includes('index.html'));
 });
 
-test('chaque fichier durable de sw.js appartient à FICHIERS (Three.js et polices)', () => {
+test('chaque fichier durable de sw.js appartient à FICHIERS et VERSION_TIERS suit licences-tierces.txt', () => {
   const sw = lire('sw.js');
   const bloc = sw.match(/const DURABLES = new Set\(\[([\s\S]*?)\]\);/);
   assert.ok(bloc, 'liste DURABLES introuvable dans sw.js');
@@ -46,7 +47,19 @@ test('chaque fichier durable de sw.js appartient à FICHIERS (Three.js et police
   for (const fichier of durables) assert.ok(listes.has(fichier), `DURABLES cite « ${fichier} » absent de FICHIERS`);
   assert.ok(durables.includes('lib/three/three.core.js'));
   assert.ok(durables.includes('lib/three/three.module.js'));
-  assert.match(sw, /const VERSION_TIERS = '/);
+
+  const versionMatch = sw.match(/const VERSION_TIERS = '([^']+)';/);
+  assert.ok(versionMatch, 'constante VERSION_TIERS introuvable dans sw.js');
+  const licences = lire('licences-tierces.txt');
+  const empreintes = new Map([...licences.matchAll(/^([0-9a-f]{64}) {2}(\S+)$/gm)].map((m) => [m[2], m[1]]));
+  for (const fichier of durables) {
+    assert.ok(empreintes.has(fichier), `DURABLES cite « ${fichier} » absent de licences-tierces.txt`);
+  }
+  const attendue = createHash('sha256')
+    .update(durables.map((fichier) => `${fichier}:${empreintes.get(fichier)}`).sort().join('\n'))
+    .digest('hex')
+    .slice(0, 12);
+  assert.equal(versionMatch[1], attendue, 'VERSION_TIERS dans sw.js ne correspond pas aux empreintes de licences-tierces.txt');
 });
 
 test('le service worker lit sa version dans config.js et n\'efface que ses propres réserves', () => {

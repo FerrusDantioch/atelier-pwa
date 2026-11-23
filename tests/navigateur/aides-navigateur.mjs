@@ -82,7 +82,7 @@ export async function nouvellePartie(page, { modele = 'perso', aide = null } = {
 // « async » et importer les modules du jeu) devienne vraie.
 // (page.waitForFunction n'attend pas les fonctions async : on interroge la
 // page nous-mêmes.)
-export async function attendre(page, condition, argument, { timeout = 15000 } = {}) {
+export async function attendre(page, condition, argument, { timeout = 25000 } = {}) {
   const limite = Date.now() + timeout;
   for (;;) {
     if (await page.evaluate(condition, argument)) return;

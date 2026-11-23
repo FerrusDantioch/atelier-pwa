@@ -54,7 +54,7 @@ test('à 23 h, l\'horloge s\'arrête ; dormir mène au matin suivant, avec une c
   assert.equal(await minuteDuJeu(page), 23 * 60);
   await page.getByRole('button', { name: /Aller à/ }).click();
   await page.getByRole('dialog', { name: /Aller à/ }).getByRole('button', { name: 'Lit', exact: true }).click();
-  await page.getByRole('button', { name: 'Dormir' }).waitFor({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Dormir' }).waitFor({ timeout: 30000 });
   await page.getByRole('button', { name: 'Dormir' }).click();
   await page.getByRole('dialog', { name: /Dormir jusqu'à demain/ }).getByRole('button', { name: 'Dormir' }).click();
   await attendre(page, async () => {
@@ -84,7 +84,7 @@ test('parler à Halaé : sa rencontre, puis une salutation ; elle s\'arrête pou
   assert.match(await allerA.innerText(), /Personnes présentes/);
   await allerA.getByRole('button', { name: /Halaé/ }).click();
   const parler = page.getByRole('button', { name: /Parler à Halaé/ });
-  await parler.waitFor({ timeout: 15000 });
+  await parler.waitFor({ timeout: 30000 });
   await parler.click();
   let dialogue = page.getByRole('dialog', { name: 'Halaé' });
   assert.match(await dialogue.innerText(), /je cherche une appli pour organiser mes vidéos/);
@@ -118,7 +118,7 @@ test('Théo arrive à 16 h par la porte d\'entrée, et repart à 17 h', async ()
   await attendre(page, async () => {
     const ecran = await import('/js/interface/ecran-jeu.js');
     return !ecran.mondeAffiche().habitantsPresents.some((h) => h.id === 'theo');
-  }, undefined, { timeout: 30000 });
+  }, undefined, { timeout: 45000 });
   assert.deepEqual(page.erreurs, []);
   await contexte.close();
 });

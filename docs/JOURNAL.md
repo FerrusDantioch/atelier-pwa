@@ -1,5 +1,109 @@
 # Journal du projet — Atelier PWA
 
+## ✨ Améliorations et correctifs 0.6.3 — Lieux agrandis, confort et fiabilité (23 novembre 2026)
+
+Suite à la revue complète du dépôt et aux choix de Ferrus (jalon 5 toujours à
+essayer sur tablette, désormais en version 0.6.3) :
+
+### Lieux agrandis pour une meilleure visibilité
+
+- **Ton domicile** (`data/lieux/domicile.json`) passe de 10 × 8 m à **14 × 11 m**
+  (`28 × 22` cases), avec la **salle d'eau déplacée dans le coin nord-est**
+  (ce qui laisse le séjour et la cuisine ouverts et bien visibles au premier
+  plan, tout en gardant ses parois hautes opaques intactes).
+- **Les bureaux de l'atelier** (`data/lieux/bureaux.json`) passent de 12 × 9 m
+  à **16 × 12 m** (`32 × 24` cases), avec des pièces nord profondes (5 m) qui
+  offrent chacune au moins un véritable espace de demi-tour en fauteuil roulant.
+- **Confort de lecture de la scène** : murs légèrement abaissés (`2,30 m`),
+  murs coupés plus discrets (`0,35 m`), portes intérieures élargies à `1,50 m`
+  (3 cases), zoom minimal abaissé (`26 px/m` pour voir tout un grand lieu),
+  zoom de départ plus confortable (`78 px/m` minimum) et marche un peu plus
+  vive (`2,1 m/s`).
+
+### Bugs corrigés
+
+- **3D et caméra** :
+  - disparition du scintillement (Z-fighting) aux coins des murs et parois
+    hautes aux 4 rotations (`js/monde/lieu.js`) ;
+  - les murs de pièces encore fermées aux bureaux ne forment plus de grandes
+    façades pleines quand ils sont au premier plan, et les portes fermées
+    restent reconnaissables même sur un mur coupé ;
+  - les objets et affiches cachés derrière un mur coupé ne bloquent plus les
+    touchers, et on ne peut plus examiner un meuble ni parler à un personnage à
+    travers un mur (`js/monde/chemin.js`, `js/monde/monde.js`) ;
+  - en fauteuil roulant, le lissage des trajets obliques garde une marge
+    latérale autour des coins ;
+  - fin du saut de caméra après un pincement à deux doigts (`js/monde/pointage.js`),
+    de la rotation de 270° à l'envers lors d'un double appui rapide
+    (`js/monde/camera-iso.js`), des repères/ombres cachés sous les tapis
+    (`js/monde/reperes.js`, `js/modeles/personnage.js`), et du filet de 1 px sur
+    les portraits/photos (`js/monde/moteur.js`) ;
+  - une pièce nouvellement ouverte accueille aussitôt ses visiteurs même si le
+    temps est arrêté (`js/monde/monde.js`).
+- **Aménagement, quêtes et dialogues** :
+  - reprendre un meuble posé pour le déplacer ne le retire plus de la sauvegarde
+    avant confirmation (zéro perte en cas de rechargement) et `trouverPlace()`
+    vérifie aussi les pièces encore fermées (`js/interface/amenagement.js`,
+    `js/jeu/amenagement.js`) ;
+  - en panneau compact (téléphone / texte « Énorme »), les noms des meubles de
+    « Tes affaires » et le bouton « Terminer » restent bien visibles (`css/jeu.css`) ;
+  - dans les dialogues, les nouvelles questions ou commandes débloquées
+    apparaissent tout de suite dans la même conversation (`js/interface/dialogue.js`),
+    et `theo-revisions` attend désormais d'avoir demandé des nouvelles à Théo
+    (`data/commandes.json`) ;
+  - dans la quête « Un coin pour souffler », si le coin calme est déjà ouvert,
+    l'étape d'écoute préalable se valide sans bloquer (`js/jeu/quetes.js`) ;
+  - fermer la fenêtre de l'ordinateur après avoir lu la dernière réplique du
+    tutoriel de Ferrus valide bien l'appel (`js/interface/visio.js`) ;
+  - cliquer sur l'objectif d'une personne ailleurs vérifie qu'elle sera encore
+    là à l'arrivée après le trajet (`js/interface/ecran-jeu.js`), et le journal
+    voit bien toutes les commandes connues (`js/interface/journal.js`).
+- **Sauvegarde, son, PWA et noyau** :
+  - protection contre l'écrasement entre deux onglets (suspension des écritures
+    + bouton « Recharger la page »), protection de la copie d'urgence contre les
+    courses asynchrones, validation de la copie d'urgence avant reprise, et
+    nettoyage du cache hors ligne incomplet en cas d'erreur réseau
+    (`js/noyau/sauvegarde.js`, `js/noyau/etat.js`, `sw.js`, `js/main.js`) ;
+  - son Web Audio plus robuste sur tablette/iOS : aucun empilement d'accords
+    tant que l'audio est suspendu ou interrompu, fondu doux à l'arrêt de la
+    musique, débranchement des oscillateurs terminés (`js/noyau/audio.js`) ;
+  - thème « Auto » et `prefers-contrast: more` suivis en direct jusque dans la
+    scène 3D (`js/avant-affichage.js`, `js/noyau/reglages.js`), élision corrigée
+    après les mots accentués (`js/noyau/textes.js`), et garde contre les doubles
+    clics au changement d'écran (`js/main.js`).
+
+### Améliorations et tests automatiques
+
+- **Mise en page réactive aux 4 tailles de texte (`@container`)** : les
+  fenêtres (atelier, visio, réglages, commandes) passent proprement sur une
+  colonne dès que le texte « Très grand » ou « Énorme » manque de place
+  (`css/interface.css`, `css/ordinateur.css`, `css/jeu.css`, `css/choix-perso.css`).
+- **Présences dans les autres lieux** : « Aller à… » et « Où aller ? » indiquent
+  qui se trouvera sur place à l'arrivée (`js/interface/aller-a.js`).
+- **Stock dans la boutique** : chaque carte de meuble déjà acheté précise
+  combien d'exemplaires attendent dans « Tes affaires » (`js/interface/boutique.js`).
+- **Stockage persistant** : demande discrète de `navigator.storage.persist()` à
+  la sauvegarde pour protéger la partie contre le nettoyage automatique du
+  navigateur (`js/noyau/sauvegarde.js`).
+- **Vérifications et automatisation** : `coherence.js` vérifie maintenant
+  l'espace de demi-tour fauteuil de chaque pièce, la limite de 2 PNJ simultanés
+  et simule réellement les quêtes sans `Proxy` ; `outils/embarquer-tiers.mjs`
+  calcule automatiquement `VERSION_TIERS` dans `sw.js` ; et
+  `.github/workflows/tests.yml` lance automatiquement les tests navigateur
+  Playwright dans Chromium en plus des tests Node.
+
+### Comment tester sur tablette
+
+1. Ouvre le domicile : vérifie la nouvelle taille des pièces, la salle d'eau au
+   nord-est (parois hautes intactes), et fais tourner la vue aux 4 angles pour
+   vérifier qu'aucun coin de mur ne scintille.
+2. Essaie le mode **Aménager** en taille de texte « Énorme » : les noms des
+   meubles dans « Tes affaires » et le bouton « Terminer » restent lisibles.
+3. Ouvre la **Boutique**, **Réglages**, la **Visio** et l'**Atelier** en texte
+   « Très grand » puis « Énorme » : les colonnes s'empilent sans rien écraser.
+4. Va aux **bureaux** : vérifie dans « Aller à… » et « Où aller ? » que les
+   personnes présentes ailleurs s'affichent (« Sur place : … »).
+
 ## ✨ Améliorations 0.6.2 — Sons doux, bonus du matériel et découpage (22 novembre 2026)
 
 Suite du travail technique et de confort (jalon 5 toujours à essayer sur

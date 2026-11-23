@@ -22,3 +22,25 @@ jobs:
 
       - name: Lancer les tests
         run: node --test "tests/*.test.mjs"
+
+  tests-navigateur:
+    name: Tests dans Chromium (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installer Playwright et Chromium
+        working-directory: tests/navigateur
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Lancer les tests navigateur
+        run: node --test --test-concurrency=1 "tests/navigateur/*.test.mjs"

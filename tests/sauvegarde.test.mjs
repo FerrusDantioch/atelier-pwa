@@ -199,3 +199,38 @@ test('sauvegarderMaintenant sérialise les appels concurrents et tolère fermerP
   assert.equal(await etat.sauvegarderMaintenant(), false);
   sauvegarde.fermerSauvegarde();
 });
+
+test('verifierPartie refuse un lieu actuel absent des lieux débloqués', () => {
+  const partie = creer();
+  partie.lieux.actuel = 'bureaux';
+  assert.match(verifierPartie(partie).join(), /lieux invalides/);
+  partie.lieux.debloques.push('bureaux');
+  assert.deepEqual(verifierPartie(partie), []);
+});
+
+test('sauvegarde:autre-onglet suspend les écritures pour ne pas écraser l\'autre onglet', async () => {
+  const { chargerConfig } = await import('./aides.mjs');
+  chargerConfig();
+  const sauvegarde = await import('../js/noyau/sauvegarde.js');
+  const etat = await import('../js/noyau/etat.js');
+  const { annoncer } = await import('../js/noyau/evenements.js');
+  await sauvegarde.ouvrirSauvegarde({ copiesDeSecours: 5 });
+
+  const partie = creer();
+  etat.chargerPartieEnCours(partie);
+  assert.equal(etat.estSuspenduParAutreOnglet(), false);
+  assert.equal(await etat.sauvegarderMaintenant(), true);
+
+  annoncer('sauvegarde:autre-onglet', { raison: 'versionchange' });
+  assert.equal(etat.estSuspenduParAutreOnglet(), true);
+  etat.modifierPartie((p) => { p.argent = 999; }, { important: true });
+  assert.equal(await etat.sauvegarderMaintenant(), false, 'aucune écriture tant que suspendu');
+  const lue = await sauvegarde.lirePartie();
+  assert.equal(lue.partie.argent, jeu.depart.argent, 'la base n\'a pas été écrasée');
+
+  // Recharger une partie lève la suspension.
+  etat.chargerPartieEnCours(creer());
+  assert.equal(etat.estSuspenduParAutreOnglet(), false);
+  etat.fermerPartie();
+  sauvegarde.fermerSauvegarde();
+});

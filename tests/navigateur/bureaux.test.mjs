@@ -30,7 +30,7 @@ test('louer les bureaux, sortir par la porte d\'entrée, y arriver ; une pièce 
     const monde = mondeAffiche();
     monde.allerVers(monde.destinations().find((d) => d.id === 'bureau'));
   });
-  await page.getByRole('button', { name: 'Utiliser l\'ordinateur' }).click({ timeout: 20000 });
+  await page.getByRole('button', { name: 'Utiliser l\'ordinateur' }).click({ timeout: 30000 });
   await page.getByRole('button', { name: /^Boutique/ }).click();
   const ordinateur = page.getByRole('dialog', { name: 'Ton ordinateur' });
   assert.match(await lireTexte(ordinateur), /Salle de pause .* D'abord, loue les bureaux de l'atelier\./);
@@ -44,7 +44,7 @@ test('louer les bureaux, sortir par la porte d\'entrée, y arriver ; une pièce 
   await page.getByRole('button', { name: 'Aller à…' }).click();
   await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Porte d\'entrée' }).click();
   const sortir = page.getByRole('button', { name: 'Sortir…' });
-  await sortir.waitFor({ timeout: 20000 });
+  await sortir.waitFor({ timeout: 30000 });
   const minuteAvant = (await lirePartieEnCours(page)).temps.minute;
   await sortir.click();
   const fenetre = page.getByRole('dialog', { name: 'Où aller ?' });
@@ -54,7 +54,7 @@ test('louer les bureaux, sortir par la porte d\'entrée, y arriver ; une pièce 
   const partie = await lirePartieEnCours(page);
   assert.equal(partie.lieux.actuel, 'bureaux');
   assert.equal(partie.temps.minute, minuteAvant + 10, 'le trajet prend 10 minutes');
-  assert.deepEqual(partie.joueur.position, { x: 0, z: 13, angle: 90 }, 'devant la porte, le dos à la porte');
+  assert.deepEqual(partie.joueur.position, { x: 0, z: 18, angle: 90 }, 'devant la porte, le dos à la porte');
   assert.match(await lireTexte(page.locator('.lieu-actuel')), /Accueil/);
   // Une pièce encore fermée : on peut examiner sa porte.
   await page.getByRole('button', { name: 'Aller à…' }).click();
@@ -63,7 +63,7 @@ test('louer les bureaux, sortir par la porte d\'entrée, y arriver ; une pièce 
   assert.doesNotMatch(await lireTexte(allerA), /Aller dans la salle de pause/, 'une pièce fermée n\'est pas une destination');
   await allerA.getByRole('button', { name: 'Porte de la salle de pause' }).click();
   const examiner = page.getByRole('button', { name: /Examiner la porte de la salle de pause/ });
-  await examiner.waitFor({ timeout: 20000 });
+  await examiner.waitFor({ timeout: 30000 });
   await examiner.click();
   assert.match(await lireTexte(page.locator('.bulle')), /La salle de pause n'est pas encore aménagée\. Tu peux l'ouvrir dans la boutique, sur l'ordinateur\./);
 

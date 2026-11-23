@@ -19,7 +19,7 @@ async function allumerOrdinateur(page, { parObjectif = false } = {}) {
     await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Bureau', exact: true }).click();
   }
   const bouton = page.getByRole('button', { name: "Utiliser l'ordinateur" });
-  await bouton.waitFor({ timeout: 20000 });
+  await bouton.waitFor({ timeout: 30000 });
   await bouton.click();
   const fenetre = page.getByRole('dialog', { name: 'Ton ordinateur' });
   await fenetre.waitFor();
@@ -211,7 +211,7 @@ test('Halaé, la première cliente, présente sa commande de vive voix ; elle ar
   // Toucher l'objectif mène à Halaé.
   await page.locator('.objectif').click();
   const parler = page.getByRole('button', { name: /Parler à Halaé/ });
-  await parler.waitFor({ timeout: 20000 });
+  await parler.waitFor({ timeout: 30000 });
   await parler.click();
   const dialogue = page.getByRole('dialog', { name: 'Halaé' });
   await dialogue.getByRole('button', { name: /Tu as besoin d'une application/ }).click();

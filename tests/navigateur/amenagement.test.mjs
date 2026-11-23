@@ -64,7 +64,7 @@ test('la boutique : photo, prix, niveau, argent manquant ; acheter, puis placer 
   const texte = await lireTexte(ordinateur);
   assert.match(texte, /Ton argent : 100 pièces/);
   assert.match(texte, /Matériel pour ton bureau/);
-  assert.match(texte, /Grand écran .* Prix : 90 pièces \+5 pièces à chaque livraison/);
+  assert.match(texte, /Grand écran .* Prix : 90 pièces \+10 pièces à chaque livraison/);
   assert.match(texte, /Siège réglable .* À partir du niveau 2 \(Bouche-à-oreille\)/);
   assert.match(texte, /Aquarium .* À partir du niveau 3 \(Atelier reconnu\)/);
   assert.equal(await ordinateur.getByRole('img', { name: 'Photo : Cactus' }).count(), 1, 'chaque article a sa photo, décrite');
@@ -121,7 +121,7 @@ test('la boutique : photo, prix, niveau, argent manquant ; acheter, puis placer 
   await contexte.close();
 });
 
-test('le matériel s\'installe sur le bureau et rapporte 5 pièces de plus à chaque livraison', async () => {
+test('le matériel s\'installe sur le bureau et rapporte 10 pièces de plus à chaque livraison', async () => {
   const contexte = await outils.contexte();
   const page = await ouvrirJeu(contexte, outils.adresse);
   await nouvellePartie(page);
@@ -135,7 +135,7 @@ test('le matériel s\'installe sur le bureau et rapporte 5 pièces de plus à ch
   await page.getByRole('button', { name: /Acheter : Grand écran/ }).click();
   await page.getByRole('button', { name: /^Acheter$/ }).click();
   const ordinateur = page.getByRole('dialog', { name: 'Ton ordinateur' });
-  assert.match(await lireTexte(ordinateur), /Le grand écran est installé sur ton bureau\. Chaque livraison te rapporte maintenant 5 pièces de plus\./);
+  assert.match(await lireTexte(ordinateur), /Le grand écran est installé sur ton bureau\. Chaque livraison te rapporte maintenant 10 pièces de plus\./);
   assert.equal(await page.getByRole('button', { name: 'Placer maintenant' }).count(), 0, 'le matériel ne se pose pas');
   assert.equal(await formesDuBureau(), 9, 'le grand écran est sur le bureau');
   await page.getByRole('button', { name: 'Continuer mes achats' }).click();
@@ -180,17 +180,17 @@ test('aménager : un meuble qui gêne est refusé, avec la raison ; tourner, pos
   assert.deepEqual(await affaires.getByRole('button').allInnerTexts(), ['Fauteuil', 'Cactus × 2']);
 
   await affaires.getByRole('button', { name: 'Fauteuil' }).click();
-  await toucherCase(page, 15, 11);
+  await toucherCase(page, 19, 15);
   assert.match(await statut(page), /Le fauteuil : impossible ici\. La place est prise par le canapé\./);
   // Devant la porte de la chambre : la raison parle du fauteuil roulant.
-  await toucherCase(page, 6, 8);
+  await toucherCase(page, 6, 9);
   assert.match(await statut(page), /impossible ici\. En fauteuil roulant, on ne pourrait plus atteindre la chambre : il faut des passages d'au moins 1 m\./);
   // « Poser ici » ne pose rien tant que c'est impossible.
   await page.getByRole('button', { name: 'Poser ici' }).click();
   assert.deepEqual((await lirePartieEnCours(page)).lieux.amenagements, {});
 
   // Au milieu du séjour : possible ; R le tourne.
-  await toucherCase(page, 9, 9);
+  await toucherCase(page, 10, 12);
   assert.match(await statut(page), /Le fauteuil, dans le séjour : ici, c'est possible\./);
   const fantome = () => page.evaluate(async () => (await import('/js/interface/ecran-jeu.js')).mondeAffiche().fantome);
   assert.equal((await fantome()).rotation, 0);
@@ -216,7 +216,7 @@ test('aménager : un meuble qui gêne est refusé, avec la raison ; tourner, pos
   partie = await lirePartieEnCours(page);
   assert.deepEqual(partie.lieux.amenagements, {});
   // Un meuble de la maison ne bouge pas.
-  await toucherCase(page, 15, 11);
+  await toucherCase(page, 19, 15);
   assert.match(await statut(page), /Le canapé fait partie de la maison : il reste à sa place\./);
   // Échap termine l'aménagement.
   await page.keyboard.press('Escape');
@@ -257,7 +257,7 @@ test('la quête « Un intérieur où tout le monde passe » : l\'objectif mène 
   await objectif.click();
   await page.locator('.panneau-amenagement').waitFor();
   await page.locator('.liste-affaires').getByRole('button', { name: 'Pouf' }).click();
-  await toucherCase(page, 9, 9);
+  await toucherCase(page, 10, 12);
   await page.getByRole('button', { name: 'Poser ici' }).click();
   assert.match(await statut(page), /Tu as posé le pouf\. Quête terminée : « Un intérieur où tout le monde passe »/);
   assert.ok((await lirePartieEnCours(page)).quetes.finies.includes('interieur-pour-tous'));

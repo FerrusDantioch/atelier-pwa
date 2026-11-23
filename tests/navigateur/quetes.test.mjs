@@ -72,7 +72,7 @@ test('le journal : bouton, touche J, Pause ; la quête de bienvenue et ses étap
   // « Y aller » : on part vers le bureau, le journal se ferme.
   await journal.getByRole('button', { name: /Y aller : Allume ton ordinateur/ }).click();
   await journal.waitFor({ state: 'detached' });
-  await page.getByRole('button', { name: "Utiliser l'ordinateur" }).waitFor({ timeout: 20000 });
+  await page.getByRole('button', { name: "Utiliser l'ordinateur" }).waitFor({ timeout: 30000 });
   await page.keyboard.press('Escape');
   const pause = page.getByRole('dialog', { name: 'Pause' });
   await pause.getByRole('button', { name: 'Journal des quêtes' }).click();
@@ -101,7 +101,7 @@ test('Théo, à 16 h : il présente sa commande, puis donne des nouvelles de son
   assert.ok((await habitantsPresents(page)).some((h) => h.id === 'theo'));
   await page.locator('.objectif').click();
   const parler = page.getByRole('button', { name: /Parler à Théo/ });
-  await parler.waitFor({ timeout: 25000 });
+  await parler.waitFor({ timeout: 35000 });
   await parler.click();
   let dialogue = page.getByRole('dialog', { name: 'Théo' });
   await dialogue.getByRole('button', { name: /Tu as besoin d'une application/ }).click();
@@ -195,7 +195,7 @@ test('les commandes du jour : au niveau 3, renouvelées chaque matin, gardées u
     await page.getByRole('button', { name: 'Aller à…' }).click();
     await page.getByRole('dialog', { name: 'Aller à…' }).getByRole('button', { name: 'Bureau', exact: true }).click();
     const bouton = page.getByRole('button', { name: "Utiliser l'ordinateur" });
-    await bouton.waitFor({ timeout: 20000 });
+    await bouton.waitFor({ timeout: 30000 });
     await bouton.click();
     const fenetre = page.getByRole('dialog', { name: 'Ton ordinateur' });
     await fenetre.getByRole('button', { name: /^Commandes/ }).click();

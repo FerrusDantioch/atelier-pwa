@@ -291,3 +291,62 @@ test('les étapes « acheter » et « placer » fautives sont refusées', () => 
   assert.match(problemes, /seuls les meubles se placent/);
   assert.match(problemes, /lieu : « lune » n'existe pas/);
 });
+
+test('l\'empreinte repère un échange de drapeau, de meuble ou de résultat à effectif égal', () => {
+  const p1 = partieNeuve();
+  p1.drapeaux = { alpha: true };
+  p1.lieux.amenagements = { domicile: [{ id: 'achat-1', x: 12, z: 12, rotation: 0 }] };
+  p1.commandes.enCours = { 'essai-courses': { modele: 'liste', fonctions: [], confort: {}, essais: 0, resultat: null } };
+  const p2 = structuredClone(p1);
+  p2.drapeaux = { beta: true };
+  assert.notEqual(empreinteDesQuetes(p1), empreinteDesQuetes(p2), 'drapeau différent');
+  const p3 = structuredClone(p1);
+  p3.lieux.amenagements = { bureaux: [{ id: 'achat-1', x: 5, z: 15, rotation: 0 }] };
+  assert.notEqual(empreinteDesQuetes(p1), empreinteDesQuetes(p3), 'lieu différent');
+  const p4 = structuredClone(p1);
+  p4.commandes.enCours['essai-courses'].resultat = 'aRetravailler';
+  assert.notEqual(empreinteDesQuetes(p1), empreinteDesQuetes(p4), 'résultat différent');
+});
+
+test('theo-revisions attend que le joueur ait demandé des nouvelles à Théo', async () => {
+  const { commandesAProposer } = await import('../js/jeu/commandes.js');
+  const partie = partieNeuve();
+  partie.drapeaux[DRAPEAU_VISIO_ACCUEIL] = true;
+  livrer(partie, 'essai-courses');
+  proposerCommande(partie, commande('halae-planning'));
+  livrer(partie, 'halae-planning');
+  proposerCommande(partie, commande('theo-changements'));
+  livrer(partie, 'theo-changements');
+  mettreAJourQuetes(partie, quetes, paliers);
+  assert.equal(commandesAProposer(partie, commandes, paliers).some((c) => c.id === 'theo-revisions'), false,
+    'pas de seconde commande avant la question « Alors, cette application ? »');
+  const [sujet] = sujetsPour(partie, quetes, 'theo', paliers);
+  faireEtape(partie, sujet.quete, sujet.etape, paliers);
+  mettreAJourQuetes(partie, quetes, paliers);
+  assert.equal(commandesAProposer(partie, commandes, paliers).some((c) => c.id === 'theo-revisions'), true,
+    'disponible tout de suite après les nouvelles');
+});
+
+test('si le coin calme est déjà ouvert avant la quête de Théo, l\'étape « écouter » se valide sans bloquer', () => {
+  const partie = partieNeuve();
+  partie.drapeaux[DRAPEAU_VISIO_ACCUEIL] = true;
+  partie.reputation = 200;
+  partie.quetes.finies.push('bienvenue', 'planning-publication', 'matin-sans-surprise',
+    'reviser-sans-se-noyer', 'interieur-pour-tous', 'un-vrai-local');
+  partie.lieux.debloques.push('bureaux');
+  partie.possessions.push(
+    { id: 'achat-1', article: 'bureaux', sorte: 'lieu', jour: 1, prix: 300 },
+    { id: 'achat-2', article: 'coin-calme', sorte: 'piece', jour: 1, prix: 150 },
+  );
+  mettreAJourQuetes(partie, quetes, paliers);
+  assert.ok(partie.quetes.actives['coin-pour-souffler']);
+  // « ecouter » et « ouvrir » sont déjà faits ; l'étape courante est « visite ».
+  assert.equal(etapeCourante(quete('coin-pour-souffler'), partie, paliers).etape.id, 'visite');
+});
+
+test('la simulation réelle de coherence.js repère un drapeau jamais posé', () => {
+  const copie = JSON.parse(JSON.stringify(donnees));
+  copie.quetes.quetes[0].debloquee = { drapeau: 'drapeau-impossible' };
+  const problemes = verifierCoherence(copie).join('\n');
+  assert.match(problemes, /bienvenue : ne commence ou ne se termine jamais/);
+});

@@ -183,11 +183,11 @@ test('une couleur ou une option de personnage inconnue est signalée', () => {
 });
 
 test('les places des personnages sont atteignables avec LEUR façon de se déplacer', () => {
-  // Halaé (fauteuil roulant) ne peut pas aller dans le recoin d'une case
-  // entre le mur et la table de la cuisine.
+  // Halaé (fauteuil roulant) ne peut pas entrer dans le recoin d'une case
+  // entre les deux chaises et la table de la cuisine.
   const pnj = structuredClone(donnees.pnj);
   const lieu = structuredClone(donnees.lieux.domicile);
-  lieu.points.push({ id: 'recoin', x: 13, z: 5, angle: 90 });
+  lieu.points.push({ id: 'recoin', x: 14, z: 6, angle: 90 });
   pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'recoin';
   const problemes = verifierCoherence({ ...donnees, pnj, lieux: { ...donnees.lieux, domicile: lieu } }).join('\n');
   assert.match(problemes, /pnj › halae › routine › n°1 : le point « recoin » n'est pas atteignable en fauteuil roulant/);
@@ -195,6 +195,51 @@ test('les places des personnages sont atteignables avec LEUR façon de se dépla
   pnj.pnj.find((p) => p.id === 'halae').routine[0].point = 'table-cuisine';
   pnj.pnj.find((p) => p.id === 'theo').routine.find((c) => c.lieu === 'domicile').point = 'recoin';
   assert.deepEqual(verifierCoherence({ ...donnees, pnj, lieux: { ...donnees.lieux, domicile: lieu } }), []);
+});
+
+test('on ne peut pas examiner un meuble à travers un mur', () => {
+  const lieu = petitLieu({ porte: 2, meubles: [{ id: 'plante', meuble: 'plante', x: 4, z: 0, rotation: 0 }] });
+  const grille = creerGrille(lieu, catalogue);
+  const cases = casesPourAtteindre(grille, grille.emprises.get('plante'), { x: 0, z: 0 });
+  // La case (3, 0) est de l'autre côté du mur x = 4 : exclue.
+  assert.equal(cases.some((c) => c.x === 3 && c.z === 0), false);
+  assert.ok(cases.some((c) => c.x === 4 && c.z === 1));
+});
+
+test('en fauteuil, une ligne oblique ne frôle pas le coin d\'un obstacle', () => {
+  const lieu = {
+    id: 'essai', nom: 'Essai', designation: 'l\'essai', chemin: 'essai.json',
+    taille: [8, 8], hauteurMurs: 2.3, depart: { x: 1, z: 1, angle: 0 },
+    pieces: [{ id: 'salle', nom: 'Salle', designation: 'la salle', zones: [[0, 0, 8, 8]], sol: { motif: 'uni', couleurs: ['parquet'] } }],
+    murs: [], ouvertures: [],
+    meubles: [{ id: 'pilier', meuble: 'plante', x: 3, z: 2, rotation: 0 }],
+    points: [],
+  };
+  const grille = creerGrille(lieu, catalogue);
+  // De (1, 1) à (5, 3), la ligne droite frôle le pilier (3, 2) : refusée en fauteuil.
+  assert.equal(ligneLibre(grille, { x: 1, z: 1 }, { x: 5, z: 3 }, 'fauteuil'), false);
+  const chemin = trouverChemin(grille, { x: 1, z: 1 }, { x: 5, z: 3 }, 'fauteuil');
+  const lisse = lisserChemin(grille, chemin, 'fauteuil');
+  assert.ok(lisse.length > 2, 'le lissage garde un point de contournement');
+});
+
+test('la vérification repère une pièce sans espace de demi-tour et plus de deux PNJ simultanés', () => {
+  const etroit = {
+    id: 'etroit', nom: 'Étroit', designation: 'l\'étroit', chemin: 'etroit.json',
+    taille: [6, 2], hauteurMurs: 2.3, depart: { x: 0, z: 0, angle: 0 },
+    pieces: [{ id: 'couloir', nom: 'Couloir', designation: 'le couloir', zones: [[0, 0, 6, 2]], sol: { motif: 'uni', couleurs: ['parquet'] } }],
+    murs: [], ouvertures: [], meubles: [], points: [],
+  };
+  const problemesDemiTour = verifierCoherence({ ...donnees, lieux: { ...donnees.lieux, etroit } }).join('\n');
+  assert.match(problemesDemiTour, /etroit\.json › pieces › couloir : aucun espace de demi-tour en fauteuil roulant/);
+
+  const pnj = structuredClone(donnees.pnj);
+  // 3 personnages en même temps au domicile à 10 h (Halaé + Ferrus + Théo).
+  pnj.pnj.find((p) => p.id === 'theo').routine.unshift({
+    de: '10:00', a: '11:00', lieu: 'domicile', point: 'table-cuisine-est', activite: 'visite',
+  });
+  const problemesLimite = verifierCoherence({ ...donnees, pnj }).join('\n');
+  assert.match(problemesLimite, /domicile à 10:00 : 3 personnages ensemble/);
 });
 
 test('la salle d\'eau est fermée par des parois hautes (les autres pièces restent ouvertes)', () => {
@@ -210,11 +255,11 @@ test('une affiche se pose sur un mur extérieur, sans ouverture derrière, avec 
   assert.equal(point.lien, 'siteOmni', 'l\'adresse vient de js/config.js, jamais des données');
   const copie = JSON.parse(JSON.stringify(domicile));
   copie.affiches.push(
-    { id: 'interieure', dessin: 'omni', de: [8, 1], a: [8, 3], largeur: 0.6, bas: 1, haut: 1.8 },
-    { id: 'sur-fenetre', dessin: 'omni', de: [2, 0], a: [5, 0], largeur: 0.6, bas: 1, haut: 1.8 },
-    { id: 'trop-large', dessin: 'omni', de: [0, 14], a: [0, 15], largeur: 2, bas: 1, haut: 1.8 },
-    { id: 'trop-haute', dessin: 'omni', de: [0, 14], a: [0, 16], largeur: 0.6, bas: 1, haut: 3.5 },
-    { id: 'sans-point', dessin: 'omni', de: [0, 14], a: [0, 16], largeur: 0.6, bas: 1, haut: 1.8, point: 'nulle-part' },
+    { id: 'interieure', dessin: 'omni', de: [10, 1], a: [10, 3], largeur: 0.6, bas: 1, haut: 1.8 },
+    { id: 'sur-fenetre', dessin: 'omni', de: [3, 0], a: [6, 0], largeur: 0.6, bas: 1, haut: 1.8 },
+    { id: 'trop-large', dessin: 'omni', de: [0, 19], a: [0, 20], largeur: 2, bas: 1, haut: 1.8 },
+    { id: 'trop-haute', dessin: 'omni', de: [0, 19], a: [0, 21], largeur: 0.6, bas: 1, haut: 3.5 },
+    { id: 'sans-point', dessin: 'omni', de: [0, 19], a: [0, 21], largeur: 0.6, bas: 1, haut: 1.8, point: 'nulle-part' },
   );
   const texte = verifierCoherence({ ...donnees, lieux: { ...donnees.lieux, domicile: copie } }).join('\n');
   assert.match(texte, /affiches › interieure : une affiche se pose sur un mur extérieur/);
