@@ -202,6 +202,8 @@ export function ecranAtelier(ctx, commande) {
     el('div', { class: 'apercu-telephone', 'aria-hidden': 'true' }, ecranApp),
     resume);
 
+  let derniereJauge = null;
+
   function rafraichir() {
     const actuel = nettoyerProjet(lireProjet(), creation);
     const modele = creation.modeles.find((m) => m.id === actuel.modele) || null;
@@ -214,7 +216,10 @@ export function ecranAtelier(ctx, commande) {
     const valeur = etat
       ? t('atelier.jaugeValeur', { charge, capacite, etat: t(`atelier.etats.${etat}`) })
       : t('atelier.jaugeSansModele');
-    for (const texte of [jaugeTexte, bandeauTexte]) texte.replaceChildren(el('strong', {}, `${t('atelier.jauge')} : `), valeur);
+    if (valeur !== derniereJauge) {
+      derniereJauge = valeur;
+      for (const texte of [jaugeTexte, bandeauTexte]) texte.replaceChildren(el('strong', {}, `${t('atelier.jauge')} : `), valeur);
+    }
     const maximum = Math.max((capacite ?? 0) + tolerance + 1, charge, 1);
     for (const { remplissage, repere } of barres) {
       remplissage.style.width = `${Math.min(100, (charge / maximum) * 100)}%`;
@@ -327,7 +332,7 @@ export function ecranAtelier(ctx, commande) {
         fermer: true,
       }],
       surFermeture: () => {
-        if (resultat.livree) ctx.aller.commandes();
+        if (resultat.livree && partieEnCours() && ctx.fenetre.element.open) ctx.aller.commandes();
       },
     });
   }

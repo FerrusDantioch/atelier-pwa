@@ -164,19 +164,35 @@ export function mettreAJourQuetes(partie, quetes, paliers) {
       if (etatDeQuete(quete, partie) === 'future') {
         if (!queteDebloquee(quete, partie, paliers)) continue;
         partie.quetes.actives[quete.id] = { debut: { jour: partie.temps.jour, minute: partie.temps.minute } };
-        for (const etape of quete.etapes) {
-          if (CONSTATEES.has(etape.type) && constatee(etape, partie, paliers)) partie.drapeaux[drapeauDEtape(quete, etape)] = true;
-        }
+        quete.etapes.forEach((etape, index) => {
+          if (!CONSTATEES.has(etape.type) || !constatee(etape, partie, paliers)) return;
+          partie.drapeaux[drapeauDEtape(quete, etape)] = true;
+          // Si une étape obligatoire constatée (ex. ouvrir le coin calme) est
+          // déjà accomplie au démarrage, un éventuel préambule « parler » qui
+          // la précédait n'a plus lieu d'être.
+          if (!etape.facultative) {
+            for (let i = 0; i < index; i += 1) {
+              const avant = quete.etapes[i];
+              if (!avant.facultative && avant.type === 'parler') partie.drapeaux[drapeauDEtape(quete, avant)] = true;
+            }
+          }
+        });
         evenements.push({ type: 'nouvelle', quete });
         encore = true;
       }
       // Les étapes constatées (même les facultatives d'une quête finie).
-      for (const etape of quete.etapes) {
+      quete.etapes.forEach((etape, index) => {
         const drapeau = drapeauDEtape(quete, etape);
-        if (partie.drapeaux[drapeau] || !CONSTATEES.has(etape.type) || !constatee(etape, partie, paliers)) continue;
+        if (partie.drapeaux[drapeau] || !CONSTATEES.has(etape.type) || !constatee(etape, partie, paliers)) return;
+        if (!etape.facultative) {
+          for (let i = 0; i < index; i += 1) {
+            const avant = quete.etapes[i];
+            if (!avant.facultative && avant.type === 'parler') partie.drapeaux[drapeauDEtape(quete, avant)] = true;
+          }
+        }
         partie.drapeaux[drapeau] = true;
         evenements.push({ type: 'etape', quete, etape });
-      }
+      });
       if (etatDeQuete(quete, partie) === 'active' && !etapeCourante(quete, partie, paliers)) {
         delete partie.quetes.actives[quete.id];
         partie.quetes.finies.push(quete.id);
@@ -274,16 +290,25 @@ export function objectifDeQuete(partie, { quetes, commandes, paliers }, id = par
 // n'a pas changé, inutile de tout revérifier (le temps qui passe, les pas
 // du personnage n'y changent rien).
 export function empreinteDesQuetes(partie) {
+  const drapeaux = Object.keys(partie.drapeaux).filter((cle) => partie.drapeaux[cle]).sort().join(',');
+  const livrees = partie.commandes.livrees.map((l) => l.id).join(',');
+  const enCours = Object.entries(partie.commandes.enCours)
+    .map(([id, projet]) => `${id}:${projet?.resultat || ''}`).sort().join(',');
+  const possessions = (partie.possessions || []).map((p) => p.id).join(',');
+  const amenagements = Object.entries(partie.lieux?.amenagements || {})
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([lieu, places]) => `${lieu}:${places.map((p) => p.id).sort().join(',')}`)
+    .join(';');
   return [
-    Object.keys(partie.drapeaux).length,
-    partie.commandes.livrees.length,
-    Object.keys(partie.commandes.enCours).join(','),
+    drapeaux,
+    livrees,
+    enCours,
     partie.reputation,
-    partie.quetes.finies.length,
-    Object.keys(partie.quetes.actives).join(','),
+    partie.quetes.finies.join(','),
+    Object.keys(partie.quetes.actives).sort().join(','),
     partie.quetes.suivie,
-    (partie.possessions || []).length,
-    Object.values(partie.lieux?.amenagements || {}).map((places) => places.length).join(','),
+    possessions,
+    amenagements,
     partie.lieux?.actuel,
   ].join('|');
 }

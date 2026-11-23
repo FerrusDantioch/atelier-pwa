@@ -69,8 +69,18 @@ export function ouvrirOrdinateur({
   // ou clients des commandes du jour.
   const pnjParId = new Map([...donnees.pnj.pnj, ...(donnees.modelesCommandes?.clients || [])].map((pnj) => [pnj.id, pnj]));
 
+  let surFermetureEcran = null;
   const fenetre = ouvrirFenetre({
-    titre: t('ordinateur.titre'), contenu: [], large: true, boutonFermer: false, surFermeture,
+    titre: t('ordinateur.titre'),
+    contenu: [],
+    large: true,
+    boutonFermer: false,
+    surFermeture: () => {
+      const rappel = surFermetureEcran;
+      surFermetureEcran = null;
+      rappel?.();
+      surFermeture?.();
+    },
   });
   fenetre.element.classList.add('fenetre-ordinateur');
 
@@ -88,6 +98,7 @@ export function ouvrirOrdinateur({
 
   // Affiche un écran ; le focus va sur son titre (ou sur « focus »).
   function montrer({ titre, contenu, actions = [], atelier = false, focus = null }) {
+    surFermetureEcran = null;
     const titreEcran = el('h3', { class: 'ecran-titre', tabindex: '-1' }, titre);
     ajouter(vider(fenetre.corps), [titreEcran, contenu]);
     fenetre.corps.scrollTop = 0;
@@ -108,6 +119,7 @@ export function ouvrirOrdinateur({
     fenetre,
     montrer,
     pied,
+    definirSurFermetureEcran: (rappel) => { surFermetureEcran = rappel; },
     montant: (n) => tPluriel('monnaie.montant', n, { singulier: jeu.monnaie.singulier, pluriel: jeu.monnaie.pluriel }),
     points: (n) => tPluriel('reputation.points', n),
     pnj: (id) => pnjParId.get(id),
@@ -228,12 +240,14 @@ export function ouvrirOrdinateur({
       const fixes = donnees.commandes.commandes;
       const livrees = new Set(partie.commandes.livrees.map((livraison) => livraison.id));
       const aProposer = commandesAProposer(partie, fixes, ctx.paliers);
+      const demain = commandesDuJourOuvertes(partie, donnees.modelesCommandes, ctx.paliers);
       if (aProposer.length > 0) contenu.push(encadre('parler', 'info', t('livraison.aProposer', { client: ctx.nomDe(aProposer[0].client) })));
-      else if (fixes.some((commande) => !livrees.has(commande.id) && !partie.commandes.enCours[commande.id])) {
+      else if (demain && etat.enCours.length === 0) {
+        contenu.push(encadre('succes', 'succes', t('ordinateur.commandes.demain')));
+      } else if (!demain && fixes.some((commande) => !livrees.has(commande.id) && !partie.commandes.enCours[commande.id])) {
         contenu.push(el('p', { class: 'aide' }, t('ordinateur.commandes.attendre')));
       } else if (etat.enCours.length === 0) {
-        const demain = commandesDuJourOuvertes(partie, donnees.modelesCommandes, ctx.paliers);
-        contenu.push(encadre('succes', 'succes', t(demain ? 'ordinateur.commandes.demain' : 'ordinateur.commandes.fini')));
+        contenu.push(encadre('succes', 'succes', t('ordinateur.commandes.fini')));
       }
     }
     if (etat.livrees.length > 0) {

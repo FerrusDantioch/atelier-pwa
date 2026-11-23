@@ -249,7 +249,7 @@
       ],
       "apercu": { "liste": ["Aujourd'hui : histoire", "Relire le chapitre 3", "Faire la fiche des dates"] },
       "recompense": { "argent": 60, "reputation": 12, "bonus": 10 },
-      "debloquee": { "apres": ["theo-changements"] },
+      "debloquee": { "apres": ["theo-changements"], "drapeau": "etape-matin-sans-surprise-nouvelles" },
       "reactions": {
         "parfait": "C'est exactement ça : une chose à la fois. Je commence ce soir.",
         "bien": "C'est déjà beaucoup plus calme. Je vais m'en servir.",

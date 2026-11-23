@@ -218,12 +218,15 @@
 }
 
 /* Seul le contenu défile : le titre, la croix et le bouton « Fermer »
-   restent toujours visibles. */
+   restent toujours visibles. Conteneur nommé pour adapter la mise en page
+   aussi bien à la largeur de l'écran qu'aux 4 tailles de texte (en « em »). */
 .fenetre-corps {
   flex: 1 1 auto;
   overflow-y: auto;
   padding: 1rem 1.2rem;
   overscroll-behavior: contain;
+  container-type: inline-size;
+  container-name: fenetre;
 }
 
 .fenetre-pied {
@@ -370,7 +373,7 @@ input[type="range"] {
   cursor: pointer;
 }
 
-@media (max-width: 560px) {
+@container fenetre (max-width: 32em) {
   .curseur {
     grid-template-columns: 1fr auto;
   }

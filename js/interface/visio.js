@@ -65,13 +65,13 @@ export function ecranVisio(ctx, { appelEntrant = false } = {}) {
 
   // La fin du premier appel : la commande d'essai arrive sur l'ordinateur, et
   // l'étape de la quête de bienvenue est faite (un seul message pour tout).
-  function finDuPremierAppel() {
+  function finDuPremierAppel({ versAccueil = true } = {}) {
     const avant = idsDesOffres(partieEnCours(), ctx.listeCommandes, ctx.paliers);
     modifierPartie((p) => { p.drapeaux[DRAPEAU_VISIO_ACCUEIL] = true; }, { important: true });
     const evenements = progresserQuetes({ annoncer: false });
     const commandes = ctx.listeCommandes;
     const nouvelles = nouvellesOffres(avant, idsDesOffres(partieEnCours(), commandes, ctx.paliers), commandes);
-    ctx.aller.accueil();
+    if (versAccueil) ctx.aller.accueil();
     const messages = [
       ...nouvelles.map((offre) => t('livraison.nouvelle', { client: ctx.nomDe(offre.client), titre: offre.titre })),
       messageDesQuetes(evenements),
@@ -147,12 +147,21 @@ export function ecranVisio(ctx, { appelEntrant = false } = {}) {
     contenu: [el('div', { class: 'visio' }, cadre, fil)],
   });
   if (premiereFois) {
+    let tutorielLu = false;
+    ctx.definirSurFermetureEcran?.(() => {
+      if (tutorielLu && partieEnCours() && !partieEnCours().drapeaux[DRAPEAU_VISIO_ACCUEIL]) {
+        finDuPremierAppel({ versAccueil: false });
+      }
+    });
     const accueil = joueurFerrus
       ? visio.accueil.joueurFerrus
       : remplir(visio.accueil.autre, { nom: nomDuJoueur(partie.joueur, donnees.personnages) });
-    expliquer([accueil, ...visio.tutoriel], () => ctx.pied([
-      { texte: t('visio.raccrocher'), icone: 'fermer', principal: true, surClic: raccrocher },
-    ])[0])?.focus();
+    expliquer([accueil, ...visio.tutoriel], () => {
+      tutorielLu = true;
+      return ctx.pied([
+        { texte: t('visio.raccrocher'), icone: 'fermer', principal: true, surClic: raccrocher },
+      ])[0];
+    })?.focus();
   } else {
     dire(mentor.repliques?.salut?.[0] || visio.auRevoir);
     boutonsHabituels().focus();

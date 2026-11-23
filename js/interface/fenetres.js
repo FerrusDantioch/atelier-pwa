@@ -20,7 +20,7 @@ import { icone } from './icones.js';
 const pile = [];
 
 // Ce qu'on peut atteindre avec Tab dans une fenêtre.
-const FOCALISABLES = 'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
+const FOCALISABLES = 'button, [href], input:not([type="hidden"]), select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 
 export function fenetreDuDessus() {
   return pile.length > 0 ? pile[pile.length - 1] : null;

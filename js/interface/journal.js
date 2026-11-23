@@ -12,6 +12,7 @@
 // Comme toute fenêtre, le journal arrête le temps tant qu'il est ouvert.
 // =============================================================================
 
+import { commandesConnues } from '../jeu/generateur.js';
 import { DESTINATION_AMENAGER, destinationDEtape, etapesDeQuete, objectifDeQuete } from '../jeu/quetes.js';
 import { modifierPartie, partieEnCours } from '../noyau/etat.js';
 import { t, tPluriel, typographier } from '../noyau/textes.js';
@@ -39,7 +40,6 @@ function statutDe({ etape, faite, ouverte }) {
  */
 export function ouvrirJournal({ donnees, nomDe, surAller }) {
   const { quetes, principes } = donnees.quetes;
-  const commandes = donnees.commandes.commandes;
   const paliers = donnees.jeu.reputation.paliers;
   const { monnaie } = donnees.jeu;
   const montant = (n) => tPluriel('monnaie.montant', n, { singulier: monnaie.singulier, pluriel: monnaie.pluriel });
@@ -63,6 +63,7 @@ export function ouvrirJournal({ donnees, nomDe, surAller }) {
 
   // Les étapes, dans l'ordre, chacune avec son statut écrit.
   function listeDesEtapes(quete, partie) {
+    const commandes = commandesConnues(partie, donnees);
     const lignes = etapesDeQuete(quete, partie, paliers);
     const objectif = objectifDeQuete(partie, { quetes, commandes, paliers }, quete.id);
     return el('ol', { class: 'etapes-quete' }, lignes.map((ligne) => {

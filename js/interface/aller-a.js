@@ -6,11 +6,25 @@
 // lieux débloqués.
 // =============================================================================
 
-import { lieuxOuOnPeutAller } from '../jeu/lieux.js';
+import { heureApresTrajet, lieuxOuOnPeutAller, ouvertures } from '../jeu/lieux.js';
+import { presenceDans } from '../jeu/routines.js';
+import { bornesDeLaJournee } from '../jeu/temps.js';
 import { t } from '../noyau/textes.js';
 import { el } from './dom.js';
 import { ouvrirFenetre } from './fenetres.js';
 import { icone } from './icones.js';
+
+// Qui sera présent dans cet autre lieu à l'arrivée (après le trajet) ?
+function nomsPresentsDans(idLieu, partie, donnees, minutes = null) {
+  if (!partie || !donnees?.pnj?.pnj || !donnees?.jeu) return [];
+  const { fin } = bornesDeLaJournee(donnees.jeu.temps);
+  const trajet = minutes ?? donnees.jeu.deplacement?.trajet ?? 10;
+  const arrivee = heureApresTrajet(partie.temps.minute, trajet, fin);
+  const ouvertes = ouvertures(partie);
+  return donnees.pnj.pnj
+    .filter((pnj) => presenceDans(pnj, idLieu, arrivee, partie.joueur, ouvertes))
+    .map((pnj) => (pnj.modele === 'ferrus' ? donnees.personnages.ferrus.nom : pnj.nom));
+}
 
 export function ouvrirAllerA({ monde, donnees, partie, versDe, surDestination, surAutreLieu }) {
   const destinations = monde.destinations();
@@ -44,19 +58,25 @@ export function ouvrirAllerA({ monde, donnees, partie, versDe, surDestination, s
           icone('personnage'), t('jeu.personneOu', { nom: personne.nom, piece: nomDePiece(personne.piece) })))))));
   }
 
-  // Les autres lieux débloqués : on y va par la porte d'entrée.
+  // Les autres lieux débloqués : on y va par la porte d'entrée (avec les
+  // personnes qu'on y trouvera à l'arrivée).
   const autres = partie && donnees?.indexLieux ? lieuxOuOnPeutAller(partie, donnees.indexLieux.lieux) : [];
   if (autres.length > 0) {
     contenu.push(el('section', { class: 'groupe-destinations' },
       el('h3', {}, t('jeu.autresLieux')),
-      el('ul', { class: 'liste-destinations' }, autres.map((id) => el('li', {}, el('button', {
-        class: 'bouton',
-        type: 'button',
-        onClick: () => {
-          fenetre.fermer();
-          surAutreLieu(id);
-        },
-      }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))));
+      el('ul', { class: 'liste-destinations' }, autres.map((id) => {
+        const presents = nomsPresentsDans(id, partie, donnees);
+        return el('li', {}, el('button', {
+          class: 'bouton',
+          type: 'button',
+          onClick: () => {
+            fenetre.fermer();
+            surAutreLieu(id);
+          },
+        }, icone('allerA'), el('span', {},
+          t('jeu.allerVers', { vers: versDe(id) }),
+          presents.length > 0 ? el('span', { class: 'texte-doux' }, ` · ${t('jeu.surPlace', { noms: presents.join(', ') })}`) : null)));
+      }))));
   }
 
   fenetre = ouvrirFenetre({
@@ -75,14 +95,19 @@ export function ouvrirVoyage({ partie, donnees, minutes, versDe, surLieu }) {
   const contenu = autres.length === 0
     ? [el('p', {}, t('voyage.aucun'))]
     : [el('p', { class: 'aide' }, t('voyage.aide', { minutes })),
-      el('ul', { class: 'menu-liste' }, autres.map((id) => el('li', {}, el('button', {
-        class: 'bouton bouton-menu',
-        type: 'button',
-        onClick: () => {
-          fenetre.fermer();
-          surLieu(id);
-        },
-      }, icone('allerA'), t('jeu.allerVers', { vers: versDe(id) })))))];
+      el('ul', { class: 'menu-liste' }, autres.map((id) => {
+        const presents = nomsPresentsDans(id, partie, donnees, minutes);
+        return el('li', {}, el('button', {
+          class: 'bouton bouton-menu',
+          type: 'button',
+          onClick: () => {
+            fenetre.fermer();
+            surLieu(id);
+          },
+        }, icone('allerA'), el('span', { class: 'bouton-textes' },
+          t('jeu.allerVers', { vers: versDe(id) }),
+          presents.length > 0 ? el('span', { class: 'bouton-detail' }, t('jeu.surPlace', { noms: presents.join(', ') })) : null)));
+      }))];
   fenetre = ouvrirFenetre({ titre: t('voyage.titre'), contenu });
   return fenetre;
 }

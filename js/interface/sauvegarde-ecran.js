@@ -52,7 +52,11 @@ export function importerUnePartie({ jeu, aUnePartie = false, surPartie }) {
     if (fichier.size > TAILLE_MAXIMALE_IMPORT) {
       lecture = { ok: false, code: 'tropGros' };
     } else {
-      lecture = lireFichierPartie(await fichier.text());
+      try {
+        lecture = lireFichierPartie(await fichier.text());
+      } catch {
+        lecture = { ok: false, code: 'abimee' };
+      }
     }
     if (!lecture.ok) {
       await informer({
@@ -148,11 +152,21 @@ export function ouvrirSauvegarde({ jeu, surPartie }) {
       icone('attention'), el('p', {}, t('sauvegarde.modeMemoire'))));
   }
 
+  let blocResume = null;
   if (partie) {
-    contenu.push(el('h3', {}, t('sauvegarde.partieEnCours')), resumeEnListe(partie, jeu));
+    blocResume = resumeEnListe(partie, jeu);
+    contenu.push(el('h3', {}, t('sauvegarde.partieEnCours')), blocResume);
   } else {
     contenu.push(el('p', {}, t('sauvegarde.aucunePartie')));
   }
+
+  const actualiserResume = () => {
+    const actuelle = partieEnCours();
+    if (!blocResume || !actuelle) return;
+    const nouveau = resumeEnListe(actuelle, jeu);
+    blocResume.replaceWith(nouveau);
+    blocResume = nouveau;
+  };
 
   const ligne = (iconeNom, texte, explication, surClic, disponible = true) => (disponible ? el('li', {},
     el('button', { class: 'bouton bouton-menu', type: 'button', onClick: surClic },
@@ -162,10 +176,12 @@ export function ouvrirSauvegarde({ jeu, surPartie }) {
   contenu.push(el('ul', { class: 'menu-liste' },
     ligne('sauvegarde', t('sauvegarde.maintenant'), t('sauvegarde.maintenantDetail'), async () => {
       const reussi = await sauvegarderMaintenant();
+      if (reussi) actualiserResume();
       notifier(reussi ? t('sauvegarde.faite') : t('sauvegarde.echec'), { type: reussi ? 'succes' : 'erreur' });
     }, Boolean(partie)),
     ligne('exporter', t('sauvegarde.exporter'), t('sauvegarde.exporterDetail'), async () => {
-      await sauvegarderMaintenant();
+      const reussi = await sauvegarderMaintenant();
+      if (reussi) actualiserResume();
       const nom = exporterPartie(partieEnCours());
       notifier(t('sauvegarde.exportee', { fichier: nom }), { type: 'succes' });
     }, Boolean(partie)),

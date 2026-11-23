@@ -62,40 +62,59 @@ function changerEcran(nouveau) {
 // --- La 3D, chargée à la demande --------------------------------------------------
 
 let trois = null;
+let promesse3D = null;
 
-// Prépare la 3D (une seule fois). Renvoie null si l'appareil ne peut pas
-// l'afficher : un message l'explique, le reste du jeu continue de marcher.
+// Prépare la 3D (une seule fois, même si deux clics rapprochés la demandent).
+// Renvoie null si l'appareil ne peut pas l'afficher : un message l'explique,
+// le reste du jeu continue de marcher.
 async function preparer3D() {
   if (trois) return trois;
-  const [moteurJs, paletteJs, mondeJs, studioJs, portraitJs] = await Promise.all([
-    import('./monde/moteur.js'), import('./modeles/palette.js'), import('./monde/monde.js'), import('./monde/studio.js'),
-    import('./monde/portrait.js'),
-  ]);
-  let moteur;
+  if (promesse3D) return promesse3D;
+  promesse3D = (async () => {
+    try {
+      const [moteurJs, paletteJs, mondeJs, studioJs, portraitJs] = await Promise.all([
+        import('./monde/moteur.js'), import('./modeles/palette.js'), import('./monde/monde.js'), import('./monde/studio.js'),
+        import('./monde/portrait.js'),
+      ]);
+      const moteur = moteurJs.creerMoteur(zoneScene, {
+        qualite: obtenirReglages().qualite,
+        surPerte: () => notifier(t('troisD.perdue'), { type: 'attention' }),
+        surRetour: () => notifier(t('troisD.retrouvee'), { type: 'succes' }),
+      });
+      const palette = paletteJs.creerPalette(donnees.palette.couleurs);
+      const studio = studioJs.creerStudio({
+        moteur, donnees, palette, animationsReduites: () => document.documentElement.getAttribute('data-animations') === 'reduites',
+      });
+      // Les portraits (visio, commandes) : des photos prises par le même moteur.
+      const portraits = portraitJs.creerPortraits({ moteur, donnees, palette, luminosite: () => obtenirReglages().luminosite });
+      trois = { moteur, palette, studio, portraits, creerMonde: mondeJs.creerMonde };
+      ecouter('reglages:modifies', ({ reglages }) => {
+        trois.moteur.changerQualite(reglages.qualite);
+        trois.studio.regler({ luminosite: reglages.luminosite });
+        trois.portraits.oublier();
+      });
+      return trois;
+    } catch (erreur) {
+      console.error(erreur);
+      await informer({ titre: t('troisD.indisponibleTitre'), message: [t('troisD.indisponible'), t('troisD.conseil')] });
+      return null;
+    } finally {
+      promesse3D = null;
+    }
+  })();
+  return promesse3D;
+}
+
+// Empêche deux transitions d'écran asynchrones de se chevaucher (double clic).
+let enTransition = false;
+async function avecTransition(tache) {
+  if (enTransition) return;
+  enTransition = true;
   try {
-    moteur = moteurJs.creerMoteur(zoneScene, {
-      qualite: obtenirReglages().qualite,
-      surPerte: () => notifier(t('troisD.perdue'), { type: 'attention' }),
-      surRetour: () => notifier(t('troisD.retrouvee'), { type: 'succes' }),
-    });
-  } catch (erreur) {
-    console.error(erreur);
-    await informer({ titre: t('troisD.indisponibleTitre'), message: [t('troisD.indisponible'), t('troisD.conseil')] });
-    return null;
+    await tache();
+  } finally {
+    enTransition = false;
   }
-  const palette = paletteJs.creerPalette(donnees.palette.couleurs);
-  const studio = studioJs.creerStudio({
-    moteur, donnees, palette, animationsReduites: () => document.documentElement.getAttribute('data-animations') === 'reduites',
-  });
-  // Les portraits (visio, commandes) : des photos prises par le même moteur.
-  const portraits = portraitJs.creerPortraits({ moteur, donnees, palette, luminosite: () => obtenirReglages().luminosite });
-  trois = { moteur, palette, studio, portraits, creerMonde: mondeJs.creerMonde };
-  ecouter('reglages:modifies', ({ reglages }) => {
-    trois.moteur.changerQualite(reglages.qualite);
-    trois.studio.regler({ luminosite: reglages.luminosite });
-    trois.portraits.oublier();
-  });
-  return trois;
 }
 
 function montrerScene(oui) {
@@ -110,12 +129,20 @@ function montrerAccueil({ focaliser = false } = {}) {
   fermerToutes();
   montrerScene(false);
   let element = null;
-  changerEcran({ detruire: () => element?.remove() });
+  const arretInstallation = ecouter('pwa:installation', ({ installe }) => {
+    if (installe) element?.querySelector('[data-action="installer"]')?.remove();
+  });
+  changerEcran({
+    detruire: () => {
+      arretInstallation();
+      element?.remove();
+    },
+  });
   element = afficherAccueil(racine, {
     resume: partieEnregistree ? resumerPartie(partieEnregistree) : null,
     jeu: donnees.jeu,
     installe: estInstalle(),
-    surContinuer: () => jouer(partieEnregistree),
+    surContinuer: () => avecTransition(() => jouer(partieEnregistree)),
     surNouvellePartie: demanderNouvellePartie,
     surImporter: () => importerUnePartie({
       jeu: donnees.jeu, aUnePartie: Boolean(partieEnregistree), surPartie: chargerAutrePartie,
@@ -154,9 +181,23 @@ async function montrerChoixPerso({ mode, joueur, surValider, surAnnuler }) {
   return true;
 }
 
+// Si la partie venait d'une version avec un lieu supprimé ou renommé, on
+// ramène le joueur dans le lieu de départ plutôt que de planter.
+function normaliserLieuxDeLaPartie(partie) {
+  const depart = donnees.jeu.depart.lieu;
+  partie.lieux.debloques = partie.lieux.debloques.filter((id) => Boolean(donnees.lieux[id]));
+  if (!partie.lieux.debloques.includes(depart)) partie.lieux.debloques.unshift(depart);
+  if (!donnees.lieux[partie.lieux.actuel] || !partie.lieux.debloques.includes(partie.lieux.actuel)) {
+    partie.lieux.actuel = depart;
+    if (partie.joueur) partie.joueur.position = null;
+  }
+}
+
 // Ouvre une partie : choix du personnage s'il n'existe pas encore (partie
 // du jalon 0), puis le jeu.
 async function jouer(partie) {
+  if (!partie) return;
+  normaliserLieuxDeLaPartie(partie);
   fermerToutes();
   chargerPartieEnCours(partie);
   partieEnregistree = partie;
@@ -164,11 +205,11 @@ async function jouer(partie) {
     const affiche = await montrerChoixPerso({
       mode: 'creation',
       joueur: null,
-      surValider: (joueur) => {
+      surValider: (joueur) => avecTransition(async () => {
         modifierPartie((p) => { p.joueur = joueur; }, { important: true });
-        afficherJeu();
-      },
-      surAnnuler: () => retournerAccueil(),
+        await afficherJeu();
+      }),
+      surAnnuler: () => avecTransition(retournerAccueil),
     });
     if (!affiche) montrerAccueil({ focaliser: true });
     return;
@@ -202,8 +243,8 @@ async function afficherJeu() {
       surReglages: ouvrirReglages,
       surSauvegarde: () => ouvrirFenetreSauvegarde({ jeu: donnees.jeu, surPartie: chargerAutrePartie }),
       surAPropos: () => ouvrirAPropos({ surMiseAJour: lancerMiseAJour }),
-      surAccueil: retournerAccueil,
-      surPersonnage: modifierPersonnage,
+      surAccueil: () => avecTransition(retournerAccueil),
+      surPersonnage: () => avecTransition(modifierPersonnage),
     },
   });
   ecran = ecranJeu;
@@ -251,6 +292,7 @@ async function retournerAccueil() {
 // --- Nouvelle partie, import, copie de secours ---------------------------------
 
 async function demanderNouvellePartie() {
+  if (enTransition) return;
   if (partieEnregistree) {
     const accord = await confirmer({
       titre: t('nouvellePartie.titre'),
@@ -259,39 +301,43 @@ async function demanderNouvellePartie() {
     });
     if (!accord) return;
   }
-  // Rien ne change tant que le personnage n'est pas choisi : « Retour »
-  // ramène à l'accueil, l'ancienne partie intacte.
-  const affiche = await montrerChoixPerso({
-    mode: 'creation',
-    joueur: null,
-    surValider: async (joueur) => {
-      if (partieEnregistree) await creerCopieDeSecours(partieEnregistree, 'avant-nouvelle-partie');
-      const partie = nouvellePartie({
-        graine: nouvelleGraine(),
-        depart: donnees.jeu.depart,
-        versionJeu: self.CONFIG_JEU.version,
-        joueur,
-      });
-      await enregistrerPartie(partie);
-      await jouer(partie);
-      // La première quête commence : un seul message pour les deux nouvelles
-      // (les lecteurs d'écran ne liraient que le second de deux messages).
-      const quetes = messageDesQuetes(progresserQuetes({ annoncer: false }));
-      notifier([t('nouvellePartie.commencee'), quetes].filter(Boolean).join(' '), { type: 'succes' });
-    },
-    surAnnuler: () => montrerAccueil({ focaliser: true }),
+  await avecTransition(async () => {
+    // Rien ne change tant que le personnage n'est pas choisi : « Retour »
+    // ramène à l'accueil, l'ancienne partie intacte.
+    const affiche = await montrerChoixPerso({
+      mode: 'creation',
+      joueur: null,
+      surValider: (joueur) => avecTransition(async () => {
+        if (partieEnregistree) await creerCopieDeSecours(partieEnregistree, 'avant-nouvelle-partie');
+        const partie = nouvellePartie({
+          graine: nouvelleGraine(),
+          depart: donnees.jeu.depart,
+          versionJeu: self.CONFIG_JEU.version,
+          joueur,
+        });
+        await enregistrerPartie(partie);
+        await jouer(partie);
+        // La première quête commence : un seul message pour les deux nouvelles
+        // (les lecteurs d'écran ne liraient que le second de deux messages).
+        const quetes = messageDesQuetes(progresserQuetes({ annoncer: false }));
+        notifier([t('nouvellePartie.commencee'), quetes].filter(Boolean).join(' '), { type: 'succes' });
+      }),
+      surAnnuler: () => montrerAccueil({ focaliser: true }),
+    });
+    if (!affiche) montrerAccueil({ focaliser: true });
   });
-  if (!affiche) montrerAccueil({ focaliser: true });
 }
 
 // Une autre partie remplace la partie en cours (import ou copie de secours).
 async function chargerAutrePartie(partie, { dejaEnregistree = false } = {}) {
-  if (!dejaEnregistree) {
-    await remplacerPartie(partie, partieEnCours() || partieEnregistree, 'avant-import');
-  }
-  await jouer(partie);
-  // Une copie de secours a déjà son propre message (« Copie de secours reprise »).
-  if (!dejaEnregistree) notifier(t('sauvegarde.import.reussi'), { type: 'succes' });
+  await avecTransition(async () => {
+    if (!dejaEnregistree) {
+      await remplacerPartie(partie, partieEnCours() || partieEnregistree, 'avant-import');
+    }
+    await jouer(partie);
+    // Une copie de secours a déjà son propre message (« Copie de secours reprise »).
+    if (!dejaEnregistree) notifier(t('sauvegarde.import.reussi'), { type: 'succes' });
+  });
 }
 
 // --- Démarrage ----------------------------------------------------------------------
@@ -314,7 +360,11 @@ function brancherMisesAJour() {
   ecouter('sauvegarde:autre-onglet', () => {
     if (autreOngletSignale) return;
     autreOngletSignale = true;
-    notifier(t('sauvegarde.autreOnglet'), { type: 'attention', persistante: true });
+    notifier(t('sauvegarde.autreOnglet'), {
+      type: 'attention',
+      persistante: true,
+      action: { texte: t('sauvegarde.recharger'), surClic: () => self.location.reload() },
+    });
   });
 }
 

@@ -297,6 +297,8 @@
   z-index: 4;
   right: max(0.6rem, env(safe-area-inset-right));
   bottom: calc(var(--hauteur-barre-bas, 4.5rem) + 0.6rem);
+  max-height: calc(100dvh - var(--hauteur-barre-haut, 4rem) - var(--hauteur-barre-bas, 4.5rem) - 1.2rem);
+  overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(2, 52px);
   gap: 8px;
@@ -316,6 +318,26 @@
 .commandes-camera .bouton-camera:last-child {
   grid-column: 1 / -1;
   width: 100%;
+}
+
+/* Sur écran très peu haut (paysage téléphone), une seule rangée pour ne pas
+   passer sous la barre du haut. */
+@media (max-height: 500px) {
+  .commandes-camera {
+    grid-template-columns: repeat(5, 48px);
+    overflow-y: visible;
+  }
+
+  .bouton-camera {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .commandes-camera .bouton-camera:last-child {
+    grid-column: auto;
+    width: 48px;
+  }
 }
 
 /* Le bouton d'action change d'icône (examiner, parler). */
@@ -387,7 +409,7 @@
   margin: 0;
 }
 
-@media (max-width: 560px) {
+@container fenetre (max-width: 30em) {
   .liste-commandes {
     grid-template-columns: 1fr;
   }
@@ -610,14 +632,16 @@
 }
 
 /* Panneau compact (petit écran, très grand texte) : le titre et le nom des
-   boutons secondaires sont cachés à l'écran, mais toujours lus. */
+   boutons d'action secondaires (Tourner, Ranger, Annuler) sont cachés à
+   l'écran, mais toujours lus ; les meubles de « Tes affaires » et « Terminer »
+   gardent toujours leur nom. */
 .panneau-amenagement.compacte {
   gap: 0.3rem;
   padding-top: 0.4rem;
 }
 
 .panneau-amenagement.compacte .amenagement-titre,
-.panneau-amenagement.compacte .bouton:not(.bouton-principal) .libelle-bouton {
+.panneau-amenagement.compacte .amenagement-actions .bouton:not(.bouton-principal) .libelle-bouton {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -627,10 +651,10 @@
   white-space: nowrap;
 }
 
-/* Les flèches et les boutons secondaires : des carrés de 48 px, sur une
-   seule ligne ; « Poser ici » garde son nom, sur la ligne suivante. */
+/* Les flèches et les boutons d'action secondaires : des carrés de 48 px, sur
+   une seule ligne ; « Poser ici » et « Terminer » gardent leur nom. */
 .panneau-amenagement.compacte .amenagement-fleches .bouton,
-.panneau-amenagement.compacte .amenagement-actions .bouton {
+.panneau-amenagement.compacte .amenagement-actions .bouton:not(.bouton-principal) {
   width: 48px;
   min-width: 48px;
   height: 48px;

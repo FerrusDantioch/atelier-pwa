@@ -127,7 +127,7 @@
   margin: 0;
 }
 
-@media (max-width: 480px) {
+@container fenetre (max-width: 28em) {
   .demande {
     flex-direction: column;
   }
@@ -201,9 +201,9 @@
 .atelier-apercu { grid-area: apercu; }
 .atelier-confort { grid-area: confort; }
 
-/* Sur tablette en largeur : l'aperçu reste visible à droite pendant qu'on
-   fait défiler les étapes. */
-@media (min-width: 900px) {
+/* Quand la fenêtre a assez de place (en « em », donc adapté aux 4 tailles de
+   texte) : l'aperçu reste visible à droite pendant qu'on fait défiler. */
+@container fenetre (min-width: 44em) {
   .atelier-grille {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
     grid-template-areas: "modeles apercu" "fonctions apercu" "confort apercu";
@@ -213,6 +213,10 @@
     position: sticky;
     top: 0;
     align-self: start;
+  }
+
+  .atelier-bandeau {
+    display: none;
   }
 }
 
@@ -449,9 +453,13 @@
 .avis-bonus > .icone, .avis-bonus .avis-etiquette { color: var(--info); }
 .avis-absent > .icone, .avis-absent .avis-etiquette { color: var(--texte-doux); }
 
-@media (max-width: 480px) {
+@container fenetre (max-width: 28em) {
   .avis {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .avis-etiquette {
+    white-space: normal;
   }
 
   .avis-texte {
@@ -471,7 +479,7 @@
   gap: 1rem;
 }
 
-@media (min-width: 760px) {
+@container fenetre (min-width: 38em) {
   .visio {
     grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
     align-items: start;
@@ -545,10 +553,17 @@
   margin: 0;
 }
 
-/* --- Petits écrans : les boutons du bas tiennent sur deux lignes --- */
+/* --- Petits écrans et très grand texte : les boutons du bas tiennent bien --- */
 .carte-commande-entete .etiquette,
 .carte-commande-client .etiquette {
   white-space: nowrap;
+}
+
+@container fenetre (max-width: 24em) {
+  .carte-commande-entete .etiquette,
+  .carte-commande-client .etiquette {
+    white-space: normal;
+  }
 }
 
 @media (max-width: 480px) {
@@ -561,6 +576,18 @@
   }
 
   .complement-etroit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 760px) {
+  [data-texte="4"] .complement-etroit {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -590,10 +617,15 @@
   height: 0.7rem;
 }
 
-@media (min-width: 900px) {
+/* Sur écran peu haut ou texte « Énorme », le bandeau ne bloque pas le défilement. */
+@media (max-height: 540px) {
   .atelier-bandeau {
-    display: none;
+    position: static;
   }
+}
+
+[data-texte="4"] .atelier-bandeau {
+  position: static;
 }
 
 @media (max-width: 560px) {
@@ -604,15 +636,13 @@
 }
 
 /* Le bandeau ne cache jamais l'élément sélectionné au clavier. */
-@media (max-width: 899px) {
-  .fenetre-atelier .fenetre-corps {
-    scroll-padding-top: 5rem;
-  }
+.fenetre-atelier .fenetre-corps {
+  scroll-padding-top: 5rem;
 }
 
-/* Quand le bandeau est là, la jauge de l'aperçu n'est plus montrée deux
-   fois : elle reste seulement pour les lecteurs d'écran. */
-@media (max-width: 899px) {
+/* Quand le bandeau est là (colonne unique), la jauge de l'aperçu n'est plus
+   montrée deux fois : elle reste seulement pour les lecteurs d'écran. */
+@container fenetre (max-width: 43.99em) {
   .atelier-apercu .jauge {
     position: absolute;
     width: 1px;
