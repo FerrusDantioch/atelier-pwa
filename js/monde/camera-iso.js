@@ -25,7 +25,7 @@ import { OrthographicCamera, Raycaster, Vector2, Vector3 } from '../../lib/three
 
 const ELEVATION = Math.atan(1 / Math.SQRT2); // 35,26° : la vraie vue isométrique
 const DISTANCE = 40;
-export const ZOOM_MINIMUM = 30;
+export const ZOOM_MINIMUM = 26;
 export const ZOOM_MAXIMUM = 190;
 const DUREE_ROTATION = 0.35; // secondes
 
@@ -37,10 +37,10 @@ export function creerCameraIso({ largeurLieu, profondeurLieu, hauteurLieu = 2.5 
   const cible = new Vector3(largeurLieu / 2, 0.8, profondeurLieu / 2);
   const ecran = { largeur: 1, hauteur: 1 };
   const marges = { haut: 0, bas: 0, gauche: 0, droite: 0 };
-  let rotation = 0; // de 0 à 3 (peut dépasser pendant les calculs, ramené ensuite)
+  let rotation = 0; // de 0 à 3
   let angle = azimut(0); // azimut actuel (animé)
   let animationRotation = null;
-  let pixelsParMetre = 70;
+  let pixelsParMetre = 78;
   let suivi = 'doux';
   let libre = false; // la vue a été déplacée à la main
 
@@ -140,10 +140,10 @@ export function creerCameraIso({ largeurLieu, profondeurLieu, hauteurLieu = 2.5 
       suivi = mode;
     },
 
-    // Le zoom de départ : tout le lieu s'il tient à une taille lisible,
-    // sinon assez gros pour viser une case du doigt.
+    // Le zoom de départ : tout le lieu s'il tient à une taille confortable,
+    // sinon assez grand (~78 px/m) pour bien voir les pièces et viser au doigt.
     zoomDeDepart() {
-      return Math.min(ZOOM_MAXIMUM, Math.max(55, Math.min(zoomPourToutVoir(), 110)));
+      return Math.min(ZOOM_MAXIMUM, Math.max(78, Math.min(zoomPourToutVoir(), 110)));
     },
 
     definirZoom(valeur) {
@@ -165,18 +165,19 @@ export function creerCameraIso({ largeurLieu, profondeurLieu, hauteurLieu = 2.5 
     },
 
     // Un quart de tour (sens : +1 ou -1), animé sauf si « instantane ».
+    // En cas d'appuis rapides, l'arrivée s'ajoute à la cible précédente pour
+    // ne jamais repartir de 270° dans l'autre sens.
     tourner(sens, { instantane = false } = {}) {
       const depart = angle;
-      rotation += sens;
-      const arrivee = azimut(rotation);
-      rotation = ((rotation % 4) + 4) % 4;
+      const baseArrivee = animationRotation ? animationRotation.arrivee : angle;
+      rotation = ((rotation + sens) % 4 + 4) % 4;
       if (instantane) {
         angle = azimut(rotation);
         animationRotation = null;
         placer();
         return;
       }
-      animationRotation = { depart, arrivee, temps: 0 };
+      animationRotation = { depart, arrivee: baseArrivee + sens * Math.PI / 2, temps: 0 };
     },
 
     // Fait glisser la vue (doigt ou souris), en pixels.

@@ -24,7 +24,7 @@
     "copiesDeSecours": 5
   },
   "deplacement": {
-    "vitesse": 1.8,
+    "vitesse": 2.1,
     "trajet": 10
   },
   "temps": {

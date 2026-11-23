@@ -68,7 +68,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   let lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
   let lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
   let grille = creerGrille(lieu, catalogue);
-  const nomsPieces = new Map(lieu.pieces.map((piece) => [piece.id, piece]));
+  let nomsPieces = new Map(lieu.pieces.map((piece) => [piece.id, piece]));
 
   const scene = new Scene();
   scene.background = new Color(couleurDuTheme('--fond-scene', '#1f1733'));
@@ -186,6 +186,19 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     };
   }
 
+  // Deux cases voisines (ou identiques) sans mur entre elles : on ne parle pas
+  // à quelqu'un à travers une cloison pleine.
+  function casesSansMurEntre(a, b) {
+    if (!a || !b) return false;
+    const dx = b.x - a.x;
+    const dz = b.z - a.z;
+    if (dx === 0 && dz === 0) return true;
+    if (Math.abs(dx) > 1 || Math.abs(dz) > 1) return false;
+    if (dx === 0 || dz === 0) return !grille.murEntre(a.x, a.z, b.x, b.z);
+    return (!grille.murEntre(a.x, a.z, b.x, a.z) && !grille.murEntre(b.x, a.z, b.x, b.z))
+      || (!grille.murEntre(a.x, a.z, a.x, b.z) && !grille.murEntre(a.x, b.z, b.x, b.z));
+  }
+
   // Les cases d'où l'on peut examiner un objet (ou parler à quelqu'un).
   // versOuIlVa : pour quelqu'un qui marche, autour de là où il s'arrêtera
   // (pour le rejoindre) plutôt qu'autour de là où il est.
@@ -195,9 +208,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       const caseHabitant = versOuIlVa ? habitants.destinationDe(cible.id) : habitants.caseDe(cible.id);
       if (!caseHabitant) return [];
       const cases = [];
-      for (const [dx, dz] of [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-        const cle = `${caseHabitant.x + dx},${caseHabitant.z + dz}`;
-        if (distances.has(cle)) cases.push({ x: caseHabitant.x + dx, z: caseHabitant.z + dz, trajet: distances.get(cle) });
+      for (const [dx, dz] of [[0, 0], [0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const candidate = { x: caseHabitant.x + dx, z: caseHabitant.z + dz };
+        const cle = `${candidate.x},${candidate.z}`;
+        if (distances.has(cle) && casesSansMurEntre(caseHabitant, candidate)) {
+          cases.push({ ...candidate, trajet: distances.get(cle) });
+        }
       }
       return cases.sort((a, b) => a.trajet - b.trajet);
     }
@@ -245,7 +261,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
   function definirObjetProche(cible) {
     if (amenagement && cible) return; // pendant l'aménagement, rien à examiner
-    if (cible === objetProche || (cible && objetProche && cible.type === 'pnj' && cible.id === objetProche.id)) return;
+    if (cible && objetProche && cible.type === 'pnj' && cible.id === objetProche.id) {
+      reperes.montrerCible(cible.boite);
+      moteur.redessiner();
+      return;
+    }
+    if (cible === objetProche) return;
     objetProche = cible;
     if (cible) reperes.montrerCible(cible.boite);
     else reperes.cacherCible();
@@ -369,7 +390,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
   // changé de chemin, on la rejoint (quelques fois au plus, jamais sans fin).
   let poursuites = 0;
   const POURSUITES_MAX = 4;
-  const aCote = (caseA, ici) => Boolean(caseA) && Math.max(Math.abs(caseA.x - ici.x), Math.abs(caseA.z - ici.z)) <= 1;
+  const aCote = (caseA, ici) => casesSansMurEntre(caseA, ici);
 
   // La personne attendue s'est-elle arrêtée à côté de nous ? Elle devient
   // alors « proche » (« Parler à Théo »), et on se tourne vers elle.
@@ -427,8 +448,16 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     if (attenteRevue > 0 || deplacement.enRoute) return;
     attenteRevue = 0.3;
     if (objetProche?.type === 'pnj') {
-      const position = habitants.position(objetProche.id);
-      if (position && ecartEnCases(deplacement.case, position) < 1.6) return;
+      const position = habitants.disponible(objetProche.id) ? habitants.position(objetProche.id) : null;
+      const caseHabitant = habitants.caseDe(objetProche.id);
+      if (position && casesSansMurEntre(caseHabitant, deplacement.case) && ecartEnCases(deplacement.case, position) < 1.6) {
+        const cible = habitants.cibles().find((c) => c.id === objetProche.id);
+        if (cible) {
+          reperes.montrerCible(cible.boite);
+          moteur.redessiner();
+          return;
+        }
+      }
     }
     definirObjetProche(chercherObjetProche());
   }
@@ -656,12 +685,16 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
   // Les meubles posés ou le matériel ont changé : le lieu est reconstruit
   // (la caméra, le personnage et les habitants restent où ils sont).
-  function actualiserLieu() {
+  // « ignorerMeuble » cache visuellement un meuble en cours de déplacement
+  // sans le retirer de la partie enregistrée.
+  function actualiserLieu({ ignorerMeuble = null } = {}) {
     catalogue = equiper(partie);
     ouvertes = ouvertures(partie);
     lieuOuvert = lieuSelonOuvertures(lieuDeBase, ouvertes);
-    lieu = lieuAmenage(lieuOuvert, meublesPoses(partie, lieuDeBase.id));
+    const poses = meublesPoses(partie, lieuDeBase.id).filter((place) => place.id !== ignorerMeuble);
+    lieu = lieuAmenage(lieuOuvert, poses);
     grille = creerGrille(lieu, catalogue);
+    nomsPieces = new Map(lieu.pieces.map((piece) => [piece.id, piece]));
     pointParId = new Map((lieu.points || []).map((point) => [point.id, point]));
     scene.remove(construit.groupe);
     construit.liberer();
@@ -681,6 +714,11 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       const proche = plusProcheAccessible(ici);
       deplacement.teleporter(proche.x, proche.z);
       placerPerso();
+    }
+    // Une pièce vient peut-être de s'ouvrir : son visiteur peut entrer aussitôt,
+    // même si l'horloge est réglée sur « Arrêtée ».
+    if (!ignorerMeuble) {
+      for (const evenement of habitants.suivre(minuteActuelle, deplacement.case)) rappels.surVisite?.(evenement);
     }
     objetProche = null;
     reperes.cacherCible();
@@ -854,6 +892,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
 
     // L'apparence a changé (écran « Ton personnage »).
     changerJoueur(joueur) {
+      if (deplacement.enRoute) {
+        deplacement.revenirAuCentre();
+        reperes.cacherDestination();
+        cibleVisee = null;
+        pnjAttendu = null;
+      }
       joueurActuel = joueur;
       apparence = apparenceDuJoueur(joueur, donnees.personnages);
       profil = profilDeDeplacement(apparence.aide);
@@ -865,6 +909,12 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       if (!grille.caseAccessible(ici.x, ici.z, profil)) {
         const proche = plusProcheAccessible(ici);
         deplacement.teleporter(proche.x, proche.z);
+        const piece = grille.piece(proche.x, proche.z);
+        if (piece && piece !== pieceActuelle) {
+          pieceActuelle = piece;
+          rappels.surPiece?.(nomsPieces.get(piece));
+        }
+        rappels.surPosition?.({ x: proche.x, z: proche.z, angle: Math.round(deplacement.angle) });
       }
       placerPerso();
       // Jouer Ferrus ou non change qui est là (le mentor ne vient pas en personne).
@@ -922,6 +972,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
     liberer() {
       clearTimeout(minuteurVue);
       moteur.arreterAnimation(image);
+      moteur.afficher(null, null);
       arreterTaille();
       pointage.debrancher();
       clavier.debrancher();
@@ -930,6 +981,7 @@ export function creerMonde({ moteur, donnees, palette, partie, reglages, rappels
       construit.liberer();
       fantome.liberer();
       reperes.liberer();
+      scene.clear();
     },
   };
 }

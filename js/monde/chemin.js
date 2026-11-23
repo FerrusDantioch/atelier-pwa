@@ -183,35 +183,37 @@ export function casesPourAtteindre(grille, emprise, depart, profil = 'pieton', d
     for (let x = ex; x < ex + largeur; x += 1) for (let z = ez; z < ez + profondeur; z += 1) ajouter(x, z);
   }
   for (let x = ex; x < ex + largeur; x += 1) {
-    ajouter(x, ez - 1);
-    ajouter(x, ez + profondeur);
+    if (!grille.murEntre(x, ez, x, ez - 1)) ajouter(x, ez - 1);
+    if (!grille.murEntre(x, ez + profondeur - 1, x, ez + profondeur)) ajouter(x, ez + profondeur);
   }
   for (let z = ez; z < ez + profondeur; z += 1) {
-    ajouter(ex - 1, z);
-    ajouter(ex + largeur, z);
+    if (!grille.murEntre(ex, z, ex - 1, z)) ajouter(ex - 1, z);
+    if (!grille.murEntre(ex + largeur - 1, z, ex + largeur, z)) ajouter(ex + largeur, z);
   }
   return candidates.sort((a, b) => a.trajet - b.trajet);
 }
 
 /**
- * Les cases traversées par la ligne droite qui relie les centres de deux
- * cases (méthode d'Amanatides et Woo). Quand la ligne passe exactement par
- * un coin, le pas est en diagonale.
+ * Les cases traversées par un segment entre deux points réels (en coordonnées
+ * de grille, ex. centre d'une case = x + 0,5). Méthode d'Amanatides et Woo.
+ * Quand la ligne passe exactement par un coin, le pas est en diagonale.
  */
-export function casesTraversees(a, b) {
-  const cases = [{ x: a.x, z: a.z }];
-  const dx = b.x - a.x;
-  const dz = b.z - a.z;
+function casesTraverseesReelles(ax, az, bx, bz) {
+  let x = Math.floor(ax);
+  let z = Math.floor(az);
+  const finX = Math.floor(bx);
+  const finZ = Math.floor(bz);
+  const cases = [{ x, z }];
+  const dx = bx - ax;
+  const dz = bz - az;
   const pasX = Math.sign(dx);
   const pasZ = Math.sign(dz);
   const deltaX = dx !== 0 ? 1 / Math.abs(dx) : Infinity;
   const deltaZ = dz !== 0 ? 1 / Math.abs(dz) : Infinity;
-  let prochainX = dx !== 0 ? 0.5 / Math.abs(dx) : Infinity;
-  let prochainZ = dz !== 0 ? 0.5 / Math.abs(dz) : Infinity;
-  let x = a.x;
-  let z = a.z;
-  let garde = Math.abs(dx) + Math.abs(dz) + 2;
-  while ((x !== b.x || z !== b.z) && garde > 0) {
+  let prochainX = dx > 0 ? (x + 1 - ax) / dx : dx < 0 ? (ax - x) / (-dx) : Infinity;
+  let prochainZ = dz > 0 ? (z + 1 - az) / dz : dz < 0 ? (az - z) / (-dz) : Infinity;
+  let garde = Math.abs(finX - x) + Math.abs(finZ - z) + 2;
+  while ((x !== finX || z !== finZ) && garde > 0) {
     garde -= 1;
     if (Math.abs(prochainX - prochainZ) < 1e-9) {
       x += pasX;
@@ -230,15 +232,38 @@ export function casesTraversees(a, b) {
   return cases;
 }
 
-// La ligne droite entre deux cases ne traverse-t-elle ni mur ni meuble ?
-export function ligneLibre(grille, a, b, profil = 'pieton') {
-  const cases = casesTraversees(a, b);
+/**
+ * Les cases traversées par la ligne droite qui relie les centres de deux
+ * cases (méthode d'Amanatides et Woo). Quand la ligne passe exactement par
+ * un coin, le pas est en diagonale.
+ */
+export function casesTraversees(a, b) {
+  return casesTraverseesReelles(a.x + 0.5, a.z + 0.5, b.x + 0.5, b.z + 0.5);
+}
+
+function suitePraticable(grille, cases, profil) {
   for (let i = 1; i < cases.length; i += 1) {
     const avant = cases[i - 1];
     const apres = cases[i];
     if (!grille.peutAller(avant.x, avant.z, apres.x, apres.z, profil)) return false;
   }
   return true;
+}
+
+// La ligne droite entre deux cases ne traverse-t-elle ni mur ni meuble ?
+// En diagonale ou en biais, on vérifie aussi deux rayons parallèles décalés
+// pour tenir compte de l'encombrement (notamment du fauteuil roulant).
+export function ligneLibre(grille, a, b, profil = 'pieton') {
+  if (!suitePraticable(grille, casesTraversees(a, b), profil)) return false;
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  if (dx === 0 || dz === 0) return true;
+  const longueur = Math.hypot(dx, dz);
+  const marge = profil === 'fauteuil' ? 0.38 : 0.22;
+  const nx = (-dz / longueur) * marge;
+  const nz = (dx / longueur) * marge;
+  return suitePraticable(grille, casesTraverseesReelles(a.x + 0.5 + nx, a.z + 0.5 + nz, b.x + 0.5 + nx, b.z + 0.5 + nz), profil)
+    && suitePraticable(grille, casesTraverseesReelles(a.x + 0.5 - nx, a.z + 0.5 - nz, b.x + 0.5 - nx, b.z + 0.5 - nz), profil);
 }
 
 /**

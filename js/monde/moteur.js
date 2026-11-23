@@ -145,11 +145,11 @@ export function creerMoteur(conteneur, { qualite = 'standard', surPerte, surReto
     get hauteur() { return hauteur; },
     get rendu() { return rendu; },
 
-    // Ce qui est dessiné : une scène et une caméra.
+    // Ce qui est dessiné : une scène et une caméra (null pour ne plus rien dessiner).
     afficher(nouvelleScene, nouvelleCamera) {
       scene = nouvelleScene;
       camera = nouvelleCamera;
-      redessiner();
+      if (scene && camera) redessiner();
     },
 
     redessiner,
@@ -187,13 +187,19 @@ export function creerMoteur(conteneur, { qualite = 'standard', surPerte, surReto
     photographier(autreScene, autreCamera, largeurVoulue, hauteurVoulue) {
       const toile = rendu.domElement;
       const ratio = rendu.getPixelRatio();
-      const l = Math.max(1, Math.min(Math.round(largeurVoulue * ratio), toile.width));
-      const h = Math.max(1, Math.min(Math.round(hauteurVoulue * ratio), toile.height));
-      if (rendu.getContext().isContextLost()) return null;
+      if (rendu.getContext().isContextLost() || toile.width < 1 || toile.height < 1) return null;
+      // Garde les proportions voulues si la toile est plus petite que la photo demandée.
+      const echelle = Math.min(1, toile.width / (largeurVoulue * ratio), toile.height / (hauteurVoulue * ratio));
+      const l = Math.max(1, Math.min(Math.floor(Math.max(1, Math.floor(largeurVoulue * echelle)) * ratio), toile.width));
+      const h = Math.max(1, Math.min(Math.floor(Math.max(1, Math.floor(hauteurVoulue * echelle)) * ratio), toile.height));
+      // Un demi-pixel logique compense l'arrondi flottant de Three.js
+      // (sinon un fin liseré de 1 pixel du décor peut apparaître au bord).
+      const lVue = Math.min(toile.width / ratio, (l + 0.5) / ratio);
+      const hVue = Math.min(toile.height / ratio, (h + 0.5) / ratio);
       autreCamera.updateProjectionMatrix();
       rendu.setScissorTest(true);
-      rendu.setScissor(0, 0, l / ratio, h / ratio);
-      rendu.setViewport(0, 0, l / ratio, h / ratio);
+      rendu.setScissor(0, 0, lVue, hVue);
+      rendu.setViewport(0, 0, lVue, hVue);
       rendu.render(autreScene, autreCamera);
       const photo = document.createElement('canvas');
       photo.width = l;
